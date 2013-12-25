@@ -37,3 +37,9 @@ nosetests.xml
 
 # ipynb
 .ipynb_checkpoints
+
+# LCM.jar
+lcm.jar
+
+# forseti2 lcm types
+forseti2/
