@@ -42,4 +42,4 @@ nosetests.xml
 lcm.jar
 
 # forseti2 lcm types
-forseti2/
+forseti2/*
