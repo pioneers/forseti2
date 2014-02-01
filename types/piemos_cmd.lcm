@@ -1,7 +1,8 @@
 package forseti2;
 
-struct to_piemos
+struct piemos_cmd
 {
+	header header;
     boolean auton;
     boolean enabled;
 }
