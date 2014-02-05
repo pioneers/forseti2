@@ -26,12 +26,12 @@ class DispenserDisplay:
 
 
         self.coords = {
-        fs2.dispenser_cmd.TEAM_GOLD:
+        fs2.dispenser_cmd.TEAM_BLUE:
         [(WIDTH-DSIZE, 50),
         (WIDTH-DSIZE, 150),
         (WIDTH-DSIZE, 250),
         (WIDTH-DSIZE, 350)],
-        fs2.dispenser_cmd.TEAM_BLUE:
+        fs2.dispenser_cmd.TEAM_GOLD:
         [(0, 350),
         (0, 250),
         (0, 150),
