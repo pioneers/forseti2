@@ -1,0 +1,9 @@
+package forseti2;
+
+struct piemos_cmd
+{
+	header header;
+    boolean auton;
+    boolean enabled;
+}
+

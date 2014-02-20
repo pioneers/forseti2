@@ -11,6 +11,8 @@ forseti2 is depdendent on several external libraries. Follow these instructions 
 
 Refer to the LCM install instructions at [lcm.googlecode.com wiki](https://code.google.com/p/lcm/wiki/BuildInstructions). 
 
+Once LCM is built, move `lcm-1.0.0/lcm-java/lcm.jar` into this directory to take advantage of `lcm-spy.sh` packet introspection.
+
 ### OpenCV ###
 In the terminal, execute:
     
