@@ -12,3 +12,4 @@ struct header
 	// time the message was sent (seconds).
 	double time;
 }
+

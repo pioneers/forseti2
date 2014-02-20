@@ -6,7 +6,6 @@ This node visualizes what the field dispensers should be doing.
 
 import lcm
 import forseti2 as fs2
-import IPython.display
 import pygame
 import time
 import math

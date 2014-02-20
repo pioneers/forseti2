@@ -11,14 +11,9 @@ struct dispenser_cmd
 
 	header header;
 
-	/* State of each dispenser. Dispenser state is accessed
-	 * by state[team_number][dispenser_number].
-	 * 
-	 * The value of each dispenser 
-	 */
+	/* State of each dispenser*/
 	int32_t state[4];
 
 	int32_t team;
-
-
 }
+

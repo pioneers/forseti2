@@ -14,7 +14,7 @@ def drive_channel(serial, channel, command):
     serial.write(chr(channel))
     serial.write(chr(command))
 
-def pololu_drive(serial, device, channel, target):
+def pololu_drive(serial, channel, target, device = 12):
     """ Drives a servo on a maestro using the pololu protocol.
     SERIAL is the serial device the maestro is attached to.
     DEVICE is the maestro device number. (default 12)
@@ -28,7 +28,7 @@ def pololu_drive(serial, device, channel, target):
     serial.write(chr((target*4) & 0x7F))
     serial.write(chr(((target*4) >> 7) & 0x7F))
 
-def get_position(serial, device, channel):
+def get_position(serial, channel, device = 12):
     """ Accesses the position of a channel using the pololu protocol.
     SERIAL is the serial device the maestro is attached to.
     DEVICE is the maestro device number. (default 12)
@@ -40,7 +40,7 @@ def get_position(serial, device, channel):
     serial.write(chr(device))
     serial.write(chr(0x10))
     serial.write(chr(channel))
-    return ord(serial.read(1)) + 256 * ord(serial.read(1))
+    return ord(serial.read(1)) + (ord(serial.read(1)) << 8)
 
 if __name__ == '__main__':
     global serial
@@ -50,10 +50,11 @@ if __name__ == '__main__':
         for i in np.linspace(500, 2300, 200):
             print (i)
             for ch in range(4):
-                pololu_drive(serial, 12, ch, int(i))
+                pololu_drive(serial, ch, int(i))
             time.sleep(.01)
         for i in np.linspace(2300, 500, 200):
             print (i)
             for ch in range(4):
-                pololu_drive(serial, 12, ch, int(i))
+                pololu_drive(serial, ch, int(i))
             time.sleep(.01)
+            
