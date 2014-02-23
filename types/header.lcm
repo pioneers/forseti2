@@ -1,0 +1,14 @@
+package forseti2;
+
+/* Standard metadata for higher-level stamped data types.
+ * This is generally used to communicate timestamped data
+ * in a particular coordinate frame.
+ */
+struct header
+{
+	// sequence ID: consecutively increasing ID 
+	int32_t seq;
+
+	// time the message was sent (seconds).
+	double time;
+}

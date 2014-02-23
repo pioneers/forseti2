@@ -34,3 +34,12 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# ipynb
+.ipynb_checkpoints
+
+# LCM.jar
+lcm.jar
+
+# forseti2 lcm types
+forseti2/*
