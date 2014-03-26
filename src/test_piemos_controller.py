@@ -12,7 +12,7 @@ class TestPiemosController:
         print(str(incMsg.time))
         print(str(incMsg.header.seq) + " " + str(incMsg.header.time))
         print(channel + ": auton=" + str(incMsg.auton) +
-              " enabled=" + str(incMsg.enabled))
+              " enabled=" + str(incMsg.enabled) + " time=" + str(incMsg.time))
 
 if __name__=='__main__':
     try:
