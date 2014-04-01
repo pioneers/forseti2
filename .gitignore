@@ -43,3 +43,7 @@ lcm.jar
 
 # forseti2 lcm types
 forseti2/*
+
+# Eagle files
+*.b#*
+*.s#*
