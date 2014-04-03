@@ -17,7 +17,7 @@ class PiemosController:
 
     def handle_override(self, channel, data):
         incMsg = forseti2.piemos_override.decode(data)
-        self.team_override[incMsg.team] = incMsg.override
+        self.team_override[incMsg.team] = not incMsg.override
         self.send_commands()
 
     def send_commands(self):
