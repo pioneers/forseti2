@@ -1,5 +1,6 @@
 import wx
 import threading
+import time
 import lcm
 import random
 import forseti2
@@ -20,6 +21,7 @@ class Overrider(object):
         self.header.seq = 0;
         self.header.time = time.time()
         self.msg = forseti2.piemos_override()
+	self.msg.header = self.header
         self.msg.team = 0
         self.msg.override = True
 
@@ -36,12 +38,15 @@ class Overrider(object):
     def do_override(self, pos, kill):
         self.msg.team = pos
         self.msg.override = kill
+	self.msg.header.time = time.time()
         self.lc.publish("piemos/override", self.msg.encode())
+	self.msg.header.seq += 1
+
 
 class OverrideMain(wx.Frame):
 
     def __init__(self, ovdr, *args, **kwargs):
-        super(MainWindow, self).__init__(*args, **kwargs)
+        super(OverrideMain, self).__init__(*args, **kwargs)
         #self.states = [True, True, True, True]
         self.ovdr = ovdr
         self.InitUI()
@@ -64,11 +69,11 @@ class OverrideMain(wx.Frame):
 
         vbox = wx.BoxSizer(wx.VERTICAL)
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox1.add(self.station1)
-        hbox1.add(self.station2)
+        hbox1.Add(self.station1, 1, wx.ALIGN_LEFT| wx.ALL)
+        hbox1.Add(self.station2, 1, wx.ALIGN_RIGHT | wx.ALL)
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox2.add(self.station3)
-        hbox2.add(self.station4)
+        hbox2.Add(self.station3, 1, wx.ALIGN_LEFT | wx.ALL)
+        hbox2.Add(self.station4, 1, wx.ALIGN_RIGHT | wx.ALL)
         vbox.Add(hbox1, 1, wx.ALIGN_TOP, 8)
         vbox.Add(hbox2, 1, wx.ALIGN_BOTTOM, 8)
 
@@ -109,7 +114,7 @@ def main():
 
     app = wx.App()
     ovdr = Overrider()
-    MainWindow(remote, None)
+    OverrideMain(ovdr, None)
     ovdr.start()
     app.MainLoop()
 
