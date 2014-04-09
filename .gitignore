@@ -43,6 +43,9 @@ lcm.jar
 
 # forseti2 lcm types
 forseti2/*
+
+
+# Video overlay stuff
 /voverly/Test/nbproject/private/
 /voverly/Voverly/nbproject/private/
 /voverly/cvtest/nbproject/private/
