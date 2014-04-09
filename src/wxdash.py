@@ -1,6 +1,15 @@
 #!/usr/bin/python2.7
+"""
+wxdash.py
+Created on Sat Apr  27 12:00:00 2013
+
+@author: kyle
+
+
+
+"""
+
 from __future__ import print_function
-# -*- coding: utf-8 -*-
 
 import wx
 import threading

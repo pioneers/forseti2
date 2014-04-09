@@ -7,7 +7,7 @@ import settings
 class FakePiemos:
 
     def __init__(self):
-        lc = lcm.LCM()
+        lc = lcm.LCM(settings.LCM_URI)
         self.msg = forseti2.piemos_health()
         self.msg.header = forseti2.header()
         self.msg.header.seq = 0
