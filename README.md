@@ -21,3 +21,9 @@ In the terminal, execute:
 ### pygame ###
 
     $ sudo apt-get install python-pygame
+    
+### arduino ###
+    $ sudo apt-get install arduino
+    
+### pyfirmata ###
+    $ sudo pip install pyfirmata
