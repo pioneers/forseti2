@@ -2,6 +2,6 @@ package forseti2;
 
 struct health
 {
-	header header;
+    header header;
     double  uptime;
 }
