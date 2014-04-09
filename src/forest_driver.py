@@ -11,6 +11,7 @@ import pyfirmata
 
 import lcm
 import forseti2 as fs2
+import settings
 
 class Forest:
     def __init__(self, addr, debug=True):
@@ -48,7 +49,7 @@ class Forest:
 
 if __name__ == '__main__':
     print "starting forest_driver.py"
-    lc = lcm.LCM("udpm://239.255.76.67:7667?ttl=1")
+    lc = lcm.LCM(settings.LCM_URI)
     f = Forest('/dev/ttyACM0')
     sub = lc.subscribe("/forest/cmd", f._forest_cmd_handler)
 

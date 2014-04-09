@@ -8,6 +8,7 @@ import lcm
 import random
 import forseti2
 import configurator
+import settings
 
 BLUE = (24, 25, 141)
 GOLD = (241, 169, 50)
@@ -253,7 +254,7 @@ def format_match(match):
 class Remote(object):
 
     def __init__(self):
-        self.lc = lcm.LCM('udpm://239.255.76.67:7667?ttl=1')
+        self.lc = lcm.LCM(settings.LCM_URI)
         self.lc.subscribe('Schedule/Schedule', self.handle_schedule)
         self.lc.subscribe('Timer/Time', self.handle_time)
         self.match_list_box = None
