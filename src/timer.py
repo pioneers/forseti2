@@ -9,6 +9,7 @@ import threading
 import time
 import random
 import os
+import settings
 
 lc_lock = threading.Lock()
 
@@ -261,7 +262,7 @@ class ControlDataSender(Node):
 class RemoteTimer(object):
 
     def __init__(self):
-        self.lc = lcm.LCM('udpm://239.255.76.67:7667?ttl=1')
+        self.lc = lcm.LCM(settings.LCM_URI)
 
     def send(self, command):
         print('Sending', command)
@@ -381,7 +382,7 @@ class Schedule(LCMNode):
 
 
 def main():
-    lc = lcm.LCM('udpm://239.255.76.67:7667?ttl=1')
+    lc = lcm.LCM(settings.LCM_URI)
     match = Match([0] * 4)
     timer = MatchTimer(lc, match)
     cd_sender = ControlDataSender(lc, match, timer)

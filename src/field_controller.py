@@ -4,6 +4,7 @@ import forseti2 as fs2
 import threading
 import time
 import sys
+import settings
 
 def printall(*arg):
     for a in arg:
@@ -58,7 +59,7 @@ class FieldController:
 
 if __name__=='__main__':
     try:
-        lc = lcm.LCM("udpm://239.255.76.67:7667?ttl=1")
+        lc = lcm.LCM(settings.LCM_URI)
         st = FieldController(lc)
         lc.subscribe("piemos0/field_cmd", st.handle_field_cmd)
         lc.subscribe("piemos1/field_cmd", st.handle_field_cmd)

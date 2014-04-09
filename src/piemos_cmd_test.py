@@ -7,8 +7,9 @@ This node tests piemos by scrubbing through all option.
 import lcm
 import time
 import forseti2 as fs2
+import settings
 
-lc = lcm.LCM("udpm://239.255.76.67:7667?ttl=1")
+lc = lcm.LCM(settings.LCM_URI)
 
 msg	= fs2.piemos_cmd()
 

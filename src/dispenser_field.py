@@ -12,6 +12,7 @@ import math
 import threading
 import serial
 from maestro_ftdi import get_position, pololu_drive
+import settings
 
 class DispenserHW:
     def __init__(self, team, ser):
@@ -39,7 +40,7 @@ class DispenserHW:
 
 if __name__ == '__main__':
     try:
-        lc = lcm.LCM("udpm://239.255.76.67:7667?ttl=1")
+        lc = lcm.LCM(settings.LCM_URI)
         serial_gold = serial.Serial("/dev/ttyUSB0", baudrate=250000)
         if (get_position(serial_gold, 6) > 512):
             serial_blue = serial.Serial("/dev/ttyUSB1", baudrate=250000)

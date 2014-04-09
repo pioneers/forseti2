@@ -8,6 +8,7 @@ import os
 import os.path
 
 from forseti2 import *
+import settings
 
 config_dir = '../configs'
 team_nums_to_names = {}
@@ -20,7 +21,7 @@ def init_team_nums():
 init_team_nums()
 
 def main():
-    lc = lcm.LCM('udpm://239.255.76.67:7667?ttl=1')
+    lc = lcm.LCM(settings.LCM_URI)
     parser = argparse.ArgumentParser()
     parser.add_argument('--load', type=str, action='store')
     parser.add_argument('--teams', type=str, action='store')

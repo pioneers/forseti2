@@ -2,6 +2,7 @@ import lcm
 import forseti2
 import threading
 import time
+import settings
 
 class FakePiemos:
 
@@ -35,7 +36,7 @@ class FakePiemos:
 
 if __name__=='__main__':
     try:
-        lc = lcm.LCM("udpm://239.255.76.67:7667?ttl=1")
+        lc = lcm.LCM(settings.LCM_URI)
         st = FakePiemos()
         lc.subscribe("piemos0/cmd", st.handle_health)
         st.start()

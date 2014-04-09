@@ -7,11 +7,11 @@ import sys
 import lcm
 import time
 import forseti2 as fs2
-
+import settings
 
 print 'starting piemos_dispenser_cmd_test'
 
-lc = lcm.LCM("udpm://239.255.76.67:7667?ttl=1")
+lc = lcm.LCM(settings.LCM_URI)
 
 msg = fs2.piemos_field_cmd()
 msg.key = 195
