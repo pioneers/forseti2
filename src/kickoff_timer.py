@@ -1,8 +1,19 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Feb  20 01:34:13 2014
+
+@author: ajc
+
+countdown to kickoff.
+"""
 
 import pygame
 import datetime
 import time
-print 'hello, world'
+
+def draw_text(surface, font, text, pos, color):
+    label = font.render(text, 1, color)
+    surface.blit(label, pos)
 
 def main():
 
@@ -14,11 +25,6 @@ def main():
     headerfont = pygame.font.SysFont("freesans", 100)
     font = pygame.font.SysFont("freesans", 250)
 
-    def draw_text(surface, font, text, pos, color):
-    	label = font.render(text, 1, color)
-    	surface.blit(label, pos)
-
-    draw_text(window, font, "Hello, world", (10,10), (255,255,255))
     kickoff = datetime.datetime(2014, 3, 1, 9, 0, 0)
     while True:
         window.fill((0,0,0))

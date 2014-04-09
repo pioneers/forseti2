@@ -1,6 +1,6 @@
 #!/bin/bash
 # 
-# rasdeploy.sh
+# lcm_build.sh
 #
 # This script installs all forseti2 and LCM dependencies on the rasberry pi.
 #
