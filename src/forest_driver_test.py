@@ -36,36 +36,54 @@ def send_msg(m):
     lc.publish("/forest/cmd", m.encode())
 
 stime = 1
+t2 = .05
+t3 = .1
 while True:
     if STROBE_ALL:
         for branch in range(8):
             for color in range (3):
                 msg.lights[branch][color] = False
+                time.sleep(t2)
+                send_msg(msg)
             msg.servos[branch] = 0
+            send_msg(msg)
+            time.sleep(t2)
         send_msg(msg)
         time.sleep(stime)
         for branch in range(8):
             for color in range (3):
                 msg.lights[branch][color] = True
+                time.sleep(t2)
+                send_msg(msg)
             msg.servos[branch] = 170
+            send_msg(msg)
+            time.sleep(t2)
         send_msg(msg)
         time.sleep(stime)
     else:
         for color in range (3):
             for branch in range(8):
                 msg.lights[branch][color] = True
+                time.sleep(t2)
+                send_msg(msg)
             send_msg(msg)
             time.sleep(stime)
             for branch in range(8):
                 msg.lights[branch][color] = False
+                time.sleep(t2)
+                send_msg(msg)
             send_msg(msg)
             time.sleep(stime)
         for branch in range(8):
             msg.servos[branch] = 0
+            time.sleep(t2)
+            send_msg(msg)
         send_msg(msg)
         time.sleep(stime)
         for branch in range(8):
             msg.servos[branch] = 170
+            time.sleep(t2)
+            send_msg(msg)
         send_msg(msg)
         time.sleep(stime)
 
