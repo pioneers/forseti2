@@ -1,0 +1,10 @@
+package forseti2;
+
+struct xbox_controller
+{
+	header header;
+
+	float axes[6];
+	boolean buttons[11];
+
+}
