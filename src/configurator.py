@@ -70,7 +70,7 @@ def do_config(lc, teams, field_map_filename='../resources/field_mapping.json'):
         field_objects = rfile.read()
     #print('Field map', field_objects)
     for i in range(len(teams)):
-        send_team_config(lc, teams[i], i+1, field_objects)
+        send_team_config(lc, teams[i], i, field_objects)
 
 def get_default_config():
     try:
