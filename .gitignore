@@ -44,6 +44,10 @@ lcm.jar
 # forseti2 lcm types
 forseti2/*
 
+# Eagle files
+*.b#*
+*.s#*
+
 
 # Video overlay stuff
 /voverly/Test/nbproject/private/
