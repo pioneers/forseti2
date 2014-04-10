@@ -14,28 +14,10 @@ import settings
 CHANNEL_NAME = "xbox0/state"
 SLEEP_TIME = 0.01
 
-lc = lcm.LCM(settings.LCM_URI)
-
-msg = fs2.xbox_controller()
-msg.header = fs2.header()
-msg.header.seq = 0
-
-pygame.joystick.init()
-if pygame.joystick.get_count() == 0:
-    print "Can't find controller..."
-    sys.exit(1)
-else:
-    pygame.init()
-    j = pygame.joystick.Joystick(0)
-    j.init()
-    platform = determine_platform(j)
-    num_axes = j.get_numaxes()
-    num_buttons = j.get_numbuttons()
-
 OSX = 0
 LINUX = 1
 def determine_platform(joystick):
-    if joystick.get_numaxes() == 15:
+    if joystick.get_numbuttons() == 15:
         return OSX
     else:
         return LINUX
@@ -57,12 +39,35 @@ def set_controller_status(m):
     pygame.event.pump() # must pump for more info from pygame
     if platform == OSX: # compatability with Mac OS X Xbox Controller Drivers
         m.axes = [j.get_axis(i) for i in xrange(num_axes)]
-        m.buttons = [j.get_button(i) for i in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)]
+        m.buttons = [j.get_button(i) for i in (11, 12, 13, 14, 8, 9, 5, 4, 10, 6, 7)]
     else: # We'll assume you're on Ubuntu. 
         m.axes = [j.get_axis(i) for i in xrange(num_axes)]
         m.buttons = [j.get_button(i) for i in xrange(num_buttons)]
 
 def main():
+    global lc
+    global j
+    global platform
+    global num_axes
+    global num_buttons
+
+    lc = lcm.LCM(settings.LCM_URI)
+
+    msg = fs2.xbox_joystick_state()
+    msg.header = fs2.header()
+    msg.header.seq = 0
+
+    pygame.joystick.init()
+    if pygame.joystick.get_count() == 0:
+        print "Can't find controller..."
+        sys.exit(1)
+    else:
+        pygame.init()
+        j = pygame.joystick.Joystick(0)
+        j.init()
+        platform = determine_platform(j)
+        num_axes = j.get_numaxes()
+        num_buttons = j.get_numbuttons()
     while True:
         time.sleep(SLEEP_TIME)
         set_controller_status(msg)
