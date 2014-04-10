@@ -2,8 +2,9 @@ package forseti2;
 
 struct piemos_cmd
 {
-	header header;
+    header header;
     boolean auton;
     boolean enabled;
-    int32_t time;
+    boolean is_blue;
+    int32_t game_time;
 }
