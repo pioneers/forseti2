@@ -5,6 +5,7 @@ import lcm
 import random
 import forseti2
 import configurator
+import settings
 
 BLUE = (24, 25, 141)
 GOLD = (241, 169, 50)
@@ -14,7 +15,7 @@ GREEN = (20, 198, 14)
 class Overrider(object):
 
     def __init__(self):
-        self.lc = lcm.LCM()
+        self.lc = lcm.LCM(settings.LCM_URI)
         self.thread = threading.Thread(target=self._loop)
         self.thread.daemon = True
         self.header = forseti2.header()

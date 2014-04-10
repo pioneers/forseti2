@@ -1,4 +1,24 @@
 #!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+"""
+configurator.py
+Created on Sat Apr  27 12:00:00 2013
+
+@author: kyle
+
+reads from various resource files stored on disk.
+sends configs to PiEMOS controller, via channels PiEMOS{n}/Config
+these configs contain RFID mappings and the PiEMOS layout configuration.
+
+example usage:
+    python configurator.py --teams 100,14,19,25 
+                            --load ../resources/field_mapping.json
+                            --config
+
+
+"""
+
+
 from __future__ import print_function
 
 import argparse

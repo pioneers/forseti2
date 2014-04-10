@@ -1,4 +1,13 @@
 #!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+"""
+timer.py
+Created on Wed Apr 24 12:00:00 2013
+
+@author: kyle
+
+
+"""
 from __future__ import print_function
 
 import forseti2
@@ -259,6 +268,10 @@ class ControlDataSender(Node):
         self.lc.publish('piemos/Control', msg.encode())
 
 
+'''
+TODO This does not appear to be used anywhere.
+
+'''
 class RemoteTimer(object):
 
     def __init__(self):

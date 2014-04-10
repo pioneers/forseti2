@@ -1,11 +1,12 @@
 import lcm
 import forseti2
 import time
+import settings
 
 class TestPiemosController:
 
     def __init__(self):
-        self.lc = lcm.LCM();
+        self.lc = lcm.LCM(settings.LCM_URI);
 
     def handle_command(self, channel, data):
         incMsg = forseti2.piemos_cmd.decode(data)
