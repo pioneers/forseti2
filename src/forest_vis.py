@@ -12,6 +12,11 @@ import math
 import threading
 import settings
 
+TEAM_BLUE = 0
+TEAM_GOLD = 1
+STATE_HELD = 2
+STATE_RELEASED = 3
+
 WIDTH=640
 HEIGHT=480
 DSIZE=50
@@ -21,29 +26,29 @@ class DispenserDisplay:
         self.lcm = lcm
         self.window = window
         self.debug = True
-        self.state = {fs2.dispenser_cmd.TEAM_GOLD:(0,0,0,0),
-                      fs2.dispenser_cmd.TEAM_BLUE:(0,0,0,0)}
+        self.state = {TEAM_GOLD:(0,0,0,0),
+                      TEAM_BLUE:(0,0,0,0)}
 
 
         self.coords = {
-        fs2.dispenser_cmd.TEAM_BLUE:
+        TEAM_BLUE:
         [(WIDTH-DSIZE, 50),
         (WIDTH-DSIZE, 150),
         (WIDTH-DSIZE, 250),
         (WIDTH-DSIZE, 350)],
-        fs2.dispenser_cmd.TEAM_GOLD:
+        TEAM_GOLD:
         [(0, 350),
         (0, 250),
         (0, 150),
         (0, 50)],
         }
 
-        self.team_name = {fs2.dispenser_cmd.TEAM_BLUE:'B',
-                         fs2.dispenser_cmd.TEAM_GOLD:'G'}
+        self.team_name = {TEAM_BLUE:'B',
+                         TEAM_GOLD:'G'}
 
         self.colors = {0:(127, 127, 127),
-                      fs2.dispenser_cmd.STATE_HELD:(255,0,0),
-                      fs2.dispenser_cmd.STATE_RELEASED:(0,255,0)}
+                      STATE_HELD:(255,0,0),
+                      STATE_RELEASED:(0,255,0)}
 
         self._read_thread = threading.Thread(target=self._read_loop)
         self._read_thread.daemon = True
@@ -70,22 +75,30 @@ class DispenserDisplay:
         self._read_thread.start()
         self._draw_thread.start()
 
-    def _dispenser_cmd_handler(self, channel, data):
-        msg = fs2.dispenser_cmd.decode(data)
+    def _forest_cmd_handler(self, channel, data):
+        msg = fs2.forest_cmd.decode(data)
         if self.debug:
             print("Received message on channel \"%s\"" % channel)
             print("   header.seq   = %s" % str(msg.header.seq))
             print("   header.time   = %s" % str(msg.header.time))
-            print("   team   = %s" % str(msg.team))
-            print("   state   = %s" % str(msg.state))
-
-        self.state[msg.team] = msg.state
+            print("   lights   = %s" % str(msg.lights))
+            print("   servos   = %s" % str(msg.servos))
+        for b in range(8):
+            for c in range (3):
+                # TODO: visualize msg.lights[b][c]
+                pass
+            activated = STATE_HELD if (msg.servos[b] == settings.SERVO_HELD) else STATE_RELEASED
+            team = b / 4
+            dispenser = b % 4
+            v = list(self.state[team])
+            v[dispenser] = activated
+            self.state[team] = v
 
     def _draw(self):
         self.window.fill((255,255,255))
         pygame.draw.rect(self.window, (255, 255, 200), (0, 0, 320, 480))
         pygame.draw.rect(self.window, (200, 200, 255), (320, 0, 320, 480))
-        for team in (fs2.dispenser_cmd.TEAM_GOLD, fs2.dispenser_cmd.TEAM_BLUE):
+        for team in (TEAM_GOLD, TEAM_BLUE):
             for i in range(4):
                 coords = self.coords[team][i]
                 rect = (coords[0], coords[1], 50, 50)
@@ -104,10 +117,10 @@ if __name__ == '__main__':
         window = pygame.display.set_mode((WIDTH, HEIGHT))
 
         lc = lcm.LCM(settings.LCM_URI)
-        dd = DispenserDisplay(fs2.dispenser_cmd.TEAM_GOLD,
+        dd = DispenserDisplay(TEAM_GOLD,
             lc,
             window)
-        sub = lc.subscribe("sprocket/field", dd._dispenser_cmd_handler)
+        sub = lc.subscribe("/forest/cmd", dd._forest_cmd_handler)
         dd.start()
         while True:
             time.sleep(.1)
