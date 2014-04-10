@@ -4,4 +4,6 @@ struct Match {
 	int32_t match_number;
 	int32_t team_numbers[4];
 	string team_names[4];
+	string gold_items_loc;
+	string blue_items_loc;
 }

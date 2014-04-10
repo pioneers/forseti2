@@ -387,7 +387,7 @@ class Schedule(LCMNode):
 
     def handle_init(self, channel, data):
         msg = forseti2.Match.decode(data)
-        configurator.do_config(self.lc, msg.team_numbers)
+        configurator.do_config(self.lc, msg.team_numbers, msg.gold_items_loc, msg.blue_items_loc)
         self.timer.match.teams = [Team(msg.team_numbers[i],
             msg.team_names[i]) for i in range(4)]
         self.timer.reset()

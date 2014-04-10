@@ -14,12 +14,19 @@ class TestPiemosController:
         print(str(incMsg.header.seq) + " " + str(incMsg.header.time))
         print(channel + ": auton=" + str(incMsg.auton) +
               " enabled=" + str(incMsg.enabled) + " time=" + str(incMsg.time))
+    def handle_config(self, channel, data):
+	print(channel)
+        incMsg = forseti2.ConfigData.decode(data)
+        #print(incMsg.ConfigFile)
+        print(incMsg.FieldObjects)
+	
 
 if __name__=='__main__':
     try:
         tpc = TestPiemosController()
         for i in range(4):
-            tpc.lc.subscribe("piemos"+str(i)+"/cmd", tpc.handle_command)
+            #tpc.lc.subscribe("piemos"+str(i)+"/cmd", tpc.handle_command)
+            tpc.lc.subscribe("PiEMOS"+str(i)+"/Config", tpc.handle_config)
         while(True):
             tpc.lc.handle()
     except KeyboardInterrupt:
