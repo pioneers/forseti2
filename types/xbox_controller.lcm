@@ -4,7 +4,12 @@ struct xbox_controller
 {
 	header header;
 
+	// these axes are, in order
+	// left stick x, left stick y, right stick x, 
+	// right stick y, left trigger, right trigger
 	float axes[6];
+	// By convention, these buttons are, in order
+
 	boolean buttons[11];
 
 }

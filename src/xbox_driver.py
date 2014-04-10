@@ -28,8 +28,17 @@ else:
     pygame.init()
     j = pygame.joystick.Joystick(0)
     j.init()
+    platform = determine_platform(j)
     num_axes = j.get_numaxes()
     num_buttons = j.get_numbuttons()
+
+OSX = 0
+LINUX = 1
+def determine_platform(joystick):
+    if joystick.get_numaxes() == 15:
+        return OSX
+    else:
+        return LINUX
 
 def send_msg(m):
     m.header.seq += 1
@@ -45,14 +54,18 @@ def set_controller_status(m):
     if not j.get_init():
         print "Joystick not initialized..."
         sys.exit(1)
-    pygame.event.pump()
-    m.axes = [j.get_axis(i) for i in xrange(num_axes)]
-    m.buttons = [j.get_button(i) for i in xrange(num_buttons)][-11:] # only get 11 control inputs
+    pygame.event.pump() # must pump for more info from pygame
+    if platform == OSX: # compatability with Mac OS X Xbox Controller Drivers
+        m.axes = [j.get_axis(i) for i in xrange(num_axes)]
+        m.buttons = [j.get_button(i) for i in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)]
+    else: # We'll assume you're on Ubuntu. 
+        m.axes = [j.get_axis(i) for i in xrange(num_axes)]
+        m.buttons = [j.get_button(i) for i in xrange(num_buttons)]
 
 def main():
     while True:
-        set_controller_status(msg)
         time.sleep(SLEEP_TIME)
+        set_controller_status(msg)
         send_msg(msg)
 
 if __name__ == '__main__':
