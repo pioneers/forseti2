@@ -11,7 +11,7 @@ import sys
 import forseti2 as fs2
 import settings
 
-CHANNEL_NAME = "xbox0/state"
+CHANNEL_PREFIX = "xbox/state"
 SLEEP_TIME = 0.01
 
 OSX = 0
@@ -22,21 +22,22 @@ def determine_platform(joystick):
     else:
         return LINUX
 
-def send_msg(m):
+def send_msg(m, joy_num = 0):
     m.header.seq += 1
     m.header.time = time.time()
+    channel = CHANNEL_PREFIX + '/' + node_name + '/' + str(joy_num)
     print('fs2.xbox_driver:')
+    print('    channel=' + channel)
     print('    header.seq=' + str(m.header.seq))
     print('    header.time=' + str(m.header.time))
     print('    axes=' + str(m.axes))
     print('    buttons=' + str(m.buttons))
-    lc.publish(CHANNEL_NAME, m.encode())
+    lc.publish(channel, m.encode())
 
-def set_controller_status(m):
+def set_controller_status(m, j):
     if not j.get_init():
         print "Joystick not initialized..."
         sys.exit(1)
-    pygame.event.pump() # must pump for more info from pygame
     if platform == OSX: # compatability with Mac OS X Xbox Controller Drivers
         m.axes = [j.get_axis(i) for i in xrange(num_axes)]
         m.buttons = [j.get_button(i) for i in (11, 12, 13, 14, 8, 9, 5, 4, 10, 6, 7)]
@@ -46,32 +47,46 @@ def set_controller_status(m):
 
 def main():
     global lc
-    global j
+    global node_name
+    global joysticks
+    global messages
     global platform
     global num_axes
     global num_buttons
+    global num_joysticks
 
     lc = lcm.LCM(settings.LCM_URI)
 
-    msg = fs2.xbox_joystick_state()
-    msg.header = fs2.header()
-    msg.header.seq = 0
+    if len(sys.argv) > 1:
+        node_name = sys.argv[1]
+    else:
+        node_name = "default"
 
-    pygame.joystick.init()
+    pygame.init()
     if pygame.joystick.get_count() == 0:
         print "Can't find controller..."
         sys.exit(1)
-    else:
-        pygame.init()
-        j = pygame.joystick.Joystick(0)
+    num_joysticks = pygame.joystick.get_count()
+
+    messages = [fs2.xbox_joystick_state() for i in xrange(num_joysticks)]
+    for msg in messages:
+        msg.header = fs2.header()
+        msg.header.seq = 0
+
+    joysticks = [pygame.joystick.Joystick(i) for i in xrange(num_joysticks)]
+    for j in joysticks:
         j.init()
-        platform = determine_platform(j)
-        num_axes = j.get_numaxes()
-        num_buttons = j.get_numbuttons()
+
+    platform = determine_platform(joysticks[0])
+    num_axes = joysticks[0].get_numaxes()
+    num_buttons = joysticks[0].get_numbuttons()
+
     while True:
         time.sleep(SLEEP_TIME)
-        set_controller_status(msg)
-        send_msg(msg)
+        pygame.event.pump() # must pump for more info from pygame
+        for j, msg in zip(joysticks, messages):
+            set_controller_status(msg, j)
+            send_msg(msg, j.get_id())
 
 if __name__ == '__main__':
     main()
