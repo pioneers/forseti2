@@ -10,6 +10,18 @@ struct xbox_joystick_state
 	float axes[6];
 	// By convention, these buttons are, in order
 	// a, b, x, y, lb, rb, back, start, guide, lstick, rstick
+	const int8_t A = 0;
+	const int8_t B = 1;
+	const int8_t X = 2;
+	const int8_t Y = 3;
+	const int8_t LB = 4;
+	const int8_t RB = 5;
+	const int8_t BACK = 6;
+	const int8_t START = 7;
+	const int8_t GUIDE = 8;
+	const int8_t LSTICK = 9;
+	const int8_t RSTICK = 10;
+
 	boolean buttons[11];
 
 }
