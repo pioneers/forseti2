@@ -24,4 +24,8 @@ struct score_delta
 
 	int8_t bonus_possession;
 	int8_t bonus_points;
+
+    // Actions should be sent in their own message
+    // Combining multiple actions (or actions with data) is not recommended
+    boolean action_reset;
 }

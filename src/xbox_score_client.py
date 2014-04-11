@@ -153,9 +153,47 @@ class BonusScoreClient(ScoreClient):
     def print_mapping(self):
         self.print_mapping_bonus()
 
+class DebugScoreClient(ScoreClient):
+    """
+    Score client for debugging purposes.
+
+    Penalties and resets would normally be done using the judge interface, but
+    this provides an alternative for debugging purposes
+    """
+
+    button_actions = {
+        PF.X : ("increment blue points", dict(blue_points=settings.GAME_PIECE_VALUE)),
+        PF.Y : ("increment gold points", dict(gold_points=settings.GAME_PIECE_VALUE)),
+        PF.A : ("increment blue permanent points", dict(blue_permanent_points=settings.PERMANENT_GOAL_VALUE)),
+        PF.B : ("increment gold permanent points", dict(gold_permanent_points=settings.PERMANENT_GOAL_VALUE)),
+        PF.BACK : ("blue bonus ball", dict(bonus_possession=fs2.score_delta.BLUE)),
+        PF.START : ("gold bonus ball", dict(bonus_possession=fs2.score_delta.GOLD)),
+        PF.GUIDE : ("change bonus ball posession, increment score", dict(
+            bonus_possession=fs2.score_delta.TOGGLE,
+            bonus_points=settings.BONUS_INCREMENT)),
+        PF.LB : ("team 0 (blue) penalty", dict(team0_penalty=settings.PENALTY_REGULAR)),
+        PF.RB : ("team 2 (gold) penalty", dict(team2_penalty=settings.PENALTY_REGULAR)),
+        PF.RSTICK : ("RESET", dict(action_reset=True)),
+    }
+
+    def update(self, i, b):
+        if b != 1:
+            # respond only on the down press
+            return
+
+        if i in self.button_actions:
+            self.seq.publish(**self.button_actions[i][1])
+
+    def print_mapping(self):
+        print "Button mapping"
+        print "--------------"
+
+        for k, v in self.button_actions.items():
+            print "{:>20}: {}".format(describe_button(k), v[0])
+
 def main():
     parser = argparse.ArgumentParser(description="Receives joystick values and outputs score changes")
-    parser.add_argument('--type', required=True, type=str, choices=['blue', 'gold', 'bonus'], action='store')
+    parser.add_argument('--type', required=True, type=str, choices=['blue', 'gold', 'bonus', 'debug'], action='store')
     parser.add_argument('--joystick', type=int, default=0, help="Joystick number")
     args = parser.parse_args()
     if args.type == 'blue':
@@ -164,6 +202,9 @@ def main():
         sclient = GoldScoreClient(joystick_number=args.joystick)
     elif args.type == 'bonus':
         sclient = BonusScoreClient(joystick_number=args.joystick)
+    elif args.type == 'debug':
+        sclient = DebugScoreClient(joystick_number=args.joystick)
+
 
     print "Initialized ScoreClient..."
     sclient.print_mapping()

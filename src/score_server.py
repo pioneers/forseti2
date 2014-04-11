@@ -49,6 +49,9 @@ class ScoreServer:
     def delta_handler(self, channel, data):
         msg = forseti2.score_delta.decode(data)
 
+        if msg.action_reset:
+            self.reset_scores()
+
         for k in ["blue_points",
                   "gold_points",
                   "blue_permanent_points",
@@ -56,17 +59,41 @@ class ScoreServer:
                   "team0_penalty",
                   "team1_penalty",
                   "team2_penalty",
-                  "team3_penalty",
-                  "bonus_points"]:
+                  "team3_penalty"
+                  ]:
             self.state[k] += msg.__getattribute__(k)
+
 
         self.state["blue_permanent_points"] = min(self.state["blue_permanent_points"],
                                                   settings.PERMANENT_GOAL_MAXIMUM)
         self.state["gold_permanent_points"] = min(self.state["gold_permanent_points"],
                                                   settings.PERMANENT_GOAL_MAXIMUM)
-
-        if msg.bonus_possession != forseti2.score_delta.UNCHANGED:
+        # Logic to handle bonus ball posession changes
+        # If bonus points are included as part of a bonus possession change delta,
+        # do not count those points if the delta turns out to be invalid
+        count_bonus_points = False
+        if msg.bonus_possession == forseti2.score_delta.UNCHANGED:
+            count_bonus_points = True
+        elif msg.bonus_possession == forseti2.score_delta.NEUTRAL:
             self.state["bonus_possession"] = msg.bonus_possession
+            count_bonus_points = True
+        elif msg.bonus_possession == forseti2.score_delta.TOGGLE:
+            if self.state["bonus_possession"] == forseti2.score_delta.NEUTRAL:
+                print "WARNING: ignoring attempt to toggle bonus ball that is not in possession of any team"
+            elif self.state["bonus_possession"] == forseti2.score_delta.BLUE:
+                self.state["bonus_possession"] = forseti2.score_delta.GOLD
+                count_bonus_points = True
+            elif self.state["bonus_possession"] == forseti2.score_delta.GOLD:
+                self.state["bonus_possession"] = forseti2.score_delta.BLUE
+                count_bonus_points = True
+        elif msg.bonus_possession == self.state["bonus_possession"]:
+            print "WARNING: ignoring attempt to reassign bonus ball to the team already in possession"
+        else:
+            self.state["bonus_possession"] = msg.bonus_possession
+            count_bonus_points = True
+
+        if count_bonus_points:
+            self.state["bonus_points"] += msg.bonus_points
 
         self.print_score()
 
