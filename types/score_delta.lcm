@@ -1,0 +1,30 @@
+package forseti2;
+
+struct score_delta
+{
+    header header;
+
+    int8_t blue_normal_points;
+    int8_t gold_normal_points;
+
+    int8_t blue_permanent_points;
+    int8_t gold_permanent_points;
+
+    // Penalties. A 5 point penalty is a value of +5
+    int8_t blue_penalty;
+    int8_t gold_penalty;
+
+    // possible values for bonus_possession
+    const int8_t UNCHANGED = 0;
+    const int8_t BLUE = 1;
+    const int8_t GOLD = 2;
+    const int8_t TOGGLE = 3;
+    const int8_t NEUTRAL = 4;
+
+    int8_t bonus_possession;
+    int8_t bonus_points;
+
+    // Actions should be sent in their own message
+    // Combining multiple actions (or actions with data) is not recommended
+    boolean action_reset;
+}
