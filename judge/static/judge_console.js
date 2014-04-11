@@ -1,8 +1,8 @@
 function populateGameClock() {
-	$.get('/api/v1/game_time', {}, function(data) {
+	$.get('/api/v1/game-time', {}, function(data) {
 		$('#game-clock').text(data);
 	});
-	$.get('/api/v1/comms_status', {}, function(data) {
+	$.get('/api/v1/comms-status', {}, function(data) {
 		$('#comms-status').text(data);
 	});
 }

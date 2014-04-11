@@ -15,11 +15,11 @@ def serve_console():
 
 stored_time = 0
 last_time = time.time()
-@app.route('/api/v1/game_time')
+@app.route('/api/v1/game-time')
 def game_time():
     return str(stored_time)
 
-@app.route('/api/v1/comms_status')
+@app.route('/api/v1/comms-status')
 def cs():
     if last_time + 1 < time.time():
         return str(0)
