@@ -108,8 +108,8 @@ class ScoreServer:
         elif state["bonus_possession"] == forseti2.score_delta.BLUE:
             gold_bonus = state["bonus_points"]
 
-        state["blue_total"] = state["blue_normal_points"] + state["blue_penalty"] + blue_bonus
-        state["gold_total"] = state["gold_normal_points"] + state["gold_penalty"] + gold_bonus
+        state["blue_total"] = state["blue_normal_points"] + state["blue_permanent_points"] - state["blue_penalty"] + blue_bonus
+        state["gold_total"] = state["gold_normal_points"] + state["gold_permanent_points"] - state["gold_penalty"] + gold_bonus
 
         return state
 
