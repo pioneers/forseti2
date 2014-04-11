@@ -6,6 +6,7 @@ import sys
 sys.path.append('../src')
 import settings
 import time
+import datetime
 
 app = Flask(__name__)
 
@@ -15,24 +16,27 @@ def serve_console():
 
 stored_time = 0
 last_time = time.time()
-@app.route('/api/v1/game-time')
 def game_time():
-    return str(stored_time)
+    time = datetime.datetime.now()
+    result = 60 - (time.second + time.microsecond / float(1000000)) 
+    if time.minute % 2:
+        result += 60
+    return result
 
-@app.route('/api/v1/comms-status')
 def comms_status():
     if last_time + 1 < time.time():
-        return str(0)
+        return 0
     else:
-        return str(1)
+        return 1
 
 @app.route('/api/v1/all-info')
 def all_info():
     data = {
-        'game-time' : int(game_time()),
-        'comms-status' : int(comms_status())
+        'game-time' : game_time(),
+        'comms-status' : comms_status()
     }
     js = json.dumps(data)
+    print js
     resp = Response(js, status=200, mimetype='application/json')
     return resp
 
