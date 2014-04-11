@@ -35,10 +35,8 @@ class ScoreServer:
             gold_points = 0,
             blue_permanent_points = 0,
             gold_permanent_points = 0,
-            team0_penalty = 0,
-            team1_penalty = 0,
-            team2_penalty = 0,
-            team3_penalty = 0,
+            blue_penalty = 0,
+            gold_penalty = 0,
             bonus_possession = forseti2.score_delta.NEUTRAL,
             bonus_points = settings.BONUS_INITIAL
             )
@@ -56,10 +54,8 @@ class ScoreServer:
                   "gold_points",
                   "blue_permanent_points",
                   "gold_permanent_points",
-                  "team0_penalty",
-                  "team1_penalty",
-                  "team2_penalty",
-                  "team3_penalty"
+                  "blue_penalty",
+                  "gold_penalty",
                   ]:
             self.state[k] += msg.__getattribute__(k)
 
@@ -98,20 +94,21 @@ class ScoreServer:
         self.print_score()
 
     def print_score(self):
-        blue_bonus = self.state["bonus_possession"] == forseti2.score_delta.BLUE
-        gold_bonus = self.state["bonus_possession"] == forseti2.score_delta.GOLD
+        # Team that does *not* have possession gets points
+        blue_bonus = self.state["bonus_possession"] == forseti2.score_delta.GOLD
+        gold_bonus = self.state["bonus_possession"] == forseti2.score_delta.BLUE
 
         print "BLUE: {} = {} + {}{} - {} | -{}{} + {} + {} = {} : GOLD".format(
-            self.state["blue_points"] + self.state["blue_permanent_points"] - self.state["team0_penalty"] - self.state["team1_penalty"] + (self.state["bonus_points"] if blue_bonus else 0),
+            self.state["blue_points"] + self.state["blue_permanent_points"] - self.state["blue_penalty"] + (self.state["bonus_points"] if blue_bonus else 0),
             self.state["blue_points"],
             self.state["blue_permanent_points"],
             " + {}".format(self.state["bonus_points"]) if blue_bonus else "",
-            self.state["team0_penalty"] + self.state["team1_penalty"],
-            self.state["team2_penalty"] + self.state["team3_penalty"],
+            self.state["blue_penalty"],
+            self.state["gold_penalty"],
             " + {}".format(self.state["bonus_points"]) if gold_bonus else "",
             self.state["gold_permanent_points"],
             self.state["gold_points"],
-            self.state["gold_points"] + self.state["gold_permanent_points"] - self.state["team2_penalty"] - self.state["team3_penalty"] + (self.state["bonus_points"] if gold_bonus else 0))
+            self.state["gold_points"] + self.state["gold_permanent_points"] - self.state["gold_penalty"] + (self.state["bonus_points"] if gold_bonus else 0))
 
 
 server = ScoreServer()

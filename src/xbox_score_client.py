@@ -171,8 +171,8 @@ class DebugScoreClient(ScoreClient):
         PF.GUIDE : ("change bonus ball posession, increment score", dict(
             bonus_possession=fs2.score_delta.TOGGLE,
             bonus_points=settings.BONUS_INCREMENT)),
-        PF.LB : ("team 0 (blue) penalty", dict(team0_penalty=settings.PENALTY_REGULAR)),
-        PF.RB : ("team 2 (gold) penalty", dict(team2_penalty=settings.PENALTY_REGULAR)),
+        PF.LB : ("blue penalty", dict(blue_penalty=settings.PENALTY_REGULAR)),
+        PF.RB : ("gold penalty", dict(gold_penalty=settings.PENALTY_REGULAR)),
         PF.RSTICK : ("RESET", dict(action_reset=True)),
     }
 
