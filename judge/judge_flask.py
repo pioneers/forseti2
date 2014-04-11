@@ -20,11 +20,21 @@ def game_time():
     return str(stored_time)
 
 @app.route('/api/v1/comms-status')
-def cs():
+def comms_status():
     if last_time + 1 < time.time():
         return str(0)
     else:
         return str(1)
+
+@app.route('/api/v1/all-info')
+def all_info():
+    data = {
+        'game-time' : int(game_time()),
+        'comms-status' : int(comms_status())
+    }
+    js = json.dumps(data)
+    resp = Response(js, status=200, mimetype='application/json')
+    return resp
 
 def handle_xbox(channel, data):
     global stored_time

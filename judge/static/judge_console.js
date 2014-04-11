@@ -1,19 +1,16 @@
-function populateGameClock() {
-	$.get('/api/v1/game-time', {}, function(data) {
-		$('#game-clock').text(data);
-	});
-	$.get('/api/v1/comms-status', {}, function(data) {
-		$('#comms-status').text(data);
-	});
+function processInfo(data) {
+	$('#game-clock').text(data['game-clock']);
+	$('#comms-status').text(data['comms-status']);
 }
 
-function main_loop() {
-	d = new Date();
-	time = d.toLocaleTimeString();
+function updateInterface() {
+	// set wall clock
+	time = new Date().toLocaleTimeString();
 	$('#wall-clock').text(time);
-	populateGameClock();
+
+	$.get('/api/v1/all-info', {}, processInfo);
 }
 
 $( document ).ready(function() {
-	window.setInterval(main_loop, 100);
+	window.setInterval(updateInterface, 100);
 });
