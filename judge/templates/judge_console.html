@@ -23,6 +23,7 @@
 	    </div>
 	    <div class="navbar-collapse collapse">
 	      <ul class="nav navbar-nav navbar-right">
+	      	<a id="wall-clock" class="navbar-brand" href="#"></a>
 	      </ul>
 	    </div>
 	  </div><!-- /container -->
@@ -43,8 +44,10 @@
 	      <hr>
 	      <!-- Game Clock -->
 	      <a href="#"><strong><i class="glyphicon glyphicon-time"></i> Game Clock </strong></a>  
-	      <div class="game-clock">
+	      <hr>
+	      <div id="game-clock">
 	      </div>
+	      <hr>
 	      <!-- column 2 -->	
 			<div class="row">
 	      </div><!--/row-->
@@ -52,7 +55,6 @@
 		</div>
 	</div>
 
-	<footer class="navbar-bottom text-center">Pioneers in Engineering Robotics Competition</footer>
 <script type='text/javascript' src="{{url_for('static', filename = 'jquery/jquery-2.1.0.min.js')}}"></script>
 <script type='text/javascript' src="{{url_for('static', filename = 'judge_console.js')}}"></script>
 </body>
