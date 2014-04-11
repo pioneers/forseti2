@@ -64,13 +64,20 @@ def do_reset(lc, args, teams):
     for i in range(len(teams)):
         send_team_reset(lc, teams[i], i + 1)
 
-def do_config(lc, teams, field_map_filename='../resources/field_mapping.json'):
-    field_objects = '[]'
-    with open(field_map_filename, 'r') as rfile:
-        field_objects = rfile.read()
+def do_config(lc, teams, gold_field_map_filename='../resources/field_mapping.json', blue_field_map_filename='../resources/field_mapping.json'):
+    gold_field_objects = '[]'
+    with open(gold_field_map_filename, 'r') as rfile:
+        gold_field_objects = rfile.read()
+    blue_field_objects = '[]'
+    with open(blue_field_map_filename, 'r') as rfile:
+        blue_field_objects = rfile.read()
     #print('Field map', field_objects)
+    gold_teams = len(teams)/2
     for i in range(len(teams)):
-        send_team_config(lc, teams[i], i+1, field_objects)
+        if (i >= gold_teams):
+            send_team_config(lc, teams[i], i, gold_field_objects)
+        else:
+            send_team_config(lc, teams[i], i, blue_field_objects)
 
 def get_default_config():
     try:
@@ -101,7 +108,7 @@ def get_team_name(num):
 def send_team_config(lc, num, idx, field_objects):
     data = ConfigData()
     data.ConfigFile = get_config(num)
-    data.IsBlueAlliance = idx <= 2
+    data.IsBlueAlliance = idx <= 1
     data.TeamNumber = int(num)
     data.TeamName = get_team_name(num)
     data.FieldObjects = field_objects

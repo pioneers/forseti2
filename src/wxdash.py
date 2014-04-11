@@ -21,6 +21,8 @@ import settings
 
 BLUE = (24, 25, 141)
 GOLD = (241, 169, 50)
+DEFAULT_FIELD_ITEMS = "field_mapping.json"
+FIELD_ITEMS_FOLDER = "../resources/"
 
 class TeamPanel(wx.Panel):
 
@@ -102,7 +104,13 @@ class MatchControl(wx.Panel):
         match_number.Add(self.match_num_ctrl)
         vbox.Add(match_number, flag=wx.CENTER)
 
-        teamSizer = wx.GridSizer(3, 2)
+        teamSizer = wx.GridSizer(4, 2)
+        self.blue_items_ctrl = wx.TextCtrl(self, size=(dc.GetCharWidth() * 20,
+            dc.GetCharHeight()))
+	self.blue_items_ctrl.AppendText(DEFAULT_FIELD_ITEMS)
+        self.gold_items_ctrl = wx.TextCtrl(self, size=(dc.GetCharWidth() * 20,
+            dc.GetCharHeight()))
+	self.gold_items_ctrl.AppendText(DEFAULT_FIELD_ITEMS)
         self.team_panels = [
             TeamPanel(self.remote, 'A', 0, 'Unknown Team', BLUE, self),
             TeamPanel(self.remote, 'C', 0, 'Unknown Team', GOLD, self),
@@ -112,7 +120,8 @@ class MatchControl(wx.Panel):
         teamSizer.AddMany(
                 [wx.StaticText(self, label='Blue Team'),
                  wx.StaticText(self, label='Gold Team')] +
-                [(panel, 0) for panel in self.team_panels])
+                [(panel, 0) for panel in self.team_panels] +
+		[self.blue_items_ctrl, self.gold_items_ctrl])
         vbox.Add(teamSizer, flag=wx.CENTER)
 
         buttons = wx.BoxSizer(wx.HORIZONTAL)
@@ -168,6 +177,12 @@ class MatchControl(wx.Panel):
             match.match_number = int(self.match_num_ctrl.GetValue())
         except ValueError:
             match.match_number = random.getrandbits(31)
+	try:
+            match.gold_items_loc = FIELD_ITEMS_FOLDER + str(self.gold_items_ctrl.GetValue())
+            match.blue_items_loc = FIELD_ITEMS_FOLDER + str(self.blue_items_ctrl.GetValue())
+        except ValueError:
+            match.gold_items_loc = FIELD_ITEMS_FOLDER + DEFAULT_FIELD_ITEMS
+            match.blue_items_loc = FIELD_ITEMS_FOLDER + DEFAULT_FIELD_ITEMS
         return match
 
     def set_match(self, match):
