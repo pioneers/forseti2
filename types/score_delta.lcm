@@ -1,0 +1,24 @@
+package forseti2;
+
+struct score_delta
+{
+	header header;
+
+    int8_t blue_points;
+	int8_t gold_points;
+
+    // Penalties. A 5 point penalty is a value of +5
+    int8_t team0_penalty;
+	int8_t team1_penalty;
+	int8_t team2_penalty;
+	int8_t team3_penalty;
+
+	const int8_t UNCHANGED = 0;
+    const int8_t BLUE = 1;
+	const int8_t GOLD = 2;
+    const int8_t TOGGLE = 3;
+	const int8_t NEUTRAL = 4;
+
+	int8_t bonus_possession;
+	int8_t bonus_points;
+}

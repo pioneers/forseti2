@@ -1,73 +1,82 @@
+#!/usr/bin/env python2.7
 """
-score_server.py
-
-@author: Allen Li
+Score server
 """
 
 import lcm
 import time
-import sys
-import forseti2 as fs2
+import forseti2
 import settings
 
-SLEEP_TIME = 0.1
-# packet format
-PF = fs2.xbox_joystick_state
+def health_handler(channel, data):
+    msg = forseti2.health.decode(data)
+    print('forseti2.health:'
+        + 'channel='
+        + str(channel)
+        + ', uptime='
+        + str(msg.uptime)
+        + ', header.seq='
+        + str(msg.header.seq)
+        + ', header.time='
+        + str(msg.header.time))
+#sub = lc.subscribe("sprocket/health", health_handler)
 
-class ScoreServer(object):
 
-    def __init__(self, num_teams = 2, update_fn = None):
-        if update_fn:
-            self.update = update_fn
-        self.scores = [0 for _ in xrange(num_teams)]
-        self.buttons = [0 for _ in xrange(11)]
+class ScoreServer:
+    def __init__(self):
+        self.lc = lcm.LCM(settings.LCM_URI)
+        self.sub = self.lc.subscribe("score/delta", self.delta_handler)
 
-    def num_teams():
-        return len(self.scores)
-
-    def increment_score(self, team, quantity):
-        self.scores[team] += quantity
-        print "new scores = " + str(self.scores)
+        self.reset_scores()
 
     def reset_scores(self):
-        self.scores = [0 for _ in xrange(len(self.scores))]
-        print "new scores = " + str(self.scores)
+        self.state = dict(
+            blue_points = 0,
+            gold_points = 0,
+            team0_penalty = 0,
+            team1_penalty = 0,
+            team2_penalty = 0,
+            team3_penalty = 0,
+            bonus_possession = forseti2.score_delta.NEUTRAL,
+            bonus_points = settings.BONUS_INITIAL
+            )
 
-    def update(self, i, b):
-        if b == 1: # respond only to pressing down
-            if i == PF.A or i == PF.START or i == PF.RB:
-                self.increment_score(0, 1)
-            if i == PF.B or i == PF.BACK or i == PF.LB:
-                self.increment_score(0, -1)
-            if i == PF.X or i == PF.RSTICK:
-                self.increment_score(1, 1)
-            if i == PF.Y or i == PF.LSTICK:
-                self.increment_score(1, -1)
-            if i == PF.GUIDE:
-                self.reset_scores()
+    def handle(self):
+        self.lc.handle()
+
+    def delta_handler(self, channel, data):
+        msg = forseti2.score_delta.decode(data)
+
+        for k in ["blue_points",
+                  "gold_points",
+                  "team0_penalty",
+                  "team1_penalty",
+                  "team2_penalty",
+                  "team3_penalty",
+                  "bonus_points"]:
+            self.state[k] += msg.__getattribute__(k)
+
+        if msg.bonus_possession != forseti2.score_delta.UNCHANGED:
+            self.state["bonus_possession"] = msg.bonus_possession
+
+        self.print_score()
+
+    def print_score(self):
+        blue_bonus = self.state["bonus_possession"] == forseti2.score_delta.BLUE
+        gold_bonus = self.state["bonus_possession"] == forseti2.score_delta.GOLD
+
+        print "BLUE: {} = {}{} - {} | -{}{} + {} = {} : GOLD".format(
+            self.state["blue_points"] - self.state["team0_penalty"] - self.state["team1_penalty"] + (self.state["bonus_points"] if blue_bonus else 0),
+            self.state["blue_points"],
+            " + {}".format(self.state["bonus_points"]) if blue_bonus else "",
+            self.state["team0_penalty"] + self.state["team1_penalty"],
+            self.state["team2_penalty"] + self.state["team3_penalty"],
+            " + {}".format(self.state["bonus_points"]) if gold_bonus else "",
+            self.state["gold_points"],
+            self.state["gold_points"] - self.state["team2_penalty"] - self.state["team3_penalty"] + (self.state["bonus_points"] if gold_bonus else 0))
 
 
-    def process_message(self, msg):
-        for i, b in enumerate(msg.buttons):
-            if self.buttons[i] != b:
-                self.buttons[i] = b
-                self.update(i, b)
+server = ScoreServer()
 
-def handle_xbox(channel, data):
-    sserver.process_message(PF.decode(data))
-
-def main():
-    global lc
-    global sserver 
-    sserver = ScoreServer()
-    lc = lcm.LCM(settings.LCM_URI)
-    subscription = lc.subscribe("xbox/state/default/0", handle_xbox)
-    print "Initialized ScoreServer..."
-    try:
-        while True:
-            lc.handle()
-    except KeyboardInterrupt:
-        pass
-
-if __name__ == '__main__':
-    main()
+while True:
+    server.handle()
