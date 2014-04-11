@@ -5,6 +5,7 @@ import forseti2 as fs2
 import sys
 sys.path.append('../src')
 import settings
+import time
 
 app = Flask(__name__)
 
@@ -13,12 +14,22 @@ def serve_console():
     return render_template('judge_console.html')
 
 stored_time = 0
+last_time = time.time()
 @app.route('/api/v1/game_time')
 def game_time():
     return str(stored_time)
 
+@app.route('/api/v1/comms_status')
+def cs():
+    if last_time + 1 < time.time():
+        return str(0)
+    else:
+        return str(1)
+
 def handle_xbox(channel, data):
     global stored_time
+    global last_time
+    last_time = time.time()
     msg = fs2.xbox_joystick_state.decode(data)
     stored_time = msg.buttons[0]
 
