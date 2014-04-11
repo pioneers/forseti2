@@ -358,22 +358,22 @@ class Schedule(LCMNode):
         self.matches[msg.match_number] = {
                 u'alliance1':
                 {
-                    u'team1': msg.teams_numbers[0],
+                    u'team1': msg.team_numbers[0],
                     u'team1_name': msg.team_names[0],
-                    u'team2': msg.teams_numbers[1],
+                    u'team2': msg.team_numbers[1],
                     u'team2_name': msg.team_names[1],
                 },
                 u'alliance2':
                 {
-                    u'team1': msg.teams_numbers[2],
+                    u'team1': msg.team_numbers[2],
                     u'team1_name': msg.team_names[2],
-                    u'team2': msg.teams_numbers[3],
+                    u'team2': msg.team_numbers[3],
                     u'team2_name': msg.team_names[3],
                 }}
         try:
             filename = '{}.match'.format(msg.match_number)
             with open(os.path.join(self.matches_dir, filename), 'w') as wfile:
-                json.dump(wfile, self.matches[msg.match_number])
+                json.dump(self.matches[msg.match_number], wfile)
         except Exception as ex:
             print('Could not save match', self.matches[msg.match_number],
                   'got exception', ex)
