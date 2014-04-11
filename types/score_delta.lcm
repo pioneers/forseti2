@@ -7,6 +7,9 @@ struct score_delta
     int8_t blue_points;
 	int8_t gold_points;
 
+    int8_t blue_permanent_points;
+    int8_t gold_permanent_points;
+
     // Penalties. A 5 point penalty is a value of +5
     int8_t team0_penalty;
 	int8_t team1_penalty;

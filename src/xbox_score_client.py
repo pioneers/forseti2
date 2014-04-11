@@ -83,16 +83,14 @@ class ScoreClient(object):
             if i in BUTTON_GAME_PIECE_ENTER:
                 self.seq.publish(gold_points=settings.GAME_PIECE_VALUE)
             elif i in BUTTON_PERMANENT_GOAL_SCORE:
-                # TODO: limit 7 balls in goal
-                self.seq.publish(blue_points=settings.PERMANENT_GOAL_VALUE)
+                self.seq.publish(blue_permanent_points=settings.PERMANENT_GOAL_VALUE)
             elif i in BUTTON_DISPENSER_BALLS_ENTER_FIELD:
                 self.seq.publish(gold_points=settings.BALL_VALUE_PER_DISPENSER)
         else:
             if i in BUTTON_GAME_PIECE_ENTER:
                 self.seq.publish(blue_points=settings.GAME_PIECE_VALUE)
             elif i in BUTTON_PERMANENT_GOAL_SCORE:
-                # TODO: limit 7 balls in goal
-                self.seq.publish(gold_points=settings.PERMANENT_GOAL_VALUE)
+                self.seq.publish(gold_permanent_points=settings.PERMANENT_GOAL_VALUE)
             elif i in BUTTON_DISPENSER_BALLS_ENTER_FIELD:
                 self.seq.publish(blue_points=settings.BALL_VALUE_PER_DISPENSER)
 
