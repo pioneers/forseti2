@@ -124,15 +124,20 @@ class MatchControl(wx.Panel):
         self.pause_button.Bind(wx.EVT_BUTTON, self.do_pause)
         self.save_button = wx.Button(self, label='Save')
         self.save_button.Bind(wx.EVT_BUTTON, self.do_save)
+        self.submit_button = wx.Button(self, label='Submit finalized score')
+        self.submit_button.Bind(wx.EVT_BUTTON, self.do_submit)
         self.time_text = wx.StaticText(self, label='0:00')
         self.stage_text = wx.StaticText(self, label='Unknown')
+        self.score_text = wx.StaticText(self, label='Score: unknown')
         self.remote.time_text = self.time_text
         buttons.Add(self.save_button, flag=wx.LEFT)
         buttons.Add(self.init_button)
         buttons.Add(self.go_button)
         buttons.Add(self.pause_button)
+        buttons.Add(self.submit_button)
         buttons.Add(self.time_text)
         buttons.Add(self.stage_text)
+        buttons.Add(self.score_text)
         vbox.Add(buttons, flag=wx.CENTER)
 
         self.SetSizer(vbox)
@@ -149,6 +154,9 @@ class MatchControl(wx.Panel):
 
     def do_init(self, e):
         self.remote.do_init(self.get_match())
+
+    def do_submit(self, e):
+        self.remote.do_submit(self.get_match())
 
     def _set_match_panel(self, match, team_idx, panel_idx):
         match.team_numbers[team_idx] = self.team_panels[panel_idx].number
@@ -180,6 +188,9 @@ class MatchControl(wx.Panel):
     def set_time(self, match):
         self.time_text.SetLabel(format_time(match.game_time_so_far))
         self.stage_text.SetLabel(match.stage_name)
+
+    def set_score(self, blue, gold):
+        self.score_text.SetLabel("Score: Blue {} | {} Gold".format(blue, gold))
 
 
 class ScheduleControl(wx.Panel):
@@ -266,6 +277,7 @@ class Remote(object):
         self.lc = lcm.LCM(settings.LCM_URI)
         self.lc.subscribe('Schedule/Schedule', self.handle_schedule)
         self.lc.subscribe('Timer/Time', self.handle_time)
+        self.lc.subscribe('score/state', self.handle_score)
         self.match_list_box = None
         self.match_control = None
         self.thread = threading.Thread(target=self._loop)
@@ -292,6 +304,10 @@ class Remote(object):
         #wx.CallAfter(self.time_text.SetLabel, format_time(msg.game_time_so_far))
         wx.CallAfter(self.match_control.set_time, msg)
 
+    def handle_score(self, channel, data):
+        msg = forseti2.score_state.decode(data)
+        wx.CallAfter(self.match_control.set_score, msg.blue_total, msg.gold_total)
+
     def do_load(self, clear_first):
         if clear_first:
             self.match_list_box.Clear()
@@ -305,6 +321,9 @@ class Remote(object):
 
     def do_init(self, match):
         self.lc.publish('Match/Init', match.encode())
+
+    def do_submit(self, match):
+        self.lc.publish('Match/Submit', match.encode())
 
     def do_time_ctrl(self, command):
         msg = forseti2.TimeControl()

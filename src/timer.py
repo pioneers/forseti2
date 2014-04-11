@@ -19,6 +19,7 @@ import time
 import random
 import os
 import settings
+import util
 
 lc_lock = threading.Lock()
 
@@ -304,9 +305,14 @@ class Schedule(LCMNode):
         self.lc = lc
         self.timer = timer
         self.matches = {}
+        self.current_match = None
+        self.totals = {}
         self.lc.subscribe('Match/Save', self.handle_save)
         self.lc.subscribe('Schedule/Load', self.handle_load)
         self.lc.subscribe('Match/Init', self.handle_init)
+        self.lc.subscribe('Match/Submit', self.handle_submit)
+        self.lc.subscribe('score/state', self.handle_score)
+        self.seq_score = util.LCMSequence(self.lc, forseti2.score_delta, "score/delta")
         self.start_thread()
 
     def clear(self):
@@ -392,6 +398,36 @@ class Schedule(LCMNode):
             msg.team_names[i]) for i in range(4)]
         self.timer.reset()
         #self.timer.start()
+
+        # Reset the scores
+        self.seq_score.publish(action_reset=True)
+        self.current_match = msg.match_number
+        self.totals[msg.match_number] = {'alliance1': 0, 'alliance2': 0}
+
+    def handle_submit(self, channel, data):
+        msg = forseti2.Match.decode(data)
+        if self.current_match is None:
+            print("WARNING: no current match")
+            return
+        elif self.current_match not in self.totals:
+            print("WARNING: no scores available for match")
+            return
+        elif msg.match_number != self.current_match:
+            print("WARNING: match number mismatch when submitting score")
+            return
+
+        # TODO: do something useful with scores
+        print ("FINAL SCORE OF MATCH {} is: Blue {} | {} Gold".format(
+            msg.match_number,
+            self.totals[msg.match_number]['alliance1'],
+            self.totals[msg.match_number]['alliance2']
+            ))
+
+    def handle_score(self, channel, data):
+        msg = forseti2.score_state.decode(data)
+        if self.current_match is not None and self.current_match in self.totals:
+            self.totals[self.current_match]['alliance1'] = msg.blue_total
+            self.totals[self.current_match]['alliance2'] = msg.gold_total
 
 
 def main():
