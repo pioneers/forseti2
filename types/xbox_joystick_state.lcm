@@ -1,0 +1,27 @@
+package forseti2;
+
+struct xbox_joystick_state
+{
+	header header;
+
+	// these axes are, in order
+	// left stick x, left stick y, right stick x, 
+	// right stick y, left trigger, right trigger
+	float axes[6];
+	// By convention, these buttons are, in order
+	// a, b, x, y, lb, rb, back, start, guide, lstick, rstick
+	const int8_t A = 0;
+	const int8_t B = 1;
+	const int8_t X = 2;
+	const int8_t Y = 3;
+	const int8_t LB = 4;
+	const int8_t RB = 5;
+	const int8_t BACK = 6;
+	const int8_t START = 7;
+	const int8_t GUIDE = 8;
+	const int8_t LSTICK = 9;
+	const int8_t RSTICK = 10;
+
+	boolean buttons[11];
+
+}
