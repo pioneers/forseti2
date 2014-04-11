@@ -4,8 +4,8 @@ struct score_delta
 {
     header header;
 
-    int8_t blue_points;
-    int8_t gold_points;
+    int8_t blue_normal_points;
+    int8_t gold_normal_points;
 
     int8_t blue_permanent_points;
     int8_t gold_permanent_points;

@@ -81,18 +81,18 @@ class ScoreClient(object):
         assert(alliance in [fs2.score_delta.BLUE, fs2.score_delta.GOLD])
         if alliance == fs2.score_delta.BLUE:
             if i in BUTTON_GAME_PIECE_ENTER:
-                self.seq.publish(gold_points=settings.GAME_PIECE_VALUE)
+                self.seq.publish(gold_normal_points=settings.GAME_PIECE_VALUE)
             elif i in BUTTON_PERMANENT_GOAL_SCORE:
                 self.seq.publish(blue_permanent_points=settings.PERMANENT_GOAL_VALUE)
             elif i in BUTTON_DISPENSER_BALLS_ENTER_FIELD:
-                self.seq.publish(gold_points=settings.BALL_VALUE_PER_DISPENSER)
+                self.seq.publish(gold_normal_points=settings.BALL_VALUE_PER_DISPENSER)
         else:
             if i in BUTTON_GAME_PIECE_ENTER:
-                self.seq.publish(blue_points=settings.GAME_PIECE_VALUE)
+                self.seq.publish(blue_normal_points=settings.GAME_PIECE_VALUE)
             elif i in BUTTON_PERMANENT_GOAL_SCORE:
                 self.seq.publish(gold_permanent_points=settings.PERMANENT_GOAL_VALUE)
             elif i in BUTTON_DISPENSER_BALLS_ENTER_FIELD:
-                self.seq.publish(blue_points=settings.BALL_VALUE_PER_DISPENSER)
+                self.seq.publish(blue_normal_points=settings.BALL_VALUE_PER_DISPENSER)
 
     def update_bonus(self, i, b):
         if b != 1:
@@ -162,8 +162,8 @@ class DebugScoreClient(ScoreClient):
     """
 
     button_actions = {
-        PF.X : ("increment blue points", dict(blue_points=settings.GAME_PIECE_VALUE)),
-        PF.Y : ("increment gold points", dict(gold_points=settings.GAME_PIECE_VALUE)),
+        PF.X : ("increment blue points", dict(blue_normal_points=settings.GAME_PIECE_VALUE)),
+        PF.Y : ("increment gold points", dict(gold_normal_points=settings.GAME_PIECE_VALUE)),
         PF.A : ("increment blue permanent points", dict(blue_permanent_points=settings.PERMANENT_GOAL_VALUE)),
         PF.B : ("increment gold permanent points", dict(gold_permanent_points=settings.PERMANENT_GOAL_VALUE)),
         PF.BACK : ("blue bonus ball", dict(bonus_possession=fs2.score_delta.BLUE)),

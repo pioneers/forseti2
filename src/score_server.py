@@ -34,8 +34,8 @@ class ScoreServer:
 
     def reset_scores(self):
         self.state = dict(
-            blue_points = 0,
-            gold_points = 0,
+            blue_normal_points = 0,
+            gold_normal_points = 0,
             blue_permanent_points = 0,
             gold_permanent_points = 0,
             blue_penalty = 0,
@@ -53,8 +53,8 @@ class ScoreServer:
         if msg.action_reset:
             self.reset_scores()
 
-        for k in ["blue_points",
-                  "gold_points",
+        for k in ["blue_normal_points",
+                  "gold_normal_points",
                   "blue_permanent_points",
                   "gold_permanent_points",
                   "blue_penalty",
@@ -108,8 +108,8 @@ class ScoreServer:
         elif state["bonus_possession"] == forseti2.score_delta.BLUE:
             gold_bonus = state["bonus_points"]
 
-        state["blue_total"] = state["blue_points"] + state["blue_penalty"] + blue_bonus
-        state["gold_total"] = state["gold_points"] + state["gold_penalty"] + gold_bonus
+        state["blue_total"] = state["blue_normal_points"] + state["blue_penalty"] + blue_bonus
+        state["gold_total"] = state["gold_normal_points"] + state["gold_penalty"] + gold_bonus
 
         return state
 
@@ -125,14 +125,14 @@ class ScoreServer:
 
         print "BLUE: {} = {} + {}{} - {} | -{}{} + {} + {} = {} : GOLD".format(
             state["blue_total"],
-            state["blue_points"],
+            state["blue_normal_points"],
             state["blue_permanent_points"],
             " + {}".format(state["bonus_points"]) if blue_bonus else "",
             state["blue_penalty"],
             state["gold_penalty"],
             " + {}".format(state["bonus_points"]) if gold_bonus else "",
             state["gold_permanent_points"],
-            state["gold_points"],
+            state["gold_normal_points"],
             state["gold_total"]
             )
 
