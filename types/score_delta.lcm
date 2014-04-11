@@ -14,6 +14,7 @@ struct score_delta
     int8_t blue_penalty;
     int8_t gold_penalty;
 
+    // possible values for bonus_possession
     const int8_t UNCHANGED = 0;
     const int8_t BLUE = 1;
     const int8_t GOLD = 2;
