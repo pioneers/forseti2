@@ -7,6 +7,7 @@ import lcm
 import time
 import forseti2
 import settings
+import util
 
 def health_handler(channel, data):
     msg = forseti2.health.decode(data)
@@ -26,6 +27,8 @@ class ScoreServer:
     def __init__(self):
         self.lc = lcm.LCM(settings.LCM_URI)
         self.sub = self.lc.subscribe("score/delta", self.delta_handler)
+        self.seq = util.LCMSequence(self.lc, forseti2.score_state, "score/state")
+        self.seq.debug = False
 
         self.reset_scores()
 
@@ -92,24 +95,46 @@ class ScoreServer:
             self.state["bonus_points"] += msg.bonus_points
 
         self.print_score()
+        self.seq.publish(**self.tabulate_state())
+
+    def tabulate_state(self):
+        state = self.state.copy()
+
+        # Team that does *not* have possession gets points
+        blue_bonus = 0
+        gold_bonus = 0
+        if state["bonus_possession"] == forseti2.score_delta.GOLD:
+            blue_bonus = state["bonus_points"]
+        elif state["bonus_possession"] == forseti2.score_delta.BLUE:
+            gold_bonus = state["bonus_points"]
+
+        state["blue_total"] = state["blue_points"] + state["blue_penalty"] + blue_bonus
+        state["gold_total"] = state["gold_points"] + state["gold_penalty"] + gold_bonus
+
+        return state
 
     def print_score(self):
-        # Team that does *not* have possession gets points
-        blue_bonus = self.state["bonus_possession"] == forseti2.score_delta.GOLD
-        gold_bonus = self.state["bonus_possession"] == forseti2.score_delta.BLUE
+        state =  self.tabulate_state()
+
+        blue_bonus = 0
+        gold_bonus = 0
+        if state["bonus_possession"] == forseti2.score_delta.GOLD:
+            blue_bonus = state["bonus_points"]
+        elif state["bonus_possession"] == forseti2.score_delta.BLUE:
+            gold_bonus = state["bonus_points"]
 
         print "BLUE: {} = {} + {}{} - {} | -{}{} + {} + {} = {} : GOLD".format(
-            self.state["blue_points"] + self.state["blue_permanent_points"] - self.state["blue_penalty"] + (self.state["bonus_points"] if blue_bonus else 0),
-            self.state["blue_points"],
-            self.state["blue_permanent_points"],
-            " + {}".format(self.state["bonus_points"]) if blue_bonus else "",
-            self.state["blue_penalty"],
-            self.state["gold_penalty"],
-            " + {}".format(self.state["bonus_points"]) if gold_bonus else "",
-            self.state["gold_permanent_points"],
-            self.state["gold_points"],
-            self.state["gold_points"] + self.state["gold_permanent_points"] - self.state["gold_penalty"] + (self.state["bonus_points"] if gold_bonus else 0))
-
+            state["blue_total"],
+            state["blue_points"],
+            state["blue_permanent_points"],
+            " + {}".format(state["bonus_points"]) if blue_bonus else "",
+            state["blue_penalty"],
+            state["gold_penalty"],
+            " + {}".format(state["bonus_points"]) if gold_bonus else "",
+            state["gold_permanent_points"],
+            state["gold_points"],
+            state["gold_total"]
+            )
 
 server = ScoreServer()
 

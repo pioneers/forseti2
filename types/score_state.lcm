@@ -1,0 +1,27 @@
+package forseti2;
+
+struct score_state
+{
+    header header;
+
+    // TOTAL = points + permanent_points + penalties + bonus ball
+    int8_t blue_total;
+    int8_t gold_total;
+
+    int8_t blue_points; // Regular points only. Not the total
+    int8_t gold_points; // Regular points only. Not the total
+
+    int8_t blue_permanent_points;
+    int8_t gold_permanent_points;
+
+    // Penalties. A 5 point penalty is a value of +5
+    int8_t blue_penalty;
+    int8_t gold_penalty;
+
+    const int8_t BLUE = 1;
+    const int8_t GOLD = 2;
+    const int8_t NEUTRAL = 4;
+
+    int8_t bonus_possession;
+    int8_t bonus_points;
+}
