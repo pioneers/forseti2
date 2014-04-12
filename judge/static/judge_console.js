@@ -80,6 +80,8 @@ function updateGameClock(gametime, mode) {
 }
 
 function processInfo(data) {
+
+
 	status = data['comms-status'];
 	if (status == '1') {
 		updateCommsStatus("COMMS_UP");
@@ -87,6 +89,7 @@ function processInfo(data) {
 		updateCommsStatus("COMMS_DOWN");
 	}
 	updateGameClock(data['game-time'], data['game-mode']);
+	$('#heartbeat').text(data['stored-a']);
 }
 
 function failedToGetInfo() {

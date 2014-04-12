@@ -17,8 +17,17 @@ def serve_console():
 # data container for persistent state
 class FlaskInfo(object):
     def __init__(self):
+        self._last_update_time = time.time()
         self.stored_a = 0
-        self.last_time = time.time()
+        self.game_time = 0.0
+        self.stage_name = 0.0
+
+    def __setattr__(self, name, value):
+        self.__dict__["_last_update_time"] = time.time()
+        self.__dict__[name] = value
+
+    def time_since_last_update(self):
+        return time.time() - self._last_update_time
 
 fi = FlaskInfo()
 def game_time():
@@ -28,10 +37,7 @@ def game_time():
     return result
 
 def comms_status():
-    if fi.last_time + 1 < time.time():
-        return 0
-    else:
-        return 1
+    return int(fi.time_since_last_update() < 1)
 
 def game_mode():
     time = game_time()
@@ -42,6 +48,7 @@ def game_mode():
 @app.route('/api/v1/all-info')
 def all_info():
     data = {
+        'stored-a' : fi.stored_a,
         'game-time' : game_time(),
         'comms-status' : comms_status(),
         'game-mode' : game_mode()
@@ -52,7 +59,6 @@ def all_info():
     return resp
 
 def handle_lcm(channel, data):
-    fi.last_time = time.time()
     msg = fs2.xbox_joystick_state.decode(data)
     fi.stored_a = msg.buttons[0]
 
