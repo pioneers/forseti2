@@ -98,8 +98,8 @@ class MatchTimer(LCMNode):
         self.lc = lc
         self.match = match
         self.stages = [Period('Setup', 0),
-            Period('Autonomous', 20, True), Period('Paused', 0),
-            Period('Teleop', 120, True), Period('End', 0)]
+            Period('Autonomous', settings.AUTONOMOUS_LENGTH_SECONDS, True), Period('Paused', 0),
+            Period('Teleop', settings.TELEOP_LENGTH_SECONDS, True), Period('End', 0)]
         self.stage_index = 0
         self.match_timer = Timer()
         self.stage_timer = Timer()
@@ -146,6 +146,7 @@ class MatchTimer(LCMNode):
             self.match.stage = 'Teleop'
             self.match.enable_all()
         elif new_stage.name == 'End':
+            self.match.stage = 'End'
             self.pause()
 
     def start(self):
