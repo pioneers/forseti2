@@ -35,46 +35,105 @@
   		<div class="row">
   			<div class="col-md-3">
   				<!-- Left column -->
-  				<a href="#"><strong><i class="glyphicon glyphicon-wrench"></i> Connection Status</strong></a>  
-  				<ul class="nav nav-pills nav-stacked" id="configuration">
-  					<li class="text-center">
-  						<span id="config-status" class="text-center label label-info">
-  							Establishing server connection...
-  						</span>
-  					</li>
-  				</ul>
-  				<hr>
-  				<a href="#"><strong><i class="glyphicon glyphicon-heart"></i> Controller Heartbeat</strong></a>  
-  				<h1 id="heartbeat" class="text-center"></h1>
+  				<div class="panel">
+  					<a class="panel-heading" href="#"><strong><span class="glyphicon glyphicon-wrench"></span> Connection Status</strong></a>  
+  					<ul class="panel-body nav nav-pills nav-stacked" id="configuration">
+  						<li class="text-center">
+  							<span id="config-status" class="text-center label label-info">
+  								Establishing server connection...
+  							</span>
+  						</li>
+  					</ul>
+  				</div>
+  				<div class="panel">
+  					<a class="panel-heading" href="#"><strong><i class="glyphicon glyphicon-heart"></i> Controller Heartbeat</strong></a>  
+  					<h1 class="panel-body" id="heartbeat" class="text-center"></h1>
+  				</div>
   			</div>
   			<div class="col-md-9"> 
 
   				<!-- Game Clock -->
-  				<a href="#"><strong><i class="glyphicon glyphicon-time"></i> Match Status </strong></a>  
-  				<div id="game-clock" class="text-center"> 0:00 </div>
-  				<div class="progress">
-  					<div id="clock-bar" class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%; float: right">
+  				<div class="panel">
+  					<a class="panel-heading" href="#"><strong><i class="glyphicon glyphicon-time"></i> Match Status </strong></a>
+  					<div class="panel-body">
+  						<div id="game-clock" class="text-center"> 0:00 </div>
+  						<div class="progress">
+  							<div id="clock-bar" class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%; float: right">
+  							</div>
+  						</div>
+  						<h1 id="game-mode" class="text-center"> Retrieving Game Mode... </h1>
   					</div>
   				</div>
-  				<h1 id="game-mode" class="text-center"> Retrieving Game Mode... </h1>
-  				<hr>
-  				<a href="#"><strong><i class="glyphicon glyphicon-cog"></i> Scoring </strong></a>  
-  				<div class="btn-group btn-group-justified">
-  					<div class="btn-group">
-  						<button type="button" class="btn btn-default pioneers-blue">Blue Alliance</button> 
-  						<h1 id="blue-total-score" class="text-center"></h1>
-  					</div>
-  					<div class="btn-group">
-  					</div>
-  					<div class="btn-group">
-  						<button type="button" class="btn btn-default pioneers-gold">Gold Alliance</button>
-  						<h1 id="gold-total-score" class="text-center"></h1>
+  				<div class="panel">
+  					<a class="panel-heading" href="#"><strong><i class="glyphicon glyphicon-cog"></i> Scoring </strong></a>  
+  					<div class="panel-body">
+  						<table class="table table-condensed">
+  							<thead>
+  								<tr>
+  									<th>
+  										<a class="btn btn-default pioneers-blue" style="width: 100%">Blue Alliance</a> 
+  									</th>
+  									<th>
+  									</th>
+  									<th>
+  										<a class="btn btn-default pioneers-gold" style="width: 100%">Gold Alliance</a> 
+  									</th>
+  								</tr>
+  							</thead>
+  							<tbody>
+  								<tr>
+  									<th>
+  										<h1 id="blue-total-score" class="text-center"></h1>
+  									</th>
+  									<th class="text-center">
+  										<h1> Total Points </h1>
+  									</th>
+  									<th>
+  										<h1 id="gold-total-score" class="text-center"></h1>
+  									</th>
+  								</tr>
+  								<tr>
+  									<th>
+  										<div id="blue-normal-points" class="text-center"></div>
+  									</th>
+  									<th class="text-center">
+  										<div> Normal </div>
+  									</th>
+  									<th>
+  										<div id="gold-normal-points" class="text-center"></div>
+  									</th>
+  								</tr>
+  								<tr>
+  									<th>
+  										<div id="blue-permanent-points" class="text-center"></div>
+  									</th>
+  									<th class="text-center">
+  										<div> Permanent Goals </div>
+  									</th>
+  									<th>
+  										<div id="gold-permanent-points" class="text-center"></div>
+  									</th>
+  								</tr>
+  								<tr>
+  									<th>
+  										<div id="blue-penalties" class="text-center"></div>
+  									</th>
+  									<th class="text-center">
+  										<div> Penalties </div>
+  									</th>
+  									<th>
+  										<div id="gold-penalties" class="text-center"></div>
+  									</th>
+  								</tr>
+  							</tbody>
+  						</table>
   					</div>
   				</div>
   			</div>
   		</div>
+  	</div>
 
-  		<script type='text/javascript' src="{{url_for('static', filename = 'jquery/jquery-2.1.0.min.js')}}"></script>
-  		<script type='text/javascript' src="{{url_for('static', filename = 'judge_console.js')}}"></script>
-  	</body>
-  	</html>
+  	<script type='text/javascript' src="{{url_for('static', filename = 'jquery/jquery-2.1.0.min.js')}}"></script>
+  	<script type='text/javascript' src="{{url_for('static', filename = 'judge_console.js')}}"></script>
+  </body>
+  </html>

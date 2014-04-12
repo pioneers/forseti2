@@ -82,8 +82,15 @@ function updateGameClock(gametime, mode) {
 function updateScore(data) {
 	blue_scores = data['blue_points'];
 	gold_scores = data['gold_points'];
-	$('#blue-total-score').text(blue_scores[0])
-	$('#gold-total-score').text(gold_scores[0])
+	$('#blue-total-score').text(blue_scores[0]);
+	$('#gold-total-score').text(gold_scores[0]);
+	$('#blue-normal-points').text(blue_scores[1]);
+	$('#gold-normal-points').text(gold_scores[1]);
+	$('#blue-permanent-points').text(blue_scores[2]);
+	$('#gold-permanent-points').text(gold_scores[2]);
+	$('#blue-penalties').text(-blue_scores[3]);
+	$('#gold-penalties').text(-gold_scores[3]);
+
 }
 
 function processInfo(data) {
