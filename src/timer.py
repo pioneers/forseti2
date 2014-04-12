@@ -146,6 +146,7 @@ class MatchTimer(LCMNode):
             self.match.stage = 'Teleop'
             self.match.enable_all()
         elif new_stage.name == 'End':
+            self.match.stage = 'End'
             self.pause()
 
     def start(self):

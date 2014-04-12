@@ -15,6 +15,7 @@ import sys
 import settings
 import util
 import re
+import json
 
 ALLIANCE_BLUE = 0
 ALLIANCE_GOLD = 1
@@ -31,18 +32,6 @@ class FieldController:
         # This also initializes variables
         self.reset_field()
 
-        # release codes to open dispensers
-        # release_codes[uuid] = (alliance, code_type)
-        # TODO(nikita): this data needs to come from somewhere
-        self.release_codes = {
-            200: (ALLIANCE_BLUE, CODE_LEFT),
-            201: (ALLIANCE_BLUE, CODE_RIGHT),
-            202: (ALLIANCE_BLUE, CODE_FALSE),
-            203: (ALLIANCE_BLUE, CODE_LEFT),
-            204: (ALLIANCE_BLUE, CODE_RIGHT),
-            205: (ALLIANCE_BLUE, CODE_FALSE) ,
-            }
-
     def reset_field(self):
         # dispenser_released[alliance][dispenser id]
         self.dispenser_released = {
@@ -55,6 +44,8 @@ class FieldController:
             ALLIANCE_BLUE: [[False, False, False] for _ in range(4)],
             ALLIANCE_GOLD: [[False, False, False] for _ in range(4)],
             }
+
+        self.release_codes = {}
 
         self.send_forest_cmd()
 
@@ -132,6 +123,42 @@ class FieldController:
 
         self.send_forest_cmd()
 
+    def handle_control(self, channel, data):
+        # TODO(nikita): is there a way to do this that doesn't depend on strings?
+        msg = fs2.ControlData.decode(data)
+        util.print_lcm_msg(msg)
+        if msg.Stage == "Teleop":
+            # This should dispense at the start of teleop
+            # (but not when the game is paused between autonomous and teleop)
+            self.release_teleop_dispensers()
+        elif msg.Stage == "End":
+            # This call is not enough to make sure the field is reset at the
+            # *start* of each match
+            # However, the field will likely remain in the "End" stage for a
+            # while before scores are tabulated and submitted. This allows field
+            # reset to happen simultaneously.
+            self.reset_field()
+
+        self.send_forest_cmd()
+
+    def handle_match_init(self, channel, data):
+        # Make sure the field is fully reset at the start of the match
+        self.reset_field()
+
+        # Load RFID tag data for the match
+        msg = fs2.Match.decode(data)
+        with open(msg.gold_items_loc) as f:
+            gold_items = json.load(f)
+        with open(msg.blue_items_loc) as f:
+            blue_items = json.load(f)
+
+        for tag in gold_items:
+            self.release_codes[int(tag["uid"], 16)] = (ALLIANCE_GOLD, tag["objectType"])
+        for tag in blue_items:
+            self.release_codes[int(tag["uid"], 16)] = (ALLIANCE_BLUE, tag["objectType"])
+
+        self.send_forest_cmd()
+
 
 if __name__=='__main__':
     try:
@@ -141,6 +168,8 @@ if __name__=='__main__':
         lc.subscribe("piemos1/field_cmd", st.handle_field_cmd)
         lc.subscribe("piemos2/field_cmd", st.handle_field_cmd)
         lc.subscribe("piemos3/field_cmd", st.handle_field_cmd)
+        lc.subscribe("piemos/Control", st.handle_control)
+        lc.subscribe("Match/Init", st.handle_match_init)
 
         while(True):
             lc.handle()
