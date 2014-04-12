@@ -19,8 +19,12 @@ class FlaskInfo(object):
     def __init__(self):
         self._last_update_time = time.time()
         self.stored_a = 0
+
         self.game_time = 0.0
+        self.stage_time = 0.0
+        self.total_stage_time = 0.0
         self.stage_name = "none"
+
         self.blue_points = [0, 0, 0, 0]
         self.gold_points = [0, 0, 0, 0]
         self.bonus_possession = 0
@@ -36,19 +40,13 @@ class FlaskInfo(object):
 
 fi = FlaskInfo()
 def game_time():
-    time = datetime.datetime.now()
-    result = time.second + time.microsecond / float(1000000) ;
-    result += 60 * (time.minute % 3);
-    return result
+    return fi.game_time
 
 def comms_status():
     return int(fi.time_since_last_update() < 1)
 
 def game_mode():
-    time = game_time()
-    if time < 20:
-        return "Autonomous"
-    return "Teleop"
+    return fi.stage_name
 
 @app.route('/api/v1/all-info')
 def all_info():
@@ -57,6 +55,9 @@ def all_info():
         'game-time' : game_time(),
         'comms-status' : comms_status(),
         'game-mode' : game_mode(),
+        'game_time' : fi.game_time,
+        'stage_time' : fi.stage_time,
+        'total_stage_time' : fi.total_stage_time,
         'stage-name' : fi.stage_name,
         'blue_points' : fi.blue_points,
         'gold_points' : fi.gold_points,
@@ -79,11 +80,19 @@ def handle_score(channel, data):
     fi.bonus_possession = m.bonus_possession
     fi.bonus_points = m.bonus_points
 
+def handle_time(channel, data):
+    m = fs2.Time.decode(data)
+    fi.game_time = m.game_time_so_far
+    fi.stage_time = m.stage_time_so_far
+    fi.total_stage_time = m.total_stage_time
+    fi.stage_name = m.stage_name
+
 def main():
     global lc
     lc = lcm.LCM(settings.LCM_URI)
-    subscription = lc.subscribe("xbox/state/default/0", handle_xbox)
-    sub = lc.subscribe("score/state", handle_score)
+    lc.subscribe("xbox/state/default/0", handle_xbox)
+    lc.subscribe("score/state", handle_score)
+    lc.subscribe("Timer/Time", handle_time)
     try:
         while True:
             lc.handle()

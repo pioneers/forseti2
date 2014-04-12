@@ -57,7 +57,8 @@ function updateGameClock(gametime, mode) {
 	game_mode_div = $('#game-mode');
 	switch (mode) {
 		case "Setup":
-			clock_bar.css("width", "0%;");
+			clock_bar.css("width", "100%");
+			game_mode_div.text("Setup");
 			break;
 		case "Teleop":
 			clock_bar.css("width", String(time / 120 * 100) + "%");
@@ -69,6 +70,7 @@ function updateGameClock(gametime, mode) {
 			break;
 		case "Paused":
 			game_mode_div.text("Match Paused");
+			clock_bar.css("width", "0%");
 			break;
 		case "End":
 			game_mode_div.text("Match Ended");
@@ -109,7 +111,7 @@ function processInfo(data) {
 function failedToGetInfo() {
 	updateCommsStatus("INFO_FAILED");
 }
-
+		
 function updateInterface() {
 	// set wall clock
 	time = new Date().toLocaleTimeString();
