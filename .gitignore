@@ -181,3 +181,5 @@ ExportedObj/
 *.unityproj
 *.booproj
 
+# Virtualenv
+judge/venv
