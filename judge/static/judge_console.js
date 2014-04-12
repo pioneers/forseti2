@@ -40,12 +40,11 @@ function updateGameClock(time) {
 	clock_bar.removeClass("progress-bar-info");
 	clock_bar.removeClass("progress-bar-warning");
 	clock_bar.removeClass("progress-bar-danger");
-	if (time >= 30) {
-		clock_bar.addClass("progress-bar-info");
-	} else if (time < 30) {
-		clock_bar.addClass("progress-bar-warning");
-	} else if (time < 10) {
+	if (time > 30) {
+	} else if (time <= 10) {
 		clock_bar.addClass("progress-bar-danger");
+	} else if (time <= 30) {
+		clock_bar.addClass("progress-bar-warning");
 	}
 }
 
