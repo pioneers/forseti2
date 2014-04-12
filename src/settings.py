@@ -9,6 +9,12 @@ LCM_URI='udpm://239.255.76.67:7667?ttl=1'
 SERVO_HELD = 0
 SERVO_RELEASED = 170
 
+# Dispensers numbers within the forest
+DISPENSER_LEFT = 0
+DISPENSER_RIGHT = 3
+DISPENSER_TELEOP_0 = 1
+DISPENSER_TELEOP_1 = 2
+
 # Game-derived values: everything that comes from the rulebook
 BONUS_INITIAL = 5
 BONUS_INCREMENT = 1
