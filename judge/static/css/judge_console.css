@@ -3,6 +3,16 @@
 	font-size: 72px;
 }
 
+.pioneers-blue {
+	background-color: #363895;
+}
+.pioneers-gold {
+	background-color: #c7aa36;
+}
+.pioneers-blue , .pioneers-gold {
+	color: white;
+}
+
 /* We do this so that the footer gets to the bottom
 */
 html,body {

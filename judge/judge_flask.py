@@ -20,7 +20,12 @@ class FlaskInfo(object):
         self._last_update_time = time.time()
         self.stored_a = 0
         self.game_time = 0.0
-        self.stage_name = 0.0
+        self.stage_name = "none"
+        self.blue_points = [0, 0, 0, 0]
+        self.gold_points = [0, 0, 0, 0]
+        self.bonus_possession = 0
+        self.bonus_points = 0
+
 
     def __setattr__(self, name, value):
         self.__dict__["_last_update_time"] = time.time()
@@ -51,21 +56,34 @@ def all_info():
         'stored-a' : fi.stored_a,
         'game-time' : game_time(),
         'comms-status' : comms_status(),
-        'game-mode' : game_mode()
+        'game-mode' : game_mode(),
+        'stage-name' : fi.stage_name,
+        'blue_points' : fi.blue_points,
+        'gold_points' : fi.gold_points,
+        'bonus_possession' : fi.bonus_possession,
+        'bonus_points' : fi.bonus_points
     }
     js = json.dumps(data)
     print js
     resp = Response(js, status=200, mimetype='application/json')
     return resp
 
-def handle_lcm(channel, data):
+def handle_xbox(channel, data):
     msg = fs2.xbox_joystick_state.decode(data)
     fi.stored_a = msg.buttons[0]
+
+def handle_score(channel, data):
+    m = fs2.score_state.decode(data)
+    fi.blue_points = [m.blue_total, m.blue_normal_points, m.blue_permanent_points, m.blue_penalty]
+    fi.gold_points = [m.gold_total, m.gold_normal_points, m.gold_permanent_points, m.gold_penalty]
+    fi.bonus_possession = m.bonus_possession
+    fi.bonus_points = m.bonus_points
 
 def main():
     global lc
     lc = lcm.LCM(settings.LCM_URI)
-    subscription = lc.subscribe("xbox/state/default/0", handle_lcm)
+    subscription = lc.subscribe("xbox/state/default/0", handle_xbox)
+    sub = lc.subscribe("score/state", handle_score)
     try:
         while True:
             lc.handle()
