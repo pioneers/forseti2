@@ -6,6 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
 	<link href="{{ url_for('static', filename='css/judge_console.css')}}" type="text/css" rel="stylesheet">
+	<link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico')}}">
     <!--[if lt IE 9]>
       <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
       <![endif]-->
@@ -13,7 +14,7 @@
 
   <body>
   	<!-- Header -->
-  	<div id="top-nav" class="navbar navbar-inverse navbar-static-top">
+  	<div id="top-nav" class="navbar navbar-fixed-top">
   		<div class="container">
   			<div class="navbar-header">
   				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -36,7 +37,7 @@
   			<div class="col-md-3">
   				<!-- Left column -->
   				<div class="panel">
-  					<a class="panel-heading" href="#"><strong><span class="glyphicon glyphicon-wrench"></span> Connection Status</strong></a>  
+  					<div id="config-heading" class="panel-heading" href="#"><strong><span class="glyphicon glyphicon-wrench"></span> Connection Status</strong></div>  
   					<ul class="panel-body nav nav-pills nav-stacked" id="configuration">
   						<li class="text-center">
   							<span id="config-status" class="text-center label label-info">
@@ -46,15 +47,14 @@
   					</ul>
   				</div>
   				<div class="panel">
-  					<a class="panel-heading" href="#"><strong><i class="glyphicon glyphicon-heart"></i> Controller Heartbeat</strong></a>  
-  					<h1 class="panel-body" id="heartbeat" class="text-center"></h1>
+  					<div id="heartbeat" class="panel-heading"><strong><i class="glyphicon glyphicon-heart"></i> Controller Heartbeat</strong></div>  
   				</div>
   			</div>
   			<div class="col-md-9"> 
 
   				<!-- Game Clock -->
   				<div class="panel">
-  					<a class="panel-heading" href="#"><strong><i class="glyphicon glyphicon-time"></i> Match Status </strong></a>
+  					<div class="panel-heading" href="#"><strong><i class="glyphicon glyphicon-time"></i> Match Status </strong></div>
   					<div class="panel-body">
   						<div id="game-clock" class="text-center"> 0:00 </div>
   						<div class="progress">
@@ -65,18 +65,29 @@
   					</div>
   				</div>
   				<div class="panel">
-  					<a class="panel-heading" href="#"><strong><i class="glyphicon glyphicon-cog"></i> Scoring </strong></a>  
+  					<div class="panel-heading" href="#"><strong><i class="glyphicon glyphicon-cog"></i> Scoring </strong></div>  
   					<div class="panel-body">
   						<table class="table table-condensed">
   							<thead>
   								<tr>
   									<th>
-  										<a class="btn btn-default pioneers-blue" style="width: 100%">Blue Alliance</a> 
+  										<div class="btn btn-default pioneers-blue" style="width: 100%"><strong>Blue Alliance </strong>
+  											<br>
+  											<span></span>
+  											<br>
+  											<span></span>
+  										</div> 
   									</th>
   									<th>
+  										<h1 class="text-center"> Match </h1>
   									</th>
   									<th>
-  										<a class="btn btn-default pioneers-gold" style="width: 100%">Gold Alliance</a> 
+  										<a class="btn btn-default pioneers-gold" style="width: 100%"><strong>Gold Alliance</strong>
+  											<br>
+  											<span></span>
+  											<br>
+  											<span></span>
+  										</a> 
   									</th>
   								</tr>
   							</thead>

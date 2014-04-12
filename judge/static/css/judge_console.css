@@ -12,11 +12,20 @@
 .pioneers-blue , .pioneers-gold {
 	color: white;
 }
+.navbar {
+	background-color: #363895;
+}
+.navbar-brand {
+	color: white;
+}
+
 
 /* We do this so that the footer gets to the bottom
 */
 html,body {
+	padding-top: 32px;
 	height: 100%;
+	background-color: #f0f0f0;
 }
 
 .navbar-static-top {

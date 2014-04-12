@@ -1,4 +1,9 @@
 function updateCommsStatus(status) {
+	heading = $('#config-heading');
+	heading.removeClass("btn-info");
+	heading.removeClass("btn-warning");
+	heading.removeClass("btn-danger");
+	heading.removeClass("btn-success");
 	status_span = $('#config-status');
 	status_span.removeClass("label-info");
 	status_span.removeClass("label-warning");
@@ -6,17 +11,24 @@ function updateCommsStatus(status) {
 	status_span.removeClass("label-success");
 	switch(status) {
 		case "COMMS_UP":
+			heading.addClass("btn-success")
 			status_span.addClass("label-success");
 			status_span.text("Connected to Server");
 			break;
 		case "COMMS_DOWN":
+			heading.addClass("btn-warning")
 			status_span.addClass("label-warning");
-			status_span.text("LCM Pings Offline...")
+			status_span.text("LCM Communications Offline...")
 			break;
 		case "INFO_FAILED":
+			heading.addClass("btn-danger")
 			status_span.addClass("label-danger");
 			status_span.text("Can't Connect to Flask Server...")
 			break;
+		default:
+			heading.addClass("btn-danger")
+			status_span.addClass("label-danger");
+			status_span.text("Unknown Error")
 	}
 }
 
@@ -74,6 +86,7 @@ function updateGameClock(gametime, mode) {
 			break;
 		case "End":
 			game_mode_div.text("Match Ended");
+			clock_bar.css("width", "0%");
 			break;
 		default:
 			game_mode_div.text("Unknown Mode");
@@ -95,17 +108,20 @@ function updateScore(data) {
 
 }
 
-function processInfo(data) {
-	status = data['comms-status'];
-	if (status == '1') {
-		updateCommsStatus("COMMS_UP");
+function updateHeartbeat(data) {
+	hb = $('#heartbeat');
+	if (data['stored-a']) {
+		hb.addClass('btn-info');
 	} else {
-		updateCommsStatus("COMMS_DOWN");
+		hb.removeClass('btn-info');
 	}
-	updateGameClock(data['game-time'], data['game-mode']);
-	$('#heartbeat').text(data['stored-a']);
+}
 
+function processInfo(data) {
+	updateCommsStatus(data['comms-status']);
+	updateGameClock(data['game-time'], data['game-mode']);
 	updateScore(data);
+	updateHeartbeat(data);
 }
 
 function failedToGetInfo() {
@@ -121,5 +137,5 @@ function updateInterface() {
 }
 
 $( document ).ready(function() {
-	window.setInterval(updateInterface, 100);
+	window.setInterval(updateInterface, 40);
 });

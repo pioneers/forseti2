@@ -25,10 +25,10 @@ class FlaskInfo(object):
         self.total_stage_time = 0.0
         self.stage_name = "none"
 
-        self.blue_points = [0, 0, 0, 0]
-        self.gold_points = [0, 0, 0, 0]
-        self.bonus_possession = 0
-        self.bonus_points = 0
+        self.blue_points = ['?', '?', '?', 0]
+        self.gold_points = ['?', '?', '?', 0]
+        self.bonus_possession = '?'
+        self.bonus_points = '?'
 
 
     def __setattr__(self, name, value):
@@ -43,7 +43,7 @@ def game_time():
     return fi.game_time
 
 def comms_status():
-    return int(fi.time_since_last_update() < 1)
+    return "COMMS_UP" if fi.time_since_last_update() < 1 else "COMMS_DOWN"
 
 def game_mode():
     return fi.stage_name
