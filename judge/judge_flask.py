@@ -70,7 +70,7 @@ def all_info():
 
 def handle_xbox(channel, data):
     msg = fs2.xbox_joystick_state.decode(data)
-    fi.stored_a = msg.buttons[0]
+    fi.stored_a = msg.buttons[fs2.xbox_joystick_state.GUIDE]
 
 def handle_score(channel, data):
     m = fs2.score_state.decode(data)
