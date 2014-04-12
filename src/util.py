@@ -20,7 +20,7 @@ class LCMSequence:
         msg.header.time = time.time()
 
         for k, v in self.defaults.items():
-            msg.__setattribute__(k, v)
+            msg.__setattr__(k, v)
 
         return msg
 
