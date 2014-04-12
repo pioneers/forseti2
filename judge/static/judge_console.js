@@ -1,3 +1,25 @@
+function updateCommsStatus(status) {
+	status_span = $('#config-status');
+	status_span.removeClass("label-info");
+	status_span.removeClass("label-warning");
+	status_span.removeClass("label-danger");
+	status_span.removeClass("label-success");
+	switch(status) {
+		case "COMMS_UP":
+			status_span.addClass("label-success");
+			status_span.text("Connected to Server");
+			break;
+		case "COMMS_DOWN":
+			status_span.addClass("label-warning");
+			status_span.text("LCM Pings Offline...")
+			break;
+		case "INFO_FAILED":
+			status_span.addClass("label-danger");
+			status_span.text("Can't Connect to Flask Server...")
+			break;
+	}
+}
+
 function updateGameClock(time) {
 	minutes = Math.floor(time / 60);
 	seconds = Math.floor(time % 60);
@@ -27,9 +49,19 @@ function updateGameClock(time) {
 	}
 }
 
+
 function processInfo(data) {
+	status = data['comms-status'];
+	if (status == '1') {
+		updateCommsStatus("COMMS_UP");
+	} else {
+		updateCommsStatus("COMMS_DOWN");
+	}
 	updateGameClock(data['game-time']);
-	$('#comms-status').text(data['comms-status']);
+}
+
+function failedToGetInfo() {
+	updateCommsStatus("INFO_FAILED");
 }
 
 function updateInterface() {
@@ -37,7 +69,7 @@ function updateInterface() {
 	time = new Date().toLocaleTimeString();
 	$('#wall-clock').text(time);
 
-	$.get('/api/v1/all-info', {}, processInfo);
+	$.get('/api/v1/all-info', {}, processInfo).fail(failedToGetInfo);
 }
 
 $( document ).ready(function() {
