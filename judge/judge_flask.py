@@ -14,43 +14,52 @@ app = Flask(__name__)
 def serve_console():
     return render_template('judge_console.html')
 
-stored_time = 0
-last_time = time.time()
+# data container for persistent state
+class FlaskInfo(object):
+    def __init__(self):
+        self.stored_a = 0
+        self.last_time = time.time()
+
+fi = FlaskInfo()
 def game_time():
     time = datetime.datetime.now()
-    result = 60 - (time.second + time.microsecond / float(1000000)) 
-    if time.minute % 2:
-        result += 60
+    result = time.second + time.microsecond / float(1000000) ;
+    result += 60 * (time.minute % 3);
     return result
 
 def comms_status():
-    if last_time + 1 < time.time():
+    if fi.last_time + 1 < time.time():
         return 0
     else:
         return 1
+
+def game_mode():
+    time = game_time()
+    if time < 20:
+        return "Autonomous"
+    return "Teleop"
 
 @app.route('/api/v1/all-info')
 def all_info():
     data = {
         'game-time' : game_time(),
-        'comms-status' : comms_status()
+        'comms-status' : comms_status(),
+        'game-mode' : game_mode()
     }
     js = json.dumps(data)
     print js
     resp = Response(js, status=200, mimetype='application/json')
     return resp
 
-def handle_xbox(channel, data):
-    global stored_time
-    global last_time
-    last_time = time.time()
+def handle_lcm(channel, data):
+    fi.last_time = time.time()
     msg = fs2.xbox_joystick_state.decode(data)
-    stored_time = msg.buttons[0]
+    fi.stored_a = msg.buttons[0]
 
 def main():
     global lc
     lc = lcm.LCM(settings.LCM_URI)
-    subscription = lc.subscribe("xbox/state/default/0", handle_xbox)
+    subscription = lc.subscribe("xbox/state/default/0", handle_lcm)
     try:
         while True:
             lc.handle()

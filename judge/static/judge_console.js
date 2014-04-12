@@ -20,7 +20,16 @@ function updateCommsStatus(status) {
 	}
 }
 
-function updateGameClock(time) {
+function updateGameClock(gametime, mode) {
+	// convert input "gametime" into 
+	if (gametime > 140) {
+		time = 0;
+	} else if (gametime > 20) {
+		time = 140 - gametime;
+	} else {
+		time = 20 - gametime;
+	}
+
 	minutes = Math.floor(time / 60);
 	seconds = Math.floor(time % 60);
 	microseconds = Math.floor(time % 1);
@@ -31,12 +40,10 @@ function updateGameClock(time) {
 		hr_seconds = String(seconds);
 	}
 	hr_time = String(minutes) + ":" + hr_seconds;
-	$('#game-clock').text(hr_time);
+	game_clock = $('#game-clock');
+	game_clock.text(hr_time);
 
-	proportionRemaining = time / 120;
 	clock_bar = $('#clock-bar');
-	clock_bar.css("width", String(proportionRemaining * 100) + "%");
-
 	clock_bar.removeClass("progress-bar-info");
 	clock_bar.removeClass("progress-bar-warning");
 	clock_bar.removeClass("progress-bar-danger");
@@ -46,8 +53,31 @@ function updateGameClock(time) {
 	} else if (time <= 30) {
 		clock_bar.addClass("progress-bar-warning");
 	}
-}
 
+	game_mode_div = $('#game-mode');
+	switch (mode) {
+		case "Setup":
+			clock_bar.css("width", "0%;");
+			break;
+		case "Teleop":
+			clock_bar.css("width", String(time / 120 * 100) + "%");
+			game_mode_div.text("Teleoperated Mode");
+			break;
+		case "Autonomous":
+			game_mode_div.text("Autonomous Mode");
+			clock_bar.css("width", String(time / 20 * 100) + "%");
+			break;
+		case "Paused":
+			game_mode_div.text("Match Paused");
+			break;
+		case "End":
+			game_mode_div.text("Match Ended");
+			break;
+		default:
+			game_mode_div.text("Unknown Mode");
+			break;
+	}
+}
 
 function processInfo(data) {
 	status = data['comms-status'];
@@ -56,7 +86,7 @@ function processInfo(data) {
 	} else {
 		updateCommsStatus("COMMS_DOWN");
 	}
-	updateGameClock(data['game-time']);
+	updateGameClock(data['game-time'], data['game-mode']);
 }
 
 function failedToGetInfo() {
