@@ -41,3 +41,25 @@ class LCMSequence:
 
         return msg
 
+def is_lcm_message(obj):
+    """
+    Check if an object is an instance of an LCM type
+
+    LCM offers no official way to do this, so test for a uniquely-named method
+    that is present in all LCM types
+    """
+    return '_get_packed_fingerprint' in dir(obj)
+
+
+def print_lcm_msg(msg, indent='', indent_increment='  '):
+    """
+    Pretty-prints an LCM message to the console
+    """
+    print indent + msg.__module__ + ":"
+    for slot in msg.__slots__:
+        value = msg.__getattribute__(slot)
+        if is_lcm_message(value):
+            print indent + indent_increment + slot + ":"
+            print_lcm_msg(value, indent + indent_increment)
+        else:
+            print indent + indent_increment + slot, "=", repr(value)
