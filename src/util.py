@@ -12,11 +12,11 @@ class LCMSequence:
         self.channel_name = channel_name
         self.defaults = defaults
         self.debug = True
+        self.seq = 0
 
     def new_msg(self):
         msg = self.msg_type()
         msg.header = forseti2.header()
-        msg.header.seq = 0
         msg.header.time = time.time()
 
         for k, v in self.defaults.items():
@@ -26,7 +26,8 @@ class LCMSequence:
 
     def publish(self, **kwargs):
         msg = self.new_msg()
-        msg.header.seq+=1
+        msg.header.seq=self.seq
+        self.seq += 1
         msg.header.time = time.time()
 
         for k, v in kwargs.items():
