@@ -5,6 +5,7 @@ import forseti2 as fs2
 import sys
 sys.path.append('../src')
 import settings
+import util
 import time
 import datetime
 
@@ -13,6 +14,20 @@ app = Flask(__name__)
 @app.route('/')
 def serve_console():
     return render_template('judge_console.html')
+
+@app.route('/score-adjust')
+def serve_score_adjust():
+    return render_template('score_adjust.html')
+
+@app.route('/api/v1/score-delta', methods=["PUT", "POST"])
+def score_delta():
+    global seq
+    args = {}
+    for k, v in request.form.items():
+        args[k] = int(v)
+    seq.publish(**args)
+    return "{success: true}"
+
 
 # data container for persistent state
 class FlaskInfo(object):
@@ -97,12 +112,13 @@ def handle_match_init(channel, data):
     fi.team_names = m.team_names
 
 def main():
-    global lc
+    global lc, seq
     lc = lcm.LCM(settings.LCM_URI)
     lc.subscribe("xbox/state/default/0", handle_xbox)
     lc.subscribe("score/state", handle_score)
     lc.subscribe("Timer/Time", handle_time)
     lc.subscribe("Match/Init", handle_match_init)
+    seq = util.LCMSequence(lc, fs2.score_delta, "score/delta")
     try:
         while True:
             lc.handle()

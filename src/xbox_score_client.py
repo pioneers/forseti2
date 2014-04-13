@@ -81,16 +81,28 @@ class ScoreClient(object):
         assert(alliance in [fs2.score_delta.BLUE, fs2.score_delta.GOLD])
         if alliance == fs2.score_delta.BLUE:
             if i in BUTTON_GAME_PIECE_ENTER:
-                self.seq.publish(gold_normal_points=settings.GAME_PIECE_VALUE)
+                self.seq.publish(
+                    blue_normal_points=-settings.GAME_PIECE_VALUE,
+                    gold_normal_points=settings.GAME_PIECE_VALUE
+                    )
             elif i in BUTTON_PERMANENT_GOAL_SCORE:
-                self.seq.publish(blue_permanent_points=settings.PERMANENT_GOAL_VALUE)
+                self.seq.publish(
+                    gold_normal_points=-settings.GAME_PIECE_VALUE,
+                    blue_permanent_points=settings.PERMANENT_GOAL_VALUE
+                    )
             elif i in BUTTON_DISPENSER_BALLS_ENTER_FIELD:
                 self.seq.publish(gold_normal_points=settings.BALL_VALUE_PER_DISPENSER)
         else:
             if i in BUTTON_GAME_PIECE_ENTER:
-                self.seq.publish(blue_normal_points=settings.GAME_PIECE_VALUE)
+                self.seq.publish(
+                    blue_normal_points=settings.GAME_PIECE_VALUE,
+                    gold_normal_points=-settings.GAME_PIECE_VALUE
+                    )
             elif i in BUTTON_PERMANENT_GOAL_SCORE:
-                self.seq.publish(gold_permanent_points=settings.PERMANENT_GOAL_VALUE)
+                self.seq.publish(
+                    gold_permanent_points=settings.PERMANENT_GOAL_VALUE,
+                    blue_normal_points=-settings.GAME_PIECE_VALUE
+                    )
             elif i in BUTTON_DISPENSER_BALLS_ENTER_FIELD:
                 self.seq.publish(blue_normal_points=settings.BALL_VALUE_PER_DISPENSER)
 
