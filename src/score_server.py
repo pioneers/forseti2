@@ -146,6 +146,11 @@ class ScoreServer:
         state["blue_total"] = state["blue_normal_points"] + state["blue_autonomous_points"] + state["blue_permanent_points"] - state["blue_penalty"] + blue_bonus
         state["gold_total"] = state["gold_normal_points"] + state["gold_autonomous_points"]+ state["gold_permanent_points"] - state["gold_penalty"] + gold_bonus
 
+        if state["bonus_possession"] == forseti2.score_delta.NEUTRAL:
+            state["bonus_time_remaining"] = settings.BONUS_TIMER_SECONDS
+        else:
+            state["bonus_time_remaining"] = int(self.bonus_penalty_time - time.time())
+
         return state
 
     def print_score(self):

@@ -28,4 +28,5 @@ struct score_state
 
     int8_t bonus_possession;
     int8_t bonus_points;
+    int8_t bonus_time_remaining;
 }
