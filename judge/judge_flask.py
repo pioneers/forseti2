@@ -30,6 +30,8 @@ class FlaskInfo(object):
         self.bonus_possession = '?'
         self.bonus_points = '?'
 
+        self.team_numbers = [0, 0, 0, 0]
+        self.team_names = ['', '', '', '']
 
     def __setattr__(self, name, value):
         self.__dict__["_last_update_time"] = time.time()
@@ -62,7 +64,9 @@ def all_info():
         'blue_points' : fi.blue_points,
         'gold_points' : fi.gold_points,
         'bonus_possession' : fi.bonus_possession,
-        'bonus_points' : fi.bonus_points
+        'bonus_points' : fi.bonus_points,
+        'team_numbers' : fi.team_numbers,
+        'team_names' : fi.team_names
     }
     js = json.dumps(data)
     print js
@@ -87,12 +91,18 @@ def handle_time(channel, data):
     fi.total_stage_time = m.total_stage_time
     fi.stage_name = m.stage_name
 
+def handle_match_init(channel, data):
+    m = fs2.Match.decode(data)
+    fi.team_numbers = m.team_numbers
+    fi.team_names = m.team_names
+
 def main():
     global lc
     lc = lcm.LCM(settings.LCM_URI)
     lc.subscribe("xbox/state/default/0", handle_xbox)
     lc.subscribe("score/state", handle_score)
     lc.subscribe("Timer/Time", handle_time)
+    lc.subscribe("Match/Init", handle_match_init)
     try:
         while True:
             lc.handle()

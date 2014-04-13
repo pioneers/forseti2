@@ -95,6 +95,17 @@ function updateGameClock(gametime, mode) {
 }
 
 function updateScore(data) {
+	// update the team names
+	team_numbers = data['team_numbers'];
+	team_names = data['team_names'];
+	var team_strings = new Array();
+	for (var i = 0; i < 4; i++) {
+		team_strings[i] = String(team_numbers[i]) + " " + team_names[i];
+		$('#team' + String(i)).text(team_strings[i]);
+	}
+
+
+	// update the scores
 	blue_scores = data['blue_points'];
 	gold_scores = data['gold_points'];
 	$('#blue-total-score').text(blue_scores[0]);
