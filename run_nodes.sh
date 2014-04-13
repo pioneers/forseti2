@@ -21,6 +21,8 @@ if gem list teamocil -i | grep false; then
     exit 1
 fi
 
+./gen-types.sh
+
 export TEAMOCIL_PATH="$PWD"
 
 echo "This script must be run in a tmux session"
