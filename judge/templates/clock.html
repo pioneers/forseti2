@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"> 
+	<title>forseti2 Clock</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='css/judge_console.css')}}" type="text/css" rel="stylesheet">
+	<link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico')}}">
+    <!--[if lt IE 9]>
+      <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+      <![endif]-->
+  </head>
+
+  <body style="padding-top: 10px">
+  	<!-- Main -->
+  	<div class="container">
+  		<div class="row">
+        <!-- Right column -->
+  			<div class="col-md-12"> 
+
+          <!-- Nav tabs -->
+          <div class="tab-content">
+        				<!-- Match Status -->
+      				<div class="panel"> 
+      					<div class="panel-heading" href="#"><strong><i class="glyphicon glyphicon-time"></i> Match Status </strong></div>
+      					<div class="panel-body">
+      						<div id="game-clock" class="text-center"> 0:00 </div>
+      						<div class="progress">
+      							<div id="clock-bar" class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%; float: right">
+      							</div>
+      						</div>
+      						<h1 id="game-mode" class="text-center"> Retrieving Game Mode... </h1>
+      					</div>
+      				</div>
+            <div class="tab-pane fade" id="score-adjust">
+              <div class="panel">
+                <div class="panel-heading"><strong><i class="glyphicon glyphicon-cog"></i> Score Adjustment  
+                <div class="panel-body">
+                </div>
+                </div>
+              </div>
+          </div>
+  			</div>
+                <!-- Scoring -->
+              <div class="panel">
+                <div class="panel-heading" href="#"><strong><i class="glyphicon glyphicon-cog"></i> Scoring </strong></div>  
+                <div class="panel-body">
+                  <table class="table table-condensed">
+                    <thead>
+                      <tr class="score-heading">
+                        <th>
+                          <div class="score-legend btn btn-default pioneers-blue" style="width: 100%"><strong>Blue Alliance </strong>
+                            <br>
+                            <span id="team0"></span>
+                            <br>
+                            <span id="team1"></span>
+                          </div> 
+                        </th>
+                        <th>
+                          <h1 class="score-legend text-center"> Match </h1>
+                        </th>
+                        <th>
+                          <a class="score-legend btn btn-default pioneers-gold" style="width: 100%"><strong>Gold Alliance</strong>
+                            <br>
+                            <span id="team2"></span>
+                            <br>
+                            <span id="team3"></span>
+                          </a> 
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <h1 id="blue-total-score" class="text-center"></h1>
+                        </td>
+                        <td class="text-center">
+                          <h1> Total Points </h1>
+                        </td>
+                        <td>
+                          <h1 id="gold-total-score" class="text-center"></h1>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <div id="blue-normal-points" class="text-center"></div>
+                        </td>
+                        <td class="text-center">
+                          <div> Normal </div>
+                        </td>
+                        <td>
+                          <div id="gold-normal-points" class="text-center"></div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <div id="blue-permanent-points" class="text-center"></div>
+                        </td>
+                        <td class="text-center">
+                          <div> Permanent Goals </div>
+                        </td>
+                        <td>
+                          <div id="gold-permanent-points" class="text-center"></div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <div id="blue-penalties" class="text-center"></div>
+                        </td>
+                        <td class="text-center">
+                          <div> Penalties </div>
+                        </td>
+                        <td>
+                          <div id="gold-penalties" class="text-center"></div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+  		</div>
+  	</div>
+
+  	<script type='text/javascript' src="{{url_for('static', filename = 'jquery/jquery-2.1.0.min.js')}}"></script>
+  	<script type='text/javascript' src="{{url_for('static', filename = 'bootstrap/js/bootstrap.min.js')}}"></script>
+    <script type='text/javascript' src="{{url_for('static', filename = 'judge_console.js')}}"></script>
+  </body>
+  </html>

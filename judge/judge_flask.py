@@ -15,6 +15,10 @@ app = Flask(__name__)
 def serve_console():
     return render_template('judge_console.html')
 
+@app.route('/clock')
+def serve_clock():
+    return render_template('clock.html')
+
 @app.route('/api/v1/score-delta', methods=["PUT", "POST"])
 def score_delta():
     global seq
