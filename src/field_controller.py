@@ -64,7 +64,7 @@ class FieldController:
             self.lights_timeouts[alliance][dispenser][color] = None
 
     def activate_lights_team(self, team, color, timeout=None):
-        alliance = team % 2
+        alliance = ALLIANCE_BLUE if team in [0, 1] else ALLIANCE_GOLD
         if alliance == ALLIANCE_BLUE:
             dispenser = settings.DISPENSER_TELEOP_1 if team%2 else settings.DISPENSER_TELEOP_0
         else:
