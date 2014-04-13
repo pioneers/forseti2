@@ -203,6 +203,8 @@ class FieldController:
         else:
             self.activate_lights_team(team, fs2.forest_cmd.BRANCH_RED)
 
+        self.send_forest_cmd()
+
 
 if __name__=='__main__':
     try:
