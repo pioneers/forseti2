@@ -25,10 +25,11 @@ CODE_RIGHT = 4
 CODE_FALSE = 5
 
 class FieldController:
-    def __init__(self, lcm):
-        self.lcm = lcm
+    def __init__(self, in_lcm):
+        self.lcm = in_lcm
         self.seq = util.LCMSequence(self.lcm, fs2.forest_cmd, "/forest/cmd")
-
+        self.seq.debug = False
+        self.bad_rfid_seq = util.LCMSequence(self.lcm, fs2.piemos_bad_rfid, "piemos/bad_rfid")
         # This also initializes variables
         self.reset_field()
 
@@ -92,8 +93,9 @@ class FieldController:
 
     def disable_robot(self, team):
         """Disable a robot after it sends a false release code"""
-        print "Team {} send false release code".format(team)
-        # TODO(nikita): actually disable robot
+        print "station {} sent false release code".format(team)
+        self.bad_rfid_seq.publish(station=team)
+        # Should be done TODO(mnuyens): actually disable robot
 
     def handle_field_cmd(self, channel, data):
         msg = fs2.piemos_field_cmd.decode(data)
@@ -126,7 +128,6 @@ class FieldController:
     def handle_control(self, channel, data):
         # TODO(nikita): is there a way to do this that doesn't depend on strings?
         msg = fs2.ControlData.decode(data)
-        util.print_lcm_msg(msg)
         if msg.Stage == "Teleop":
             # This should dispense at the start of teleop
             # (but not when the game is paused between autonomous and teleop)
