@@ -1,37 +1,37 @@
 [{
-    "uid": 890090833,
+    "tagId": 890090833,
     "objectId": 0,
-    "tagId": "350db551",
+    "uid": "350db551",
     "readerType": "Dispenser",
     "objectType": 5
 },{
-    "uid": 3313555281,
+    "tagId": 3313555281,
     "objectId": 0,
-    "tagId": "c580d751",
+    "uid": "c580d751",
     "readerType": "Dispenser",
     "objectType": 5
 },{
-    "uid": 2777274193,
+    "tagId": 2777274193,
     "objectId": 0,
-    "tagId": "a589d751",
+    "uid": "a589d751",
     "readerType": "Dispenser",
     "objectType": 4
 },{
-    "uid": 898886440,
+    "tagId": 898886440,
     "objectId": 0,
-    "tagId": "3593eb28",
+    "uid": "3593eb28",
     "readerType": "Dispenser",
     "objectType": 4
 },{
-    "uid": 2240206673,
+    "tagId": 2240206673,
     "objectId": 0,
-    "tagId": "8586d751",
+    "uid": "8586d751",
     "readerType": "Dispenser",
     "objectType": 3
 },{
-    "uid": 2501433169,
+    "tagId": 2501433169,
     "objectId": 0,
-    "tagId": "9518d751",
+    "uid": "9518d751",
     "readerType": "Dispenser",
     "objectType": 3
 }]
