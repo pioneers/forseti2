@@ -38,8 +38,8 @@ class ScoreServer:
 
     def reset_scores(self):
         self.state = dict(
-            blue_normal_points = 0,
-            gold_normal_points = 0,
+            blue_normal_points = settings.INITIAL_ALLIANCE_SCORE,
+            gold_normal_points = settings.INITIAL_ALLIANCE_SCORE,
             blue_autonomous_points = 0,
             gold_autonomous_points = 0,
             blue_permanent_points = 0,
