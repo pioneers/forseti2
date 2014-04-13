@@ -33,6 +33,7 @@ class FieldController:
         self.lcm = in_lcm
         self.seq = util.LCMSequence(self.lcm, fs2.forest_cmd, "/forest/cmd")
         self.seq.debug = False
+        self.score_seq = util.LCMSequence(self.lcm, fs2.score_delta, "score/delta")
         self.bad_rfid_seq = util.LCMSequence(self.lcm, fs2.piemos_bad_rfid, "piemos/bad_rfid")
         self.piemos_last_health = [0, 0, 0, 0]
         # This also initializes variables
@@ -129,10 +130,19 @@ class FieldController:
             if not self.dispenser_released[alliance][settings.DISPENSER_LEFT]:
                 self.activate_lights(alliance, settings.DISPENSER_LEFT, fs2.forest_cmd.BRANCH_GREEN, DISPENSER_GREEN_SECONDS)
                 self.dispenser_released[alliance][settings.DISPENSER_LEFT] = True
+                if alliance == ALLIANCE_BLUE:
+                    self.score_seq.publish(blue_normal_points=settings.DISPENSER_RELEASE_POINTS)
+                else:
+                    self.score_seq.publish(gold_normal_points=settings.DISPENSER_RELEASE_POINTS)
         elif code_type == CODE_RIGHT:
             if not self.dispenser_released[alliance][settings.DISPENSER_RIGHT]:
                 self.activate_lights(alliance, settings.DISPENSER_RIGHT, fs2.forest_cmd.BRANCH_GREEN, DISPENSER_GREEN_SECONDS)
                 self.dispenser_released[alliance][settings.DISPENSER_RIGHT] = True
+                if alliance == ALLIANCE_BLUE:
+                    self.score_seq.publish(blue_normal_points=settings.DISPENSER_RELEASE_POINTS)
+                else:
+                    self.score_seq.publish(gold_normal_points=settings.DISPENSER_RELEASE_POINTS)
+
         else:
             assert(False) # Code type not valid
 
