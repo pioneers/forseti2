@@ -64,6 +64,10 @@ function updateGameClock(data) {
 		clock_bar.addClass("progress-bar-warning");
 	}
 
+	bonus_bar = $('#bonus-bar');
+	bonus_time = data['bonus_time']
+	bonus_bar.css("width", String(bonus_time / 30 * 100) + "%");
+
 	game_mode_div = $('#game-mode');
 	switch (mode) {
 		case "Setup":
@@ -104,12 +108,14 @@ function updateScore(data) {
 	gold_scores = data['gold_points'];
 	$('#blue-total-score').text(blue_scores[0]);
 	$('#gold-total-score').text(gold_scores[0]);
-	$('#blue-normal-points').text(blue_scores[1]);
-	$('#gold-normal-points').text(gold_scores[1]);
-	$('#blue-permanent-points').text(blue_scores[2]);
-	$('#gold-permanent-points').text(gold_scores[2]);
-	$('#blue-penalties').text(-blue_scores[3]);
-	$('#gold-penalties').text(-gold_scores[3]);
+	$('#blue-autonomous-points').text(blue_scores[1]);
+	$('#gold-autonomous-points').text(gold_scores[1]);
+	$('#blue-normal-points').text(blue_scores[2]);
+	$('#gold-normal-points').text(gold_scores[2]);
+	$('#blue-permanent-points').text(blue_scores[3]);
+	$('#gold-permanent-points').text(gold_scores[3]);
+	$('#blue-penalties').text(-blue_scores[4]);
+	$('#gold-penalties').text(-gold_scores[4]);
 
 }
 
