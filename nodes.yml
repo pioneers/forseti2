@@ -19,6 +19,7 @@ session:
         - cmd: "python wxdash.py"
         - cmd: "python xbox_driver.py debug"
         - cmd: "python xbox_score_client.py --type debug --joystick debug"
+        - cmd: "python overdash.py"
         - cmd:
             - "cd ../judge"
             - "python judge_flask.py"
