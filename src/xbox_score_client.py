@@ -51,9 +51,9 @@ def describe_button(b):
 
 class ScoreClient(object):
 
-    def __init__(self, joystick_channel='default'):
+    def __init__(self, lcm_joystick_channel='default'):
         self.lc = lcm.LCM(settings.LCM_URI)
-        self.subscription = self.lc.subscribe("xbox/state/{}/0".format(joystick_channel),
+        self.subscription = self.lc.subscribe(lcm_joystick_channel,
                                               self.handle_xbox)
         self.seq = util.LCMSequence(self.lc, fs2.score_delta, "score/delta")
         self.buttons = [0 for _ in xrange(11)]
@@ -206,16 +206,19 @@ class DebugScoreClient(ScoreClient):
 def main():
     parser = argparse.ArgumentParser(description="Receives joystick values and outputs score changes")
     parser.add_argument('--type', required=True, type=str, choices=['blue', 'gold', 'bonus', 'debug'], action='store')
-    parser.add_argument('--joystick', default=0, help="Joystick channel name")
+    parser.add_argument('--channel', type=str, default='debug', help="Joystick channel name")
+    parser.add_argument('--joystick', type=int, default=0, help="Joystick number")
     args = parser.parse_args()
+
+    sclient_args = dict(lcm_joystick_channel="xbox/state/{}/{}".format(args.channel, args.joystick))
     if args.type == 'blue':
-        sclient = BlueScoreClient(joystick_channel=args.joystick)
+        sclient = BlueScoreClient(**sclient_args)
     elif args.type == 'gold':
-        sclient = GoldScoreClient(joystick_channel=args.joystick)
+        sclient = GoldScoreClient(**sclient_args)
     elif args.type == 'bonus':
-        sclient = BonusScoreClient(joystick_channel=args.joystick)
+        sclient = BonusScoreClient(**sclient_args)
     elif args.type == 'debug':
-        sclient = DebugScoreClient(joystick_channel=args.joystick)
+        sclient = DebugScoreClient(**sclient_args)
 
 
     print "Initialized ScoreClient..."

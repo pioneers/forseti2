@@ -18,7 +18,7 @@ session:
         - cmd: "python scheduler.py"
         - cmd: "python wxdash.py"
         - cmd: "python xbox_driver.py debug"
-        - cmd: "python xbox_score_client.py --type debug --joystick debug"
+        - cmd: "python xbox_score_client.py --type debug --channel debug --joystick 0"
         - cmd: "python overdash.py"
         - cmd:
             - "cd ../judge"
