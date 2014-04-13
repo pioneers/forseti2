@@ -1,0 +1,37 @@
+[{
+    "uid": 1696054052,
+    "objectId": 3,
+    "tagId": "6517bb24",
+    "readerType": "Dispenser",
+    "objectType": 5
+},{
+    "uid": 89437521,
+    "objectId": 3,
+    "tagId": "0554b551",
+    "readerType": "Dispenser",
+    "objectType": 5
+},{
+    "uid": 354073380,
+    "objectId": 3,
+    "tagId": "151abb24",
+    "readerType": "Dispenser",
+    "objectType": 4
+},{
+    "uid": 2501557028,
+    "objectId": 3,
+    "tagId": "951abb24",
+    "readerType": "Dispenser",
+    "objectType": 4
+},{
+    "uid": 2510207780,
+    "objectId": 3,
+    "tagId": "959ebb24",
+    "readerType": "Dispenser",
+    "objectType": 3
+},{
+    "uid": 1696898897,
+    "objectId": 3,
+    "tagId": "65249f51",
+    "readerType": "Dispenser",
+    "objectType": 3
+}]
