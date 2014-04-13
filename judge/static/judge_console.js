@@ -32,30 +32,28 @@ function updateCommsStatus(status) {
 	}
 }
 
-function updateGameClock(gametime, mode) {
+function updateGameClock(data) {
+	mode = data['stage_name'];
+	stage_time = data['stage_time'];
+	total_stage_time = data['total_stage_time'];
 	// convert input "gametime" into 
-	if (gametime > 140) {
-		time = 0;
-	} else if (gametime > 20) {
-		time = 140 - gametime;
-	} else {
-		time = 20 - gametime;
-	}
+	time = total_stage_time - stage_time;
 
 	minutes = Math.floor(time / 60);
 	seconds = Math.floor(time % 60);
-	microseconds = Math.floor(time % 1);
+	disp_seconds = Math.ceil(time % 60);
 
-	if (seconds < 10) {
-		hr_seconds = "0" + String(seconds);
+	if (disp_seconds < 10) {
+		hr_seconds = "0" + String(disp_seconds);
 	} else {
-		hr_seconds = String(seconds);
+		hr_seconds = String(disp_seconds);
 	}
 	hr_time = String(minutes) + ":" + hr_seconds;
 	game_clock = $('#game-clock');
 	game_clock.text(hr_time);
 
 	clock_bar = $('#clock-bar');
+	clock_bar.css("width", String(time / total_stage_time * 100) + "%");
 	clock_bar.removeClass("progress-bar-info");
 	clock_bar.removeClass("progress-bar-warning");
 	clock_bar.removeClass("progress-bar-danger");
@@ -69,24 +67,20 @@ function updateGameClock(gametime, mode) {
 	game_mode_div = $('#game-mode');
 	switch (mode) {
 		case "Setup":
-			clock_bar.css("width", "100%");
 			game_mode_div.text("Setup");
+			clock_bar.css("width", "100%");
 			break;
 		case "Teleop":
-			clock_bar.css("width", String(time / 120 * 100) + "%");
 			game_mode_div.text("Teleoperated Mode");
 			break;
 		case "Autonomous":
 			game_mode_div.text("Autonomous Mode");
-			clock_bar.css("width", String(time / 20 * 100) + "%");
 			break;
 		case "Paused":
 			game_mode_div.text("Match Paused");
-			clock_bar.css("width", "0%");
 			break;
 		case "End":
 			game_mode_div.text("Match Ended");
-			clock_bar.css("width", "0%");
 			break;
 		default:
 			game_mode_div.text("Unknown Mode");
@@ -121,7 +115,7 @@ function updateScore(data) {
 
 function updateHeartbeat(data) {
 	hb = $('#heartbeat');
-	if (data['stored-a']) {
+	if (data['stored_a']) {
 		hb.addClass('btn-info');
 	} else {
 		hb.removeClass('btn-info');
@@ -129,8 +123,8 @@ function updateHeartbeat(data) {
 }
 
 function processInfo(data) {
-	updateCommsStatus(data['comms-status']);
-	updateGameClock(data['game-time'], data['game-mode']);
+	updateCommsStatus(data['comms_status']);
+	updateGameClock(data);
 	updateScore(data);
 	updateHeartbeat(data);
 }

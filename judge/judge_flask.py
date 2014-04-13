@@ -56,26 +56,18 @@ class FlaskInfo(object):
         return time.time() - self._last_update_time
 
 fi = FlaskInfo()
-def game_time():
-    return fi.game_time
-
 def comms_status():
     return "COMMS_UP" if fi.time_since_last_update() < 1 else "COMMS_DOWN"
-
-def game_mode():
-    return fi.stage_name
 
 @app.route('/api/v1/all-info')
 def all_info():
     data = {
-        'stored-a' : fi.stored_a,
-        'game-time' : game_time(),
-        'comms-status' : comms_status(),
-        'game-mode' : game_mode(),
+        'stored_a' : fi.stored_a,
+        'comms_status' : comms_status(),
         'game_time' : fi.game_time,
         'stage_time' : fi.stage_time,
         'total_stage_time' : fi.total_stage_time,
-        'stage-name' : fi.stage_name,
+        'stage_name' : fi.stage_name,
         'blue_points' : fi.blue_points,
         'gold_points' : fi.gold_points,
         'bonus_possession' : fi.bonus_possession,
@@ -126,7 +118,7 @@ def main():
         pass
 
 def run_flask_app():
-    app.run(debug = True)
+    app.run(host = '0.0.0.0')
 
 if __name__ == '__main__':
     t = threading.Thread(target = main)
