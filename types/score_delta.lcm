@@ -7,6 +7,9 @@ struct score_delta
     int8_t blue_normal_points;
     int8_t gold_normal_points;
 
+    int8_t blue_autonomous_points;
+    int8_t gold_autonomous_points;
+
     int8_t blue_permanent_points;
     int8_t gold_permanent_points;
 

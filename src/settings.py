@@ -16,6 +16,8 @@ DISPENSER_TELEOP_0 = 1
 DISPENSER_TELEOP_1 = 2
 
 # Game-derived values: everything that comes from the rulebook
+INITIAL_ALLIANCE_SCORE = 2 # each alliance starts with 2 balls on the field,
+                           # for a 2-2 initial score
 BONUS_INITIAL = 5
 BONUS_INCREMENT = 1
 BONUS_TIMER_SECONDS = 30.0

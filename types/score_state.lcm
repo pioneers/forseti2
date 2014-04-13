@@ -4,9 +4,12 @@ struct score_state
 {
     header header;
 
-    // TOTAL = points + permanent_points + penalties + bonus ball
+    // TOTAL = points + autonomous_points + permanent_points + penalties + bonus ball
     int8_t blue_total;
     int8_t gold_total;
+
+    int8_t blue_autonomous_points;
+    int8_t gold_autonomous_points;
 
     int8_t blue_normal_points;
     int8_t gold_normal_points;
@@ -25,4 +28,5 @@ struct score_state
 
     int8_t bonus_possession;
     int8_t bonus_points;
+    int8_t bonus_time_remaining;
 }

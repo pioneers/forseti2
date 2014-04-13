@@ -39,9 +39,10 @@ class FlaskInfo(object):
         self.stage_time = 0.0
         self.total_stage_time = 0.0
         self.stage_name = "none"
+        self.bonus_time = 0.0
 
-        self.blue_points = ['?', '?', '?', 0]
-        self.gold_points = ['?', '?', '?', 0]
+        self.blue_points = ['?', '?', '?', '?', 0]
+        self.gold_points = ['?', '?', '?', '?', 0]
         self.bonus_possession = '?'
         self.bonus_points = '?'
 
@@ -68,6 +69,7 @@ def all_info():
         'stage_time' : fi.stage_time,
         'total_stage_time' : fi.total_stage_time,
         'stage_name' : fi.stage_name,
+        'bonus_time' : fi.bonus_time,
         'blue_points' : fi.blue_points,
         'gold_points' : fi.gold_points,
         'bonus_possession' : fi.bonus_possession,
@@ -86,10 +88,11 @@ def handle_xbox(channel, data):
 
 def handle_score(channel, data):
     m = fs2.score_state.decode(data)
-    fi.blue_points = [m.blue_total, m.blue_normal_points, m.blue_permanent_points, m.blue_penalty]
-    fi.gold_points = [m.gold_total, m.gold_normal_points, m.gold_permanent_points, m.gold_penalty]
+    fi.blue_points = [m.blue_total, m.blue_autonomous_points, m.blue_normal_points, m.blue_permanent_points, m.blue_penalty]
+    fi.gold_points = [m.gold_total, m.blue_autonomous_points, m.gold_normal_points, m.gold_permanent_points, m.gold_penalty]
     fi.bonus_possession = m.bonus_possession
     fi.bonus_points = m.bonus_points
+    fi.bonus_time = m.bonus_time_remaining
 
 def handle_time(channel, data):
     m = fs2.Time.decode(data)
