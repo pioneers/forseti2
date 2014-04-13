@@ -15,10 +15,6 @@ app = Flask(__name__)
 def serve_console():
     return render_template('judge_console.html')
 
-@app.route('/score-adjust')
-def serve_score_adjust():
-    return render_template('score_adjust.html')
-
 @app.route('/api/v1/score-delta', methods=["PUT", "POST"])
 def score_delta():
     global seq
@@ -114,7 +110,7 @@ def handle_match_init(channel, data):
 def main():
     global lc, seq
     lc = lcm.LCM(settings.LCM_URI)
-    lc.subscribe("xbox/state/default/0", handle_xbox)
+    lc.subscribe("xbox/state/debug/0", handle_xbox)
     lc.subscribe("score/state", handle_score)
     lc.subscribe("Timer/Time", handle_time)
     lc.subscribe("Match/Init", handle_match_init)
