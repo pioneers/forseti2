@@ -147,6 +147,14 @@ function updateInterface() {
 	$.get('/api/v1/all-info', {}, processInfo).fail(failedToGetInfo);
 }
 
-$( document ).ready(function() {
+function submitAdjustment(e) {
+	e.preventDefault();
+	$.post('/api/v1/score-delta', $(this).serialize());
+	$('#adjust-form')[0].reset();
+}
+
+$( document ).ready(function($) {
 	window.setInterval(updateInterface, 40);
+	$('#heartbeat').tooltip({title: "Press the guide button", placement: 'bottom'});
+	$('form').submit(submitAdjustment);
 });
