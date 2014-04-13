@@ -11,7 +11,7 @@ sends configs to PiEMOS controller, via channels PiEMOS{n}/Config
 these configs contain RFID mappings and the PiEMOS layout configuration.
 
 example usage:
-    python configurator.py --teams 100,14,19,25 
+    python configurator.py --teams 100,14,19,25
                             --load ../resources/field_mapping.json
                             --config
 
@@ -26,6 +26,7 @@ import csv
 import lcm
 import os
 import os.path
+import time
 
 from forseti2 import *
 import settings
@@ -74,6 +75,7 @@ def do_config(lc, teams, gold_field_map_filename='../resources/field_mapping.jso
     #print('Field map', field_objects)
     gold_teams = len(teams)/2
     for i in range(len(teams)):
+        time.sleep(.5)
         if (i >= gold_teams):
             send_team_config(lc, teams[i], i, gold_field_objects)
         else:
@@ -107,11 +109,11 @@ def get_team_name(num):
 
 def send_team_config(lc, num, idx, field_objects):
     data = ConfigData()
-    data.ConfigFile = get_config(num)
+    data.ConfigFile = get_config(num).replace('\t','').replace('\n', '').replace('\r', '')
     data.IsBlueAlliance = idx <= 1
     data.TeamNumber = int(num)
     data.TeamName = get_team_name(num)
-    data.FieldObjects = field_objects
+    data.FieldObjects = field_objects.replace('\t','').replace('\n', '').replace('\r', '')
     lc.publish('PiEMOS' + str(idx) + '/Config', data.encode())
 
 def send_team_reset(lc, num, idx):

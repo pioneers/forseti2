@@ -1,0 +1,44 @@
+[
+ {
+  "tagId": 200, 
+  "readerType": "Grizzly", 
+  "uid": "c8", 
+  "objectId": 0, 
+  "objectType": 3
+ }, 
+ {
+  "tagId": 201, 
+  "readerType": "Grizzly", 
+  "uid": "c9", 
+  "objectId": 0, 
+  "objectType": 4
+ }, 
+ {
+  "tagId": 202, 
+  "readerType": "Grizzly", 
+  "uid": "ca", 
+  "objectId": 0, 
+  "objectType": 5
+ }, 
+ {
+  "tagId": 3672356894, 
+  "readerType": "Grizzly", 
+  "uid": "1eb8e3da", 
+  "objectId": 0, 
+  "objectType": 2
+ }, 
+ {
+  "tagId": 3635183646, 
+  "readerType": "Grizzly", 
+  "uid": "1e80acd8", 
+  "objectId": 0, 
+  "objectType": 2
+ }, 
+ {
+  "tagId": 3672344798, 
+  "readerType": "Grizzly", 
+  "uid": "de88e3da", 
+  "objectId": 0, 
+  "objectType": 2
+ }
+]
