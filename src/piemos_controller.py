@@ -29,6 +29,7 @@ class PiemosController:
             self.bad_rfids = [-1,-1,-1,-1]
         for station in range(4):
             self.msg.enabled = self.enable and self.team_override[station] and (self.msg.game_time > self.bad_rfids[station])
+            self.msg.is_blue = station in [0, 1]
             self.msg.header.time = time.time()
             self.lc.publish("piemos"+str(station)+"/cmd", self.msg.encode())
 
