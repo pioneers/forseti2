@@ -18,6 +18,9 @@
 .navbar-brand {
 	color: white;
 }
+.score-heading>th {
+	width: 33.333%;
+}
 
 
 /* We do this so that the footer gets to the bottom
