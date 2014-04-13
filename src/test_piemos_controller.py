@@ -17,8 +17,8 @@ class TestPiemosController:
     def handle_config(self, channel, data):
 	print(channel)
         incMsg = forseti2.ConfigData.decode(data)
-        #print(incMsg.ConfigFile)
-        print(incMsg.FieldObjects)
+        print(incMsg.ConfigFile)
+        #print(incMsg.FieldObjects)
 
 
 if __name__=='__main__':

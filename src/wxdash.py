@@ -21,7 +21,7 @@ import settings
 
 BLUE = (24, 25, 141)
 GOLD = (241, 169, 50)
-DEFAULT_FIELD_ITEMS = "field_mapping.json"
+DEFAULT_FIELD_ITEMS = "smallfieldmap.json"
 FIELD_ITEMS_FOLDER = "../resources/"
 
 class TeamPanel(wx.Panel):
