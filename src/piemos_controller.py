@@ -24,6 +24,9 @@ class PiemosController:
 
     def send_commands(self):
         self.msg.header.seq += 1
+        if self.msg.game_time == 0:
+            # Reset the bad rfid timers at the start of each match
+            self.bad_rfids = [-1,-1,-1,-1]
         for station in range(4):
             self.msg.enabled = self.enable and self.team_override[station] and (self.msg.game_time > self.bad_rfids[station])
             self.msg.header.time = time.time()

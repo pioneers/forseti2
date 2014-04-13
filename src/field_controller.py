@@ -93,9 +93,9 @@ class FieldController:
 
     def disable_robot(self, team):
         """Disable a robot after it sends a false release code"""
+        # TODO(nikita): some kind of debouncing if these are sent too frequently
         print "station {} sent false release code".format(team)
         self.bad_rfid_seq.publish(station=team)
-        # Should be done TODO(mnuyens): actually disable robot
 
     def handle_field_cmd(self, channel, data):
         msg = fs2.piemos_field_cmd.decode(data)
