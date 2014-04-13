@@ -1,0 +1,24 @@
+session:
+  name: "forseti2"
+  windows:
+    - name: "forseti2"
+      root: "src"
+      layout: "tiled"
+      panes:
+        - cmd:
+            - "watch -c -t echo '\\\\\\033[31m Hit CTRL-C to SHUT DOWN all of field control'"
+            - "tmux kill-window -t forseti2"
+          focus: true
+        - cmd: "python field_controller.py"
+        - cmd: "python forest_driver.py"
+        - cmd: "python forest_vis.py"
+        - cmd: "python piemos_controller.py"
+        - cmd: "python score_server.py"
+        - cmd: "python timer.py"
+        - cmd: "python wxdash.py"
+        - cmd: "python xbox_driver.py debug"
+        - cmd: "python xbox_score_client.py --type debug --joystick debug"
+        - cmd:
+            - "cd ../judge"
+            - "python judge_flask.py"
+
