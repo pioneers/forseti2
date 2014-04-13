@@ -16,6 +16,7 @@ import settings
 import util
 import re
 import json
+import time
 
 ALLIANCE_BLUE = 0
 ALLIANCE_GOLD = 1
@@ -46,9 +47,30 @@ class FieldController:
             ALLIANCE_GOLD: [[False, False, False] for _ in range(4)],
             }
 
+        self.lights_timeouts = {
+            ALLIANCE_BLUE: [[None, None, None] for _ in range(4)],
+            ALLIANCE_GOLD: [[None, None, None] for _ in range(4)],
+        }
+
         self.release_codes = {}
 
         self.send_forest_cmd()
+
+    def activate_lights(self, alliance, dispenser, color, timeout=None):
+        self.lights[alliance][dispenser][color] = True
+        if timeout is not None:
+            self.lights_timeouts[alliance][dispenser][color] = time.time() + timeout
+        else:
+            self.lights_timeouts[alliance][dispenser][color] = None
+
+    def activate_lights_team(self, team, color, timeout=None):
+        alliance = team % 2
+        if alliance == ALLIANCE_BLUE:
+            dispenser = settings.DISPENSER_TELEOP_1 if team%2 else settings.DISPENSER_TELEOP_0
+        else:
+            dispenser = settings.DISPENSER_TELEOP_0 if team%2 else settings.DISPENSER_TELEOP_1
+
+        self.activate_lights(alliance, dispenser, color, timeout)
 
     def release_teleop_dispensers(self):
         """Release dispensers, as needed, at start of tele-op"""
@@ -56,12 +78,20 @@ class FieldController:
         self.dispenser_released[0][settings.DISPENSER_TELEOP_1] = True
         self.dispenser_released[1][settings.DISPENSER_TELEOP_0] = True
         self.dispenser_released[1][settings.DISPENSER_TELEOP_1] = True
+        self.activate_lights_team(0, fs2.forest_cmd.BRANCH_GREEN, 1.0)
+        self.activate_lights_team(1, fs2.forest_cmd.BRANCH_GREEN, 1.0)
+        self.activate_lights_team(2, fs2.forest_cmd.BRANCH_GREEN, 1.0)
+        self.activate_lights_team(3, fs2.forest_cmd.BRANCH_GREEN, 1.0)
 
     def send_forest_cmd(self):
         lights = [None for _ in range(8)]
         servos = [None for _ in range(8)]
         for team, offset in ((ALLIANCE_BLUE, 0), (ALLIANCE_GOLD, 4)):
             for i in range(4):
+                for j in range(3):
+                    if self.lights_timeouts[team][i][j] is not None and self.lights_timeouts[team][i][j] < time.time():
+                        self.lights_timeouts[team][i][j] = None
+                        self.lights[team][i][j] = False
                 lights[offset + i] = self.lights[team][i]
                 servos[offset + i] = settings.SERVO_RELEASED if self.dispenser_released[team][i] else settings.SERVO_HELD
         self.seq.publish(lights=lights, servos=servos)
@@ -82,20 +112,24 @@ class FieldController:
             self.disable_robot(team)
         elif code_type == CODE_LEFT:
             if not self.dispenser_released[alliance][settings.DISPENSER_LEFT]:
-                self.lights[alliance][settings.DISPENSER_LEFT][fs2.forest_cmd.BRANCH_GREEN] = True
+                self.activate_lights(alliance, settings.DISPENSER_LEFT, fs2.forest_cmd.BRANCH_GREEN, 1.0)
                 self.dispenser_released[alliance][settings.DISPENSER_LEFT] = True
         elif code_type == CODE_RIGHT:
             if not self.dispenser_released[alliance][settings.DISPENSER_RIGHT]:
-                self.lights[alliance][settings.DISPENSER_RIGHT][fs2.forest_cmd.BRANCH_GREEN] = True
+                self.activate_lights(alliance, settings.DISPENSER_RIGHT, fs2.forest_cmd.BRANCH_GREEN, 1.0)
                 self.dispenser_released[alliance][settings.DISPENSER_RIGHT] = True
         else:
             assert(False) # Code type not valid
+
+
 
     def disable_robot(self, team):
         """Disable a robot after it sends a false release code"""
         # TODO(nikita): some kind of debouncing if these are sent too frequently
         print "station {} sent false release code".format(team)
         self.bad_rfid_seq.publish(station=team)
+
+        self.activate_lights_team(team, fs2.forest_cmd.BRANCH_ORANGE, 3.0)
 
     def handle_field_cmd(self, channel, data):
         msg = fs2.piemos_field_cmd.decode(data)
@@ -160,6 +194,15 @@ class FieldController:
 
         self.send_forest_cmd()
 
+    def handle_piemos_health(self, channel, data):
+        msg = fs2.piemos_health.decode(data)
+        team = int(re.match("piemos(\d)/health", channel).group(1))
+
+        if msg.robot_connection:
+            self.activate_lights_team(team, fs2.forest_cmd.BRANCH_RED, 0.0)
+        else:
+            self.activate_lights_team(team, fs2.forest_cmd.BRANCH_RED)
+
 
 if __name__=='__main__':
     try:
@@ -169,6 +212,10 @@ if __name__=='__main__':
         lc.subscribe("piemos1/field_cmd", st.handle_field_cmd)
         lc.subscribe("piemos2/field_cmd", st.handle_field_cmd)
         lc.subscribe("piemos3/field_cmd", st.handle_field_cmd)
+        lc.subscribe("piemos0/health", st.handle_piemos_health)
+        lc.subscribe("piemos1/health", st.handle_piemos_health)
+        lc.subscribe("piemos2/health", st.handle_piemos_health)
+        lc.subscribe("piemos3/health", st.handle_piemos_health)
         lc.subscribe("piemos/Control", st.handle_control)
         lc.subscribe("Match/Init", st.handle_match_init)
 
