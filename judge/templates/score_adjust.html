@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>forseti2 Score adjustment</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <!--[if lt IE 9]>
+      <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+      <![endif]-->
+
+	<style type="text/css">
+	  input[type=number] {
+	  width: 50px;
+	  }
+	  td {
+	  text-align: right;
+	  }
+	</style>
+  </head>
+
+  <body>
+	<div>
+	  <div>
+		<span id="wall-clock"> </span>
+	  </div>
+	  <p>SCORE ADJUSTMENT</p>
+	  <p>Enter numbers to change score by. (Relative, not absolute)</p>
+
+	  <form id="adjust-form" action="#">
+		<table>
+		  <tr>
+			<td>Change BLUE normal points: <input type="number" name="blue_normal_points" value="0"/></td>
+			<td>Change GOLD normal points: <input type="number" name="gold_normal_points" value="0"/></td>
+		  <tr>
+			<td>Change BLUE permanent points: <input type="number" name="blue_permanent_points" value="0"/></td>
+			<td>Change GOLD permanent points: <input type="number" name="gold_permanent_points" value="0"/></td>
+		  </tr>
+		  <tr>
+			<td colspan="2" style="text-align:center">
+			  A 5-point penalty is +5 in the penalty box!
+			</td>
+		  </tr>
+		  <tr>
+			<td>Change BLUE penalty points: <input type="number" name="blue_penalty" value="0"/></td>
+			<td>Change GOLD penalty points: <input type="number" name="gold_penalty" value="0"/></td>
+		  </tr>
+		</table>
+		<p><input type="submit" value="Submit"/></p>
+	  </form>
+	</div>
+
+	<script type='text/javascript' src="{{url_for('static', filename = 'jquery/jquery-2.1.0.min.js')}}"></script>
+	<script type='text/javascript' src="{{url_for('static', filename = 'score_adjust.js')}}"></script>
+  </body>
+</html>
