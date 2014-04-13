@@ -26,7 +26,7 @@ CODE_RIGHT = 4
 CODE_FALSE = 5
 
 DISPENSER_GREEN_SECONDS = 6.0
-PIEMOS_TIMEOUT_SECONDS = 1.0
+PIEMOS_TIMEOUT_SECONDS = 2.0
 
 class FieldController:
     def __init__(self, in_lcm):
@@ -220,7 +220,7 @@ class FieldController:
     def handle_piemos_health(self, channel, data):
         msg = fs2.piemos_health.decode(data)
         team = int(re.match("piemos(\d)/health", channel).group(1))
-        self.piemos_last_health[channel] = time.time()
+        self.piemos_last_health[team] = time.time()
 
         if msg.robot_connection:
             self.activate_lights_team(team, fs2.forest_cmd.BRANCH_RED, 0.0)
