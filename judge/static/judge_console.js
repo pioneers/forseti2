@@ -1,4 +1,9 @@
 function updateCommsStatus(status) {
+	heading = $('#config-heading');
+	heading.removeClass("btn-info");
+	heading.removeClass("btn-warning");
+	heading.removeClass("btn-danger");
+	heading.removeClass("btn-success");
 	status_span = $('#config-status');
 	status_span.removeClass("label-info");
 	status_span.removeClass("label-warning");
@@ -6,17 +11,24 @@ function updateCommsStatus(status) {
 	status_span.removeClass("label-success");
 	switch(status) {
 		case "COMMS_UP":
+			heading.addClass("btn-success")
 			status_span.addClass("label-success");
 			status_span.text("Connected to Server");
 			break;
 		case "COMMS_DOWN":
+			heading.addClass("btn-warning")
 			status_span.addClass("label-warning");
-			status_span.text("LCM Pings Offline...")
+			status_span.text("LCM Communications Offline...")
 			break;
 		case "INFO_FAILED":
+			heading.addClass("btn-danger")
 			status_span.addClass("label-danger");
 			status_span.text("Can't Connect to Flask Server...")
 			break;
+		default:
+			heading.addClass("btn-danger")
+			status_span.addClass("label-danger");
+			status_span.text("Unknown Error")
 	}
 }
 
@@ -57,7 +69,8 @@ function updateGameClock(gametime, mode) {
 	game_mode_div = $('#game-mode');
 	switch (mode) {
 		case "Setup":
-			clock_bar.css("width", "0%;");
+			clock_bar.css("width", "100%");
+			game_mode_div.text("Setup");
 			break;
 		case "Teleop":
 			clock_bar.css("width", String(time / 120 * 100) + "%");
@@ -69,9 +82,11 @@ function updateGameClock(gametime, mode) {
 			break;
 		case "Paused":
 			game_mode_div.text("Match Paused");
+			clock_bar.css("width", "0%");
 			break;
 		case "End":
 			game_mode_div.text("Match Ended");
+			clock_bar.css("width", "0%");
 			break;
 		default:
 			game_mode_div.text("Unknown Mode");
@@ -80,6 +95,17 @@ function updateGameClock(gametime, mode) {
 }
 
 function updateScore(data) {
+	// update the team names
+	team_numbers = data['team_numbers'];
+	team_names = data['team_names'];
+	var team_strings = new Array();
+	for (var i = 0; i < 4; i++) {
+		team_strings[i] = String(team_numbers[i]) + " " + team_names[i];
+		$('#team' + String(i)).text(team_strings[i]);
+	}
+
+
+	// update the scores
 	blue_scores = data['blue_points'];
 	gold_scores = data['gold_points'];
 	$('#blue-total-score').text(blue_scores[0]);
@@ -93,23 +119,26 @@ function updateScore(data) {
 
 }
 
-function processInfo(data) {
-	status = data['comms-status'];
-	if (status == '1') {
-		updateCommsStatus("COMMS_UP");
+function updateHeartbeat(data) {
+	hb = $('#heartbeat');
+	if (data['stored-a']) {
+		hb.addClass('btn-info');
 	} else {
-		updateCommsStatus("COMMS_DOWN");
+		hb.removeClass('btn-info');
 	}
-	updateGameClock(data['game-time'], data['game-mode']);
-	$('#heartbeat').text(data['stored-a']);
+}
 
+function processInfo(data) {
+	updateCommsStatus(data['comms-status']);
+	updateGameClock(data['game-time'], data['game-mode']);
 	updateScore(data);
+	updateHeartbeat(data);
 }
 
 function failedToGetInfo() {
 	updateCommsStatus("INFO_FAILED");
 }
-
+		
 function updateInterface() {
 	// set wall clock
 	time = new Date().toLocaleTimeString();
@@ -119,5 +148,5 @@ function updateInterface() {
 }
 
 $( document ).ready(function() {
-	window.setInterval(updateInterface, 100);
+	window.setInterval(updateInterface, 40);
 });
