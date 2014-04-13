@@ -25,6 +25,8 @@ CODE_LEFT = 3
 CODE_RIGHT = 4
 CODE_FALSE = 5
 
+DISPENSER_GREEN_SECONDS = 6.0
+
 class FieldController:
     def __init__(self, in_lcm):
         self.lcm = in_lcm
@@ -74,14 +76,20 @@ class FieldController:
 
     def release_teleop_dispensers(self):
         """Release dispensers, as needed, at start of tele-op"""
+        if (self.dispenser_released[0][settings.DISPENSER_TELEOP_0] and
+            self.dispenser_released[0][settings.DISPENSER_TELEOP_1] and
+            self.dispenser_released[1][settings.DISPENSER_TELEOP_0] and
+            self.dispenser_released[1][settings.DISPENSER_TELEOP_1]):
+            return
+
         self.dispenser_released[0][settings.DISPENSER_TELEOP_0] = True
         self.dispenser_released[0][settings.DISPENSER_TELEOP_1] = True
         self.dispenser_released[1][settings.DISPENSER_TELEOP_0] = True
         self.dispenser_released[1][settings.DISPENSER_TELEOP_1] = True
-        self.activate_lights_team(0, fs2.forest_cmd.BRANCH_GREEN, 1.0)
-        self.activate_lights_team(1, fs2.forest_cmd.BRANCH_GREEN, 1.0)
-        self.activate_lights_team(2, fs2.forest_cmd.BRANCH_GREEN, 1.0)
-        self.activate_lights_team(3, fs2.forest_cmd.BRANCH_GREEN, 1.0)
+        self.activate_lights_team(0, fs2.forest_cmd.BRANCH_GREEN, DISPENSER_GREEN_SECONDS)
+        self.activate_lights_team(1, fs2.forest_cmd.BRANCH_GREEN, DISPENSER_GREEN_SECONDS)
+        self.activate_lights_team(2, fs2.forest_cmd.BRANCH_GREEN, DISPENSER_GREEN_SECONDS)
+        self.activate_lights_team(3, fs2.forest_cmd.BRANCH_GREEN, DISPENSER_GREEN_SECONDS)
 
     def send_forest_cmd(self):
         lights = [None for _ in range(8)]
@@ -112,11 +120,11 @@ class FieldController:
             self.disable_robot(team)
         elif code_type == CODE_LEFT:
             if not self.dispenser_released[alliance][settings.DISPENSER_LEFT]:
-                self.activate_lights(alliance, settings.DISPENSER_LEFT, fs2.forest_cmd.BRANCH_GREEN, 1.0)
+                self.activate_lights(alliance, settings.DISPENSER_LEFT, fs2.forest_cmd.BRANCH_GREEN, DISPENSER_GREEN_SECONDS)
                 self.dispenser_released[alliance][settings.DISPENSER_LEFT] = True
         elif code_type == CODE_RIGHT:
             if not self.dispenser_released[alliance][settings.DISPENSER_RIGHT]:
-                self.activate_lights(alliance, settings.DISPENSER_RIGHT, fs2.forest_cmd.BRANCH_GREEN, 1.0)
+                self.activate_lights(alliance, settings.DISPENSER_RIGHT, fs2.forest_cmd.BRANCH_GREEN, DISPENSER_GREEN_SECONDS)
                 self.dispenser_released[alliance][settings.DISPENSER_RIGHT] = True
         else:
             assert(False) # Code type not valid
@@ -129,7 +137,7 @@ class FieldController:
         print "station {} sent false release code".format(team)
         self.bad_rfid_seq.publish(station=team)
 
-        self.activate_lights_team(team, fs2.forest_cmd.BRANCH_ORANGE, 3.0)
+        self.activate_lights_team(team, fs2.forest_cmd.BRANCH_ORANGE, settings.BAD_RFID_DISABLE_SECONDS)
 
     def handle_field_cmd(self, channel, data):
         msg = fs2.piemos_field_cmd.decode(data)
