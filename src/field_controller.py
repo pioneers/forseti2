@@ -26,6 +26,7 @@ CODE_RIGHT = 4
 CODE_FALSE = 5
 
 DISPENSER_GREEN_SECONDS = 6.0
+PIEMOS_TIMEOUT_SECONDS = 1.0
 
 class FieldController:
     def __init__(self, in_lcm):
@@ -33,6 +34,7 @@ class FieldController:
         self.seq = util.LCMSequence(self.lcm, fs2.forest_cmd, "/forest/cmd")
         self.seq.debug = False
         self.bad_rfid_seq = util.LCMSequence(self.lcm, fs2.piemos_bad_rfid, "piemos/bad_rfid")
+        self.piemos_last_health = [0, 0, 0, 0]
         # This also initializes variables
         self.reset_field()
 
@@ -92,6 +94,11 @@ class FieldController:
         self.activate_lights_team(3, fs2.forest_cmd.BRANCH_GREEN, DISPENSER_GREEN_SECONDS)
 
     def send_forest_cmd(self):
+        # TODO(nikita): this loop belongs somewhere else
+        for team in range(4):
+            if self.piemos_last_health[team] < time.time() - PIEMOS_TIMEOUT_SECONDS:
+                self.activate_lights_team(team, fs2.forest_cmd.BRANCH_RED)
+
         lights = [None for _ in range(8)]
         servos = [None for _ in range(8)]
         for team, offset in ((ALLIANCE_BLUE, 0), (ALLIANCE_GOLD, 4)):
@@ -136,8 +143,6 @@ class FieldController:
         # TODO(nikita): some kind of debouncing if these are sent too frequently
         print "station {} sent false release code".format(team)
         self.bad_rfid_seq.publish(station=team)
-
-        self.activate_lights_team(team, fs2.forest_cmd.BRANCH_ORANGE, settings.BAD_RFID_DISABLE_SECONDS)
 
     def handle_field_cmd(self, channel, data):
         msg = fs2.piemos_field_cmd.decode(data)
@@ -205,11 +210,18 @@ class FieldController:
     def handle_piemos_health(self, channel, data):
         msg = fs2.piemos_health.decode(data)
         team = int(re.match("piemos(\d)/health", channel).group(1))
+        self.piemos_last_health[channel] = time.time()
 
         if msg.robot_connection:
             self.activate_lights_team(team, fs2.forest_cmd.BRANCH_RED, 0.0)
         else:
             self.activate_lights_team(team, fs2.forest_cmd.BRANCH_RED)
+
+        if msg.enabled:
+            self.activate_lights_team(team, fs2.forest_cmd.BRANCH_ORANGE, 0.0)
+        else:
+            self.activate_lights_team(team, fs2.forest_cmd.BRANCH_ORANGE, settings.BAD_RFID_DISABLE_SECONDS)
+
 
         self.send_forest_cmd()
 
