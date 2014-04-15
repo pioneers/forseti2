@@ -8,7 +8,6 @@ import lcm
 import forseti2 as fs2
 import pygame
 import time
-import math
 import threading
 import settings
 
@@ -52,8 +51,8 @@ class DispenserDisplay:
                        3:(0,255,0),
                        4:(51,51,0),
                        5:(255,255,0),
-                       6:(0,0,255),
-                       7:(0,0,51)}
+                       6:(0,0,51),
+                       7:(0,0,255)}
 
         self._read_thread = threading.Thread(target=self._read_loop)
         self._read_thread.daemon = True
@@ -90,7 +89,6 @@ class DispenserDisplay:
             print("   servos   = %s" % str(msg.servos))
         for b in range(8):
             for c in range (3):
-                # TODO: visualize msg.lights[b][c]
                 self.state[b][c] = msg.lights[b][c]
 
             v = list(self.state[b])
