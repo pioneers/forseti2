@@ -34,16 +34,22 @@ def send_msg(m, joy_num = 0):
     print('    buttons=' + str(m.buttons))
     lc.publish(channel, m.encode())
 
+# Sets the controller status, and returns True if
+# updated buttons, False otherwise. 
 def set_controller_status(m, j):
     if not j.get_init():
         print "Joystick not initialized..."
         sys.exit(1)
     if platform == OSX: # compatability with Mac OS X Xbox Controller Drivers
-        m.axes = [j.get_axis(i) for i in xrange(num_axes)]
-        m.buttons = [j.get_button(i) for i in (11, 12, 13, 14, 8, 9, 5, 4, 10, 6, 7)]
+        axes = [j.get_axis(i) for i in xrange(num_axes)]
+        buttons = [j.get_button(i) for i in (11, 12, 13, 14, 8, 9, 5, 4, 10, 6, 7)]
     else: # We'll assume you're on Ubuntu. 
-        m.axes = [j.get_axis(i) for i in xrange(num_axes)]
-        m.buttons = [j.get_button(i) for i in xrange(num_buttons)]
+        axes = [j.get_axis(i) for i in xrange(num_axes)]
+        buttons = [j.get_button(i) for i in xrange(num_buttons)]
+    ans = axes != m.axes # whether there's been a change
+    m.axes = axes
+    m.buttons = buttons
+    return ans
 
 def main():
     global lc
@@ -85,8 +91,8 @@ def main():
         time.sleep(SLEEP_TIME)
         pygame.event.pump() # must pump for more info from pygame
         for j, msg in zip(joysticks, messages):
-            set_controller_status(msg, j)
-            send_msg(msg, j.get_id())
+            if set_controller_status(msg, j):
+                send_msg(msg, j.get_id())
 
 if __name__ == '__main__':
     main()
