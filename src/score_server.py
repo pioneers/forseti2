@@ -32,7 +32,7 @@ class ScoreServer:
         self.seq.debug = False
 
         self.current_time = 0
-        self.bonus_penalty_time = 0 # Time when bonus penalty will be assessed
+        self.bonus_penalty_time = self.current_time # Time when bonus penalty will be assessed
 
         self.reset_scores()
 
@@ -149,7 +149,9 @@ class ScoreServer:
         if state["bonus_possession"] == forseti2.score_delta.NEUTRAL:
             state["bonus_time_remaining"] = settings.BONUS_TIMER_SECONDS
         else:
-            state["bonus_time_remaining"] = int(self.bonus_penalty_time - time.time())
+            remaining = self.bonus_penalty_time - time.time()
+            remaining = int(min(max(0, remaining), settings.BONUS_TIMER_SECONDS))
+            state["bonus_time_remaining"] = remaining
 
         return state
 
