@@ -79,7 +79,6 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 self.lc.handle()
             except Exception as e:
                 print "Got exception while handling lcm message", e
-                raise
 
     def add_subscription(self, channel, msg_type, subscription_id):
         """
