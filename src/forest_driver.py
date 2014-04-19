@@ -17,14 +17,14 @@ class Forest:
     def __init__(self, addr, debug=True):
         self.board = None
         self.pins = []
-        self.pins.append((22, 24, 26, 2))
-        self.pins.append((28, 30, 32, 3))
-        self.pins.append((34, 36, 38, 4))
-        self.pins.append((40, 42, 44, 5))
-        self.pins.append((46, 48, 50, 6))
-        self.pins.append((31, 33, 35, 7))
-        self.pins.append((37, 39, 41, 8))
-        self.pins.append((43, 45, 47, 9))
+        self.pins.append((22, 23, 24, 2))
+        self.pins.append((25, 26, 27, 3))
+        self.pins.append((28, 29, 30, 4))
+        self.pins.append((31, 32, 33, 5))
+        self.pins.append((34, 35, 36, 6))
+        self.pins.append((37, 38, 39, 7))
+        self.pins.append((40, 41, 42, 8))
+        self.pins.append((43, 44, 45, 9))
         if addr is not None:
             self.board = ArduinoMega(addr)
             for b in self.pins:
@@ -50,7 +50,7 @@ class Forest:
 if __name__ == '__main__':
     print "starting forest_driver.py"
     lc = lcm.LCM(settings.LCM_URI)
-    f = Forest('/dev/ttyACM0')
+    f = Forest('/dev/ttyUSB0')
     sub = lc.subscribe("/forest/cmd", f._forest_cmd_handler)
 
     while True:
