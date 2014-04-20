@@ -106,22 +106,22 @@ class DispenserDisplay:
             pygame.draw.rect(self.window, color, redrect)
 
             yellowrect = (x + SSIZE, y, SSIZE, SSIZE)
-            color = self.colors[self.state[dispenser][YELLOW] + 2]
+            color = self.colors[self.state[dispenser][YELLOW] + 4]
             pygame.draw.rect(self.window, color, yellowrect)
-            
+
             greenrect = (x, y + SSIZE, SSIZE, SSIZE)
-            color = self.colors[self.state[dispenser][GREEN] + 4]
+            color = self.colors[self.state[dispenser][GREEN] + 2]
             pygame.draw.rect(self.window, color, greenrect)
-            
+
             servorect = (x + SSIZE, y + SSIZE, SSIZE, SSIZE)
             color = self.colors[self.state[dispenser][SERVO] + 6]
             pygame.draw.rect(self.window, color, servorect)
-            
+
             txt = str(dispenser)
             tcoords = (x + 15, y + 5)
             # print tcoords
             self._draw_text(txt, tcoords, (255,255,255))
-                
+
 if __name__ == '__main__':
     try:
         WIDTH, HEIGHT = (640, 480)

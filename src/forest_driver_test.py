@@ -46,7 +46,7 @@ while True:
                 msg.lights[branch][color] = False
                 time.sleep(t2)
                 send_msg(msg)
-            msg.servos[branch] = 0
+            msg.servos[branch] = settings.SERVO_HELD
             send_msg(msg)
             time.sleep(t2)
         send_msg(msg)
@@ -56,7 +56,7 @@ while True:
                 msg.lights[branch][color] = True
                 time.sleep(t2)
                 send_msg(msg)
-            msg.servos[branch] = 170
+            msg.servos[branch] = SERVO_RELEASED
             send_msg(msg)
             time.sleep(t2)
         send_msg(msg)
@@ -76,13 +76,13 @@ while True:
             send_msg(msg)
             time.sleep(stime)
         for branch in range(8):
-            msg.servos[branch] = 0
+            msg.servos[branch] = settings.SERVO_HELD
             time.sleep(t2)
             send_msg(msg)
         send_msg(msg)
         time.sleep(stime)
         for branch in range(8):
-            msg.servos[branch] = 170
+            msg.servos[branch] = settings.SERVO_RELEASED
             time.sleep(t2)
             send_msg(msg)
         send_msg(msg)
