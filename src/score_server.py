@@ -79,6 +79,12 @@ class ScoreServer:
         if msg.action_reset:
             self.reset_scores()
 
+        # Ignore messages that set permanent goal points above the maximum allowed
+        if (self.state["blue_permanent_points"] + msg.blue_permanent_points) > settings.PERMANENT_GOAL_MAXIMUM:
+            return
+        if (self.state["gold_permanent_points"] + msg.gold_permanent_points) > settings.PERMANENT_GOAL_MAXIMUM:
+            return
+
         for k in ["blue_normal_points",
                   "gold_normal_points",
                   "blue_autonomous_points",
@@ -91,10 +97,6 @@ class ScoreServer:
             self.state[k] += msg.__getattribute__(k)
 
 
-        self.state["blue_permanent_points"] = min(self.state["blue_permanent_points"],
-                                                  settings.PERMANENT_GOAL_MAXIMUM)
-        self.state["gold_permanent_points"] = min(self.state["gold_permanent_points"],
-                                                  settings.PERMANENT_GOAL_MAXIMUM)
         # Logic to handle bonus ball posession changes
         # If bonus points are included as part of a bonus possession change delta,
         # do not count those points if the delta turns out to be invalid
