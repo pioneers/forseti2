@@ -11,6 +11,8 @@ import os
 import settings
 import util
 import LCMNode
+import requests
+import code
 
 LCMNode = LCMNode.LCMNode
 
@@ -135,6 +137,42 @@ class Schedule(LCMNode):
             self.totals[msg.match_number]['alliance1'],
             self.totals[msg.match_number]['alliance2']
             ))
+
+        match_num = msg.match_number
+        score1 = self.totals[match_num]['alliance1']
+        score2 = self.totals[match_num]['alliance2']
+        a1 = {
+            "number" : 1, 
+            "autonomous" : score1, 
+            "bonus" : 0, 
+            "manual" : 0, 
+            "penalty" : 0, 
+            "team1" : {
+                "number" : msg.team_numbers[0],
+                "disqualified" : False
+            }, 
+            "team2" : {
+                "number" : msg.team_numbers[1],
+                "disqualified" : False
+            }
+        }
+        a2 = {
+            "number" : 2, 
+            "autonomous" : score2, 
+            "bonus" : 0, 
+            "manual" : 0, 
+            "penalty" : 0, 
+            "team1" : {
+                "number" : msg.team_numbers[2],
+                "disqualified" : False
+            }, 
+            "team2" : {
+                "number" : msg.team_numbers[3],
+                "disqualified" : False
+            }
+        }
+        args = {"alliance1" : a1, "alliance2" : a2}
+        r = requests.post('http://pioneers.berkeley.edu/match_schedule/api/match/{}/'.format(msg.match_number), args)
 
     def handle_score(self, channel, data):
         msg = forseti2.score_state.decode(data)
