@@ -84,28 +84,106 @@
                 <form id="adjust-form" action="#">
                   <table class="table">
                     <tbody>
-                    <tr>
-                      <td>Change BLUE normal points: <input type="number" name="blue_normal_points" value="0"/></td>
-                      <td>Change GOLD normal points: <input type="number" name="gold_normal_points" value="0"/></td>
+					  <tr>
+						<td>BLUE</td>
+						<td/>
+						<td>GOLD</td>
+					  </tr>
+					  <tr>
+						<td>
+						  <h1>
+							<span id="old_blue_total_score"></span>
+							+ <span id="diff_blue_total_score"></span>
+							= <span id="new_blue_total_score"></span>
+						  </h1>
+						</td>
+						<td class="text-center">
+						  <h1>Total Points</h1>
+						</td>
+						<td>
+						  <h1>
+							<span id="old_gold_total_score"></span>
+							+ <span id="diff_gold_total_score"></span>
+							= <span id="new_gold_total_score"></span>
+						  </h1>
+						</td>
+					  </tr>
                       <tr>
-                        <td>Change BLUE permanent points: <input type="number" name="blue_permanent_points" value="0"/></td>
-                        <td>Change GOLD permanent points: <input type="number" name="gold_permanent_points" value="0"/></td>
+                        <td>
+						  <span id="old_blue_autonomous_points"></span>
+						  + <input class="diff" type="number" name="blue_autonomous_points" value="0"/>
+						  = <input class="new" type="number" id="new_blue_autonomous_points" value="0"/>
+						</td>
+						<td class="text-center">
+						  Autonomous
+						</td>
+                        <td>
+						  <span id="old_gold_autonomous_points"></span>
+						  + <input class="diff" type="number" name="gold_autonomous_points" value="0"/>
+						  = <input class="new" type="number" id="new_gold_autonomous_points" value="0"/>
+						</td>
                       </tr>
-<!--                       <tr>
-                        <td colspan="2" style="text-align:center">
-                          A 5-point penalty is +5 in the penalty box!
-                        </td>
+                      <tr>
+                        <td>
+						  <span id="old_blue_normal_points"></span>
+						  + <input class="diff" type="number" name="blue_normal_points" value="0"/>
+						  = <input class="new" type="number" id="new_blue_normal_points" value="0"/>
+						</td>
+						<td class="text-center">
+						  Normal
+						</td>
+                        <td>
+						  <span id="old_gold_normal_points"></span>
+						  + <input class="diff" type="number" name="gold_normal_points" value="0"/>
+						  = <input class="new" type="number" id="new_gold_normal_points" value="0"/>
+						</td>
                       </tr>
- -->                      <tr>
-                        <td>Change BLUE penalty points: <input type="number" name="blue_penalty" value="0"/></td>
-                        <td>Change GOLD penalty points: <input type="number" name="gold_penalty" value="0"/></td>
+                      <tr>
+                        <td>
+						  <span id="old_blue_permanent_points"></span>
+						  + <input class="diff" type="number" name="blue_permanent_points" value="0"/>
+						  = <input class="new" type="number" id="new_blue_permanent_points" value="0"/>
+						</td>
+						<td class="text-center">
+						  Permanent
+						</td>
+                        <td>
+						  <span id="old_gold_permanent_points"></span>
+						  + <input class="diff" type="number" name="gold_permanent_points" value="0"/>
+						  = <input class="new" type="number" id="new_gold_permanent_points" value="0"/>
+						</td>
                       </tr>
+                      <tr>
+                        <td>
+						  (<span id="old_blue_penalty"></span>
+						  + <input class="diff" type="number" name="blue_penalty" value="0"/>
+						  = <input class="new" type="number" id="new_blue_penalty" value="0"/>)
+						</td>
+						<td class="text-center">
+						  Penalty
+						</td>
+                        <td>
+						  (<span id="old_gold_penalty"></span>
+						  + <input class="diff" type="number" name="gold_penalty" value="0"/>
+						  = <input class="new" type="number" id="new_gold_penalty" value="0"/>)
+						</td>
+                      </tr>
+					  <tr>
+						<td/>
+						<td>
+						  Bonus
+						  <span id="old_bonus_points"></span>
+						  + <input class="diff" type="number" name="bonus_points" value="0"/>
+						  = <input class="new" type="number" id="new_bonus_points" value="0"/>
+						</td>
+						<td/>
+					  </tr>
                     </tbody>
-                    </table>
-                    <div class="container">
-                      <input type="submit" value="Submit" class="btn btn-default"></input>
-                    </div>
-                  </form>
+                  </table>
+                  <div class="container">
+                    <input type="submit" value="Submit" class="btn btn-default"></input>
+                  </div>
+                </form>
                 </div>
                 </div>
               </div>

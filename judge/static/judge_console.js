@@ -117,6 +117,29 @@ function updateScore(data) {
 	$('#blue-penalties').text(-blue_scores[4]);
 	$('#gold-penalties').text(-gold_scores[4]);
 
+  if (data['bonus_possession'] == 2) {
+	$('#blue-bonus-points').text(data['bonus_points'])
+	$('#gold-bonus-points').text("");
+  } else if (data['bonus_possession'] == 1) {
+	$('#blue-bonus-points').text("");
+	$('#gold-bonus-points').text(data['bonus_points'])
+  } else {
+	$('#blue-bonus-points').text("");
+	$('#gold-bonus-points').text("");
+  }
+
+	$('#old_blue_total_score').text(blue_scores[0]);
+	$('#old_gold_total_score').text(gold_scores[0]);
+	$('#old_blue_autonomous_points').text(blue_scores[1]);
+	$('#old_gold_autonomous_points').text(gold_scores[1]);
+	$('#old_blue_normal_points').text(blue_scores[2]);
+	$('#old_gold_normal_points').text(gold_scores[2]);
+	$('#old_blue_permanent_points').text(blue_scores[3]);
+	$('#old_gold_permanent_points').text(gold_scores[3]);
+	$('#old_blue_penalty').text(blue_scores[4]);
+	$('#old_gold_penalty').text(gold_scores[4]);
+	$('#old_bonus_points').text(data['bonus_points']);
+	recalculateTotals();
 }
 
 function updateHeartbeat(data) {
@@ -150,11 +173,73 @@ function updateInterface() {
 function submitAdjustment(e) {
 	e.preventDefault();
 	$.post('/api/v1/score-delta', $(this).serialize());
+	recalculateTotals();
 	$('#adjust-form')[0].reset();
+}
+
+function totalHelper(name) {
+  $("#new_" + name).val(parseInt($("#old_" + name).text()) + parseInt($("input[name=" + name + "]").val()));
+}
+
+function diffHelper(name) {
+  $("input[name=" + name + "]").val(parseInt($("#new_" + name).val()) - parseInt($("#old_" + name).text()));
+}
+
+function recalculateTotals() {
+  totalHelper("blue_autonomous_points");
+  totalHelper("gold_autonomous_points");
+  totalHelper("blue_normal_points");
+  totalHelper("gold_normal_points");
+  totalHelper("blue_permanent_points");
+  totalHelper("gold_permanent_points");
+  totalHelper("blue_penalty");
+  totalHelper("gold_penalty");
+  totalHelper("bonus_points");
+
+  recalculateSum();
+}
+
+function recalculateDiffs() {
+  diffHelper("blue_autonomous_points");
+  diffHelper("gold_autonomous_points");
+  diffHelper("blue_normal_points");
+  diffHelper("gold_normal_points");
+  diffHelper("blue_permanent_points");
+  diffHelper("gold_permanent_points");
+  diffHelper("blue_penalty");
+  diffHelper("gold_penalty");
+  diffHelper("bonus_points");
+
+  recalculateSum();
+}
+
+function recalculateSum() {
+  $("#new_blue_total_score").text(
+	parseInt($("#new_blue_autonomous_points").val()) +
+	  parseInt($("#new_blue_normal_points").val()) +
+	  parseInt($("#new_blue_permanent_points").val()) +
+      (parseInt($("#blue-bonus-points").text()) || 0) -
+	  parseInt($("#new_blue_penalty").val())
+  );
+  $("#diff_blue_total_score").text(
+	parseInt($("#new_blue_total_score").text()) -
+	  parseInt($("#old_blue_total_score").text()));
+  $("#new_gold_total_score").text(
+	parseInt($("#new_gold_autonomous_points").val()) +
+	  parseInt($("#new_gold_normal_points").val()) +
+	  parseInt($("#new_gold_permanent_points").val()) +
+      (parseInt($("#gold-bonus-points").text()) || 0) -
+	  parseInt($("#new_gold_penalty").val())
+  );
+  $("#diff_gold_total_score").text(
+	parseInt($("#new_gold_total_score").text()) -
+	  parseInt($("#old_gold_total_score").text()));
 }
 
 $( document ).ready(function($) {
 	window.setInterval(updateInterface, 40);
 	$('#heartbeat').tooltip({title: "Press the guide button", placement: 'bottom'});
 	$('form').submit(submitAdjustment);
+	$('input.diff').on('input', recalculateTotals);
+	$('input.new').on('input', recalculateDiffs);
 });

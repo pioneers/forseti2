@@ -89,7 +89,7 @@ def handle_xbox(channel, data):
 def handle_score(channel, data):
     m = fs2.score_state.decode(data)
     fi.blue_points = [m.blue_total, m.blue_autonomous_points, m.blue_normal_points, m.blue_permanent_points, m.blue_penalty]
-    fi.gold_points = [m.gold_total, m.blue_autonomous_points, m.gold_normal_points, m.gold_permanent_points, m.gold_penalty]
+    fi.gold_points = [m.gold_total, m.gold_autonomous_points, m.gold_normal_points, m.gold_permanent_points, m.gold_penalty]
     fi.bonus_possession = m.bonus_possession
     fi.bonus_points = m.bonus_points
     fi.bonus_time = m.bonus_time_remaining

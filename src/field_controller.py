@@ -94,6 +94,9 @@ class FieldController:
         self.activate_lights_team(2, fs2.forest_cmd.BRANCH_GREEN, DISPENSER_GREEN_SECONDS)
         self.activate_lights_team(3, fs2.forest_cmd.BRANCH_GREEN, DISPENSER_GREEN_SECONDS)
 
+        self.score_seq.publish(blue_normal_points=2*settings.BALL_VALUE_PER_DISPENSER,
+                               gold_normal_points=2*settings.BALL_VALUE_PER_DISPENSER)
+
     def send_forest_cmd(self):
         # TODO(nikita): this loop belongs somewhere else
         for team in range(4):
@@ -131,17 +134,21 @@ class FieldController:
                 self.activate_lights(alliance, settings.DISPENSER_LEFT, fs2.forest_cmd.BRANCH_GREEN, DISPENSER_GREEN_SECONDS)
                 self.dispenser_released[alliance][settings.DISPENSER_LEFT] = True
                 if alliance == ALLIANCE_BLUE:
-                    self.score_seq.publish(blue_normal_points=settings.DISPENSER_RELEASE_POINTS)
+                    self.score_seq.publish(blue_normal_points=settings.DISPENSER_RELEASE_POINTS,
+                                           gold_normal_points=settings.BALL_VALUE_PER_DISPENSER)
                 else:
-                    self.score_seq.publish(gold_normal_points=settings.DISPENSER_RELEASE_POINTS)
+                    self.score_seq.publish(gold_normal_points=settings.DISPENSER_RELEASE_POINTS,
+                                           blue_normal_points=settings.BALL_VALUE_PER_DISPENSER)
         elif code_type == CODE_RIGHT:
             if not self.dispenser_released[alliance][settings.DISPENSER_RIGHT]:
                 self.activate_lights(alliance, settings.DISPENSER_RIGHT, fs2.forest_cmd.BRANCH_GREEN, DISPENSER_GREEN_SECONDS)
                 self.dispenser_released[alliance][settings.DISPENSER_RIGHT] = True
                 if alliance == ALLIANCE_BLUE:
-                    self.score_seq.publish(blue_normal_points=settings.DISPENSER_RELEASE_POINTS)
+                    self.score_seq.publish(blue_normal_points=settings.DISPENSER_RELEASE_POINTS,
+                                           gold_normal_points=settings.BALL_VALUE_PER_DISPENSER)
                 else:
-                    self.score_seq.publish(gold_normal_points=settings.DISPENSER_RELEASE_POINTS)
+                    self.score_seq.publish(gold_normal_points=settings.DISPENSER_RELEASE_POINTS,
+                                           blue_normal_points=settings.BALL_VALUE_PER_DISPENSER)
 
         else:
             assert(False) # Code type not valid
