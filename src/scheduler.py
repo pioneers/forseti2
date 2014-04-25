@@ -167,6 +167,7 @@ class Schedule(LCMNode):
             "bonus" : bonus_points[1], 
             "manual" : score_state.gold_normal_points, 
             "penalty" : score_state.gold_penalty, 
+            "team1" : {
                 "number" : msg.team_numbers[2],
                 "disqualified" : False
             }, 
