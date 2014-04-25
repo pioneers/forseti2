@@ -150,7 +150,7 @@ class Schedule(LCMNode):
             "number" : 1, 
             "autonomous" : score_state.blue_autonomous_points, 
             "bonus" : bonus_points[0], 
-            "manual" : score_state.blue_normal_points, 
+            "manual" : score_state.blue_normal_points + score_state.blue_permanent_points, 
             "penalty" : score_state.blue_penalty, 
             "team1" : {
                 "number" : msg.team_numbers[0],
@@ -165,7 +165,7 @@ class Schedule(LCMNode):
             "number" : 2, 
             "autonomous" : score_state.gold_autonomous_points, 
             "bonus" : bonus_points[1], 
-            "manual" : score_state.gold_normal_points, 
+            "manual" : score_state.gold_normal_points + score_state.gold_permanent_points, 
             "penalty" : score_state.gold_penalty, 
             "team1" : {
                 "number" : msg.team_numbers[2],
