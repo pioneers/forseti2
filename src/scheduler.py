@@ -25,6 +25,7 @@ class Schedule(LCMNode):
         self.matches = {}
         self.current_match = None
         self.totals = {}
+        self.score_states = {}
         self.lc.subscribe('Match/Save', self.handle_save)
         self.lc.subscribe('Schedule/Load', self.handle_load)
         self.lc.subscribe('Match/Init', self.handle_init)
@@ -131,7 +132,6 @@ class Schedule(LCMNode):
             print("WARNING: match number mismatch when submitting score")
             return
 
-        # TODO: do something useful with scores
         print ("FINAL SCORE OF MATCH {} is: Blue {} | {} Gold".format(
             msg.match_number,
             self.totals[msg.match_number]['alliance1'],
@@ -139,14 +139,19 @@ class Schedule(LCMNode):
             ))
 
         match_num = msg.match_number
-        score1 = self.totals[match_num]['alliance1']
-        score2 = self.totals[match_num]['alliance2']
+        # TODO: Put the score determining logic in handle_score
+        score_state = self.score_states[match_num]
+        bonus_points = [0, 0]
+        if score_state.bonus_possession == forseti2.score_state.BLUE:
+            bonus_points[0] += score_state.bonus_points
+        if score_state.bonus_possession == forseti2.score_state.GOLD:
+            bonus_points[1] += score_state.bonus_points
         a1 = {
             "number" : 1, 
-            "autonomous" : score1, 
-            "bonus" : 0, 
-            "manual" : 0, 
-            "penalty" : 0, 
+            "autonomous" : score_state.blue_autonomous_points, 
+            "bonus" : bonus_points[0], 
+            "manual" : score_state.blue_normal_points, 
+            "penalty" : score_state.blue_penalty, 
             "team1" : {
                 "number" : msg.team_numbers[0],
                 "disqualified" : False
@@ -158,11 +163,10 @@ class Schedule(LCMNode):
         }
         a2 = {
             "number" : 2, 
-            "autonomous" : score2, 
-            "bonus" : 0, 
-            "manual" : 0, 
-            "penalty" : 0, 
-            "team1" : {
+            "autonomous" : score_state.gold_autonomous_points, 
+            "bonus" : bonus_points[1], 
+            "manual" : score_state.gold_normal_points, 
+            "penalty" : score_state.gold_penalty, 
                 "number" : msg.team_numbers[2],
                 "disqualified" : False
             }, 
@@ -179,6 +183,7 @@ class Schedule(LCMNode):
         if self.current_match is not None and self.current_match in self.totals:
             self.totals[self.current_match]['alliance1'] = msg.blue_total
             self.totals[self.current_match]['alliance2'] = msg.gold_total
+            self.score_states[self.current_match] = msg
 
 
 def main():
