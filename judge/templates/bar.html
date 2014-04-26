@@ -28,13 +28,31 @@
                   <table style="width:100%">
                     <tr id="score-container">
                       <td>
-                        <h1 id="blue-total-score" class="text-center pioneers-blue btn score" style="float:left"></h1>
+                        <div class="text-center pioneers-blue btn score" style="float:left">
+                          <div style="float:left">
+                            <div class="team" id="team0">
+                            </div>
+                            <div class="team" id="team1">
+                            </div>
+                          </div>
+                          <div id="blue-total-score" style="float:right">
+                          </div>
+                        </div>
                       </td>
                       <td>
                         <div id="game-clock" class="text-center"> 0:00 </div>
                       </td>
                       <td>
-                        <h1 id="gold-total-score" class="text-center pioneers-gold btn score" style="float:right"></h1>
+                        <div class="text-center pioneers-gold btn score" style="float:left">
+                          <div id="gold-total-score" style="float:left">
+                          </div>
+                          <div style="float:right">
+                            <div class="team" id="team2">
+                            </div>
+                            <div class="team" id="team3">
+                            </div>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   </table>
@@ -63,5 +81,6 @@
   	<script type='text/javascript' src="{{url_for('static', filename = 'jquery/jquery-2.1.0.min.js')}}"></script>
   	<script type='text/javascript' src="{{url_for('static', filename = 'bootstrap/js/bootstrap.min.js')}}"></script>
     <script type='text/javascript' src="{{url_for('static', filename = 'judge_console.js')}}"></script>
+    <script type='text/javascript' src="{{url_for('static', filename = 'bar.js')}}"></script>
   </body>
   </html>
