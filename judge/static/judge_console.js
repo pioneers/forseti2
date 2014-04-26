@@ -101,6 +101,9 @@ function updateScore(data) {
 		team_strings[i] = String(team_numbers[i]) + " " + team_names[i];
 		$('#team' + String(i)).text(team_strings[i]);
 	}
+	// update match number
+	match_number = data['match_number'];
+	$('#match-number').text(match_number)
 
 
 	// update the scores
