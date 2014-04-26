@@ -12,7 +12,6 @@ import settings
 import util
 import LCMNode
 import requests
-import code
 
 LCMNode = LCMNode.LCMNode
 
@@ -177,7 +176,7 @@ class Schedule(LCMNode):
             }
         }
         args = {"alliance1" : a1, "alliance2" : a2}
-        r = requests.post('http://pioneers.berkeley.edu/match_schedule/api/match/{}/'.format(msg.match_number), args)
+        r = requests.post('https://pioneers.berkeley.edu/match_schedule/api/match/{}/'.format(msg.match_number), json.dumps(args))
 
     def handle_score(self, channel, data):
         msg = forseti2.score_state.decode(data)
