@@ -141,10 +141,12 @@ class Schedule(LCMNode):
         # TODO: Put the score determining logic in handle_score
         score_state = self.score_states[match_num]
         bonus_points = [0, 0]
+        # Note: possession is defined as the bonus ball being on your side of the field
+        # If the blue alliance has possession, the gold alliance gets the points
         if score_state.bonus_possession == forseti2.score_state.BLUE:
-            bonus_points[0] += score_state.bonus_points
-        if score_state.bonus_possession == forseti2.score_state.GOLD:
             bonus_points[1] += score_state.bonus_points
+        if score_state.bonus_possession == forseti2.score_state.GOLD:
+            bonus_points[0] += score_state.bonus_points
         a1 = {
             "number" : 1, 
             "autonomous" : score_state.blue_autonomous_points, 
