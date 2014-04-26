@@ -148,7 +148,6 @@ class Schedule(LCMNode):
         if score_state.bonus_possession == forseti2.score_state.GOLD:
             bonus_points[0] += score_state.bonus_points
         a1 = {
-            "number" : 1, 
             "autonomous" : score_state.blue_autonomous_points, 
             "bonus" : bonus_points[0], 
             "manual" : score_state.blue_normal_points + score_state.blue_permanent_points, 
@@ -163,7 +162,6 @@ class Schedule(LCMNode):
             }
         }
         a2 = {
-            "number" : 2, 
             "autonomous" : score_state.gold_autonomous_points, 
             "bonus" : bonus_points[1], 
             "manual" : score_state.gold_normal_points + score_state.gold_permanent_points, 
