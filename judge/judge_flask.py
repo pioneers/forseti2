@@ -19,6 +19,10 @@ def serve_console():
 def serve_clock():
     return render_template('clock.html')
 
+@app.route('/bar')
+def serve_bar():
+    return render_template('bar.html')
+
 @app.route('/api/v1/score-delta', methods=["PUT", "POST"])
 def score_delta():
     global seq
