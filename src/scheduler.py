@@ -11,6 +11,7 @@ import os
 import settings
 import util
 import LCMNode
+import requests
 
 LCMNode = LCMNode.LCMNode
 
@@ -23,6 +24,7 @@ class Schedule(LCMNode):
         self.matches = {}
         self.current_match = None
         self.totals = {}
+        self.score_states = {}
         self.lc.subscribe('Match/Save', self.handle_save)
         self.lc.subscribe('Schedule/Load', self.handle_load)
         self.lc.subscribe('Match/Init', self.handle_init)
@@ -129,18 +131,59 @@ class Schedule(LCMNode):
             print("WARNING: match number mismatch when submitting score")
             return
 
-        # TODO: do something useful with scores
         print ("FINAL SCORE OF MATCH {} is: Blue {} | {} Gold".format(
             msg.match_number,
             self.totals[msg.match_number]['alliance1'],
             self.totals[msg.match_number]['alliance2']
             ))
 
+        match_num = msg.match_number
+        # TODO: Put the score determining logic in handle_score
+        score_state = self.score_states[match_num]
+        bonus_points = [0, 0]
+        # Note: possession is defined as the bonus ball being on your side of the field
+        # If the blue alliance has possession, the gold alliance gets the points
+        if score_state.bonus_possession == forseti2.score_state.BLUE:
+            bonus_points[1] += score_state.bonus_points
+        if score_state.bonus_possession == forseti2.score_state.GOLD:
+            bonus_points[0] += score_state.bonus_points
+        a1 = {
+            "autonomous" : score_state.blue_autonomous_points, 
+            "bonus" : bonus_points[0], 
+            "manual" : score_state.blue_normal_points + score_state.blue_permanent_points, 
+            "penalty" : score_state.blue_penalty, 
+            "team1" : {
+                "number" : msg.team_numbers[0],
+                "disqualified" : False
+            }, 
+            "team2" : {
+                "number" : msg.team_numbers[1],
+                "disqualified" : False
+            }
+        }
+        a2 = {
+            "autonomous" : score_state.gold_autonomous_points, 
+            "bonus" : bonus_points[1], 
+            "manual" : score_state.gold_normal_points + score_state.gold_permanent_points, 
+            "penalty" : score_state.gold_penalty, 
+            "team1" : {
+                "number" : msg.team_numbers[2],
+                "disqualified" : False
+            }, 
+            "team2" : {
+                "number" : msg.team_numbers[3],
+                "disqualified" : False
+            }
+        }
+        args = {"alliance1" : a1, "alliance2" : a2}
+        r = requests.post('https://pioneers.berkeley.edu/match_schedule/api/match/{}/'.format(msg.match_number), json.dumps(args))
+
     def handle_score(self, channel, data):
         msg = forseti2.score_state.decode(data)
         if self.current_match is not None and self.current_match in self.totals:
             self.totals[self.current_match]['alliance1'] = msg.blue_total
             self.totals[self.current_match]['alliance2'] = msg.gold_total
+            self.score_states[self.current_match] = msg
 
 
 def main():
