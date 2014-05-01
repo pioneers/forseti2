@@ -97,8 +97,13 @@ function updateScore(data) {
 	team_numbers = data['team_numbers'];
 	team_names = data['team_names'];
 	var team_strings = new Array();
-	for (var i = 0; i < 4; i++) {
+    var i;
+	for (i = 2; i < 4; i++) {
 		team_strings[i] = String(team_numbers[i]) + " " + team_names[i];
+		$('#team' + String(i)).text(team_strings[i]);
+	}
+	for (i = 0; i < 2; i++) {
+		team_strings[i] = team_names[i] + " " + String(team_numbers[i]);
 		$('#team' + String(i)).text(team_strings[i]);
 	}
 	// update match number
@@ -240,7 +245,7 @@ function recalculateSum() {
 }
 
 $( document ).ready(function($) {
-	window.setInterval(updateInterface, 40);
+	window.setInterval(updateInterface, 200);
 	$('#heartbeat').tooltip({title: "Press the guide button", placement: 'bottom'});
 	$('form').submit(submitAdjustment);
 	$('input.diff').on('input', recalculateTotals);
