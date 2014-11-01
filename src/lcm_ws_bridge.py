@@ -92,6 +92,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         self.subscriptions[subscription_id] = self.lc.subscribe(channel, handle)
 
     def remove_subscription(self, subscription_id):
+        if subscription_id not in self.subscriptions:
+            return
         print "UNSUBSCRIBING"
         self.lc.unsubscribe(self.subscriptions[subscription_id])
         del self.subscriptions[subscription_id]
