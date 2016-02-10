@@ -176,6 +176,7 @@ class MatchTimer(LCMNode):
         func()
 
     def handle_init(self, channel, data):
+        print("match init received")
         msg = forseti2.Match.decode(data)
         self.match.teams = [Team(msg.team_numbers[i], msg.team_names[i]) for i in range(4)]
         self.reset()

@@ -21,10 +21,13 @@ TYPES_ROOT = forseti2
 ### END SETTINGS
 
 class WSHandler(tornado.websocket.WebSocketHandler):
+    def check_origin(self, origin):
+        return True
     def open(self):
         """
         Called when a client opens the websocket
         """
+        print "open called"
         self.lc = lcm.LCM(LCM_URI)
         self.thread = threading.Thread(target=self.lcm_loop)
         self.thread.daemon = True
