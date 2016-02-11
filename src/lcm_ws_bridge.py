@@ -12,13 +12,19 @@ import tornado.httpserver
 import json
 import lcm
 import threading
-
+import LCMNode
 ### SETTINGS
 import settings
 import forseti2
 LCM_URI = settings.LCM_URI
 TYPES_ROOT = forseti2
 ### END SETTINGS
+lc = lcm.LCM(LCM_URI)
+
+class BridgeNode(LCMNode.LCMNode):
+    def __init__(self, lc):
+        self.lc = lc
+        self.start_thread()
 
 class WSHandler(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
@@ -28,16 +34,19 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         Called when a client opens the websocket
         """
         print "open called"
-        self.lc = lcm.LCM(LCM_URI)
-        self.thread = threading.Thread(target=self.lcm_loop)
-        self.thread.daemon = True
-        self.thread.start()
+        self.lc = lc
+        # self.thread = threading.Thread(target=self.lcm_loop)
+        # self.thread.daemon = True
+        # self.thread.start()
         self.subscriptions = {}
 
-    def close(self):
+    def on_close(self):
         """
         Called when the websocket closes
         """
+        print "closed called"
+        for subscription_id in self.subscriptions.keys():
+            self.remove_subscription(subscription_id)
         # No thread shutdown and LCM cleanup here, because we assume that the
         # program is quitting anyway
         pass
@@ -73,15 +82,15 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     ### LCM-related
 
-    def lcm_loop(self):
-        """
-        Runs the LCM handling loop
-        """
-        while True:
-            try:
-                self.lc.handle()
-            except Exception as e:
-                print "Got exception while handling lcm message", e
+    # def lcm_loop(self):
+    #     """
+    #     Runs the LCM handling loop
+    #     """
+    #     while True:
+    #         try:
+    #             self.lc.handle()
+    #         except Exception as e:
+    #             print "Got exception while handling lcm message", e
 
     def add_subscription(self, channel, msg_type, subscription_id):
         """
@@ -147,6 +156,7 @@ application = tornado.web.Application([
 ])
 
 if __name__ == '__main__':
+    BridgeNode(lc)
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.listen(8000)
     tornado.ioloop.IOLoop.instance().start()

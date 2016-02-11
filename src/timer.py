@@ -158,9 +158,9 @@ class MatchTimer(LCMNode):
             self.check_for_stage_change()
             self.match.time = int(self.match_timer.time())
             msg = forseti2.Time()
-            msg.game_time_so_far = self.match_timer.time()
-            msg.stage_time_so_far = self.stage_timer.time()
-            msg.total_stage_time = self.current_stage().length
+            msg.game_time_so_far = self.match_timer.time() * 1000
+            msg.stage_time_so_far = self.stage_timer.time() * 1000
+            msg.total_stage_time = self.current_stage().length * 1000
             msg.stage_name = self.current_stage().name
             self.lc.publish('Timer/Time', msg.encode())
 
