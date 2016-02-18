@@ -25,7 +25,7 @@ import LCMNode
 Node = LCMNode.Node
 LCMNode = LCMNode.LCMNode
 
-class Timer(Object):
+class Timer(object):
 
     def __init__(self):
         self.start_time = time.time()
@@ -51,13 +51,14 @@ class Timer(Object):
         return self
 
 
-def LightHouseTimer(LCMNode):
-    def __init__(self):
+class LighthouseTimer(LCMNode):
+    def __init__(self, lc):
+        self.lc = lc
         self.timer = Timer()
         self.stage_name = ""
         self.lc.subscribe("Button/Control", self.handle_control)
         self.lc.subscribe("Timer/Time", self.handle_time)
-        self.button_pressed = false
+        self.button_pressed = True
 
     def run(self):
         while 1:
@@ -67,14 +68,14 @@ def LightHouseTimer(LCMNode):
             msg = forseti2.LighthouseTime()
             if self.button_pressed:
                 self.timer.start()
-            time = int(self.timer.time())
-            if time > 10:
+            lighthouse_time = int(self.timer.time())
+            if lighthouse_time > 10:
                 msg.lighthouse_on_time = 0
                 msg.is_lighthouse_on = "Lighthouse is available"
                 self.lc.publish('GameObjectTimer/LighthouseTime', msg.encode())
                 self.timer.pause()
             else:
-                msg.lighthouse_on_time = time * 1000
+                msg.lighthouse_on_time = lighthouse_time * 1000
                 msg.is_lighthouse_on = "Lighthouse is unavailable"
                 self.lc.publish('GameObjectTimer/LighthouseTime', msg.encode())
          
@@ -89,7 +90,7 @@ def LightHouseTimer(LCMNode):
 
 def main():
     lc = lcm.LCM(settings.LCM_URI)
-    timer = LighthouseTimer()
+    timer = LighthouseTimer(lc)
     timer.run()
 
 
