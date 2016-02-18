@@ -1,0 +1,6 @@
+package forseti2;
+
+struct LighthouseTime {
+	int32_t lighthouse_on_time;
+	string is_lighthouse_on;
+}
