@@ -56,3 +56,66 @@ Once LCM is built, move `lcm-1.0.0/lcm-java/lcm.jar` into this directory to take
 ### arduino and firmata ###
 
 There's no port avaialble for arduino or firmata. 
+
+## Nodes and their Functions ##
+
+### timer.py ###
+
+Maintains match timer and current match stage.
+
+Inputs:
+
+- Timer/Control: TimeControl
+  + receives commands for the match timer (start, pause, reset)
+
+Outputs:
+
+- Timer/Time: Time
+  + publishes (every .3 secs) time elapsed in current match and stage, as well as the current stage name
+
+### lcm_ws_bridge.py ###
+
+Bridges lcm to websockets so javascript applications can access the network
+
+Inputs:
+
+- */*: *
+  + receives whatever the websocket client requests
+
+Outputs:
+
+- */*: *
+  + publishes whatever the websocket client requests
+
+### robot_controller.py ###
+
+Maintains state of each robot
+
+Inputs:
+
+- Timer/Time: Time
+  + uses current match stage to determine robot stage unless overridden or emergency stopped
+- Robot[0-3]/Estop: Estop
+  + uses current emergency stop state and overrides all robot state if in estop mode
+- Robot[0-3]/Override: Override
+  + determines whether or not robot is in manual override mode (overrides timers only)
+- Robot[0-3]/RobotState: RobotState
+  + controls robot state using manual override only if in override mode
+
+Outputs:
+
+- Robot[0-3]/RobotControl: RobotControl
+  + publishes (every .3 secs) the state of the robot (estop?, autonomous?, enabled?)
+
+### heartbeat.py ###
+
+Acts as a heartbeat for clients to confirm they are connected to the field network
+
+Inputs:
+
+
+Outputs:
+
+- Heartbeat/Beat: Heartbeat
+  + oscillates between True and False every second
+
