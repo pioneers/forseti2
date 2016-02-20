@@ -17,9 +17,9 @@ LCMNode = LCMNode.LCMNode
 class Button(LCMNode):
 
     def __init__(self):
-    	self.send_channel = "Button/Press"
+    	self.send_channel = "Button/Button"
         self.button = forseti2.Button()
-        self.pressed = False
+        self.button.pressed = False
         self.lc = lcm.LCM(settings.LCM_URI)
 
     def run(self):
