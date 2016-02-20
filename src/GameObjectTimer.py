@@ -56,7 +56,7 @@ class LighthouseTimer(LCMNode):
         self.lc = lc
         self.timer = Timer()
         self.stage_name = ""
-        self.lc.subscribe("Button/Button", self.handle_control)
+        self.lc.subscribe("Game_Button/Button", self.handle_control)
         self.lc.subscribe("Timer/Time", self.handle_time)
         self.button_pressed = True
 

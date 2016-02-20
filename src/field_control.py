@@ -59,10 +59,11 @@ class Game_Motor(LCMNode):
         func()
 
     def run(self):
-    	if (self.motor.activated):
-    		self.motor = self.motor.encode()
+    	#if (self.motor.activated):
+        if True:
+    		# self.motor = self.motor.encode()
     		while True:
-				self.lc.publish(self.send_channel, self.motor)
+				self.lc.publish(self.send_channel, self.motor.encode())
 				self.motor.activated = not self.motor.activated
 
 	def deactivate(self):
@@ -75,8 +76,8 @@ class Game_Motor(LCMNode):
 def main():
 	button = Game_Button()
 	motor = Game_Motor()
-	button.run()
-	#motor.run()
+	# button.run()
+	motor.run()
 
 main()
 
