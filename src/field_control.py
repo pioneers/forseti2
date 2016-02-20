@@ -13,11 +13,12 @@ import LCMNode
 
 Node = LCMNode.Node
 LCMNode = LCMNode.LCMNode
-
-class Button(LCMNode):
+# changes here go to network_monitor, lighthouse timer 
+# lcm channel names are "[Class-name]/[.lcm file name]"
+class Game_Button(LCMNode):
 
     def __init__(self):
-    	self.send_channel = "Button/Button"
+    	self.send_channel = "Game_Button/Button"
         self.button = forseti2.Button()
         self.button.pressed = False
         self.lc = lcm.LCM(settings.LCM_URI)
@@ -37,19 +38,19 @@ class Button(LCMNode):
 		self.button.pressed = False
 
 
-class Motor(LCMNode):
+class Game_Motor(LCMNode):
 
     def __init__(self):
-    	self.send_channel = "Motor/Activate"
-    	self.receive_channel = "Motor/Control"
+    	self.send_channel = "Game_Motor/Motor"
+    	self.receive_channel = "Timer/Time"
         self.motor = forseti2.Motor()
-        self.activated = False
+        self.motor.activated = False
         self.lc = lcm.LCM(settings.LCM_URI)
         self.lc.subscribe(self.receive_channel, self.handle_control) 
         # subscribe channel same or different from publish?
 
     def handle_control(self, channel, data):
-    	msg = forseti2.TimeControl.decode(data)
+    	msg = forseti2.Time.decode(data)
         print('Received command', msg.command_name)
         func = {
             'activate': self.activate,
@@ -72,8 +73,8 @@ class Motor(LCMNode):
 
 
 def main():
-	button = Button()
-	motor = Motor()
+	button = Game_Button()
+	motor = Game_Motor()
 	button.run()
 	#motor.run()
 
