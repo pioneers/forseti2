@@ -18,15 +18,16 @@ class Button(LCMNode):
 
     def __init__(self):
     	self.send_channel = "Button/Press"
-        self.button = LCM.Button()
+        self.button = forseti2.Button()
         self.pressed = False
         self.lc = lcm.LCM(settings.LCM_URI)
 
     def run(self):
-    	if (self.button.pressed):
-    		self.button = self.button.encode()
+    	#if (self.button.pressed):
+        if True:
+    		# self.button = self.button
     		while True:
-				lc.publish(send_channel, self.button)
+				self.lc.publish(self.send_channel, self.button.encode())
 				self.button.pressed = not self.button.pressed
 
 	def press(self):
@@ -41,10 +42,10 @@ class Motor(LCMNode):
     def __init__(self):
     	self.send_channel = "Motor/Activate"
     	self.receive_channel = "Motor/Control"
-        self.motor = LCM.Motor()
+        self.motor = forseti2.Motor()
         self.activated = False
         self.lc = lcm.LCM(settings.LCM_URI)
-        self.lc.subscribe(receive_channel, self.handle_control) 
+        self.lc.subscribe(self.receive_channel, self.handle_control) 
         # subscribe channel same or different from publish?
 
     def handle_control(self, channel, data):
@@ -60,7 +61,7 @@ class Motor(LCMNode):
     	if (self.motor.activated):
     		self.motor = self.motor.encode()
     		while True:
-				lc.publish(send_channel, self.motor)
+				self.lc.publish(self.send_channel, self.motor)
 				self.motor.activated = not self.motor.activated
 
 	def deactivate(self):
@@ -76,6 +77,7 @@ def main():
 	button.run()
 	#motor.run()
 
+main()
 
 """import lcm 
 import forseti2
