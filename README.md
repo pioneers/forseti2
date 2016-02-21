@@ -79,13 +79,13 @@ Bridges lcm to websockets so javascript applications can access the network
 
 Inputs:
 
-- */*: *
-  + receives whatever the websocket client requests
+- *: *
+  + receives whatever the websocket clients request
 
 Outputs:
 
-- */*: *
-  + publishes whatever the websocket client requests
+- *: *
+  + publishes whatever the websocket clients request
 
 ### robot_controller.py ###
 
