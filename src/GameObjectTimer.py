@@ -56,7 +56,7 @@ class LighthouseTimer(LCMNode):
         self.lc = lc
         self.timer = Timer()
         self.stage_name = ""
-        self.lc.subscribe("Button/Control", self.handle_control)
+        self.lc.subscribe("Game_Button/Button", self.handle_control)
         self.lc.subscribe("Timer/Time", self.handle_time)
         self.button_pressed = True
 
@@ -82,7 +82,7 @@ class LighthouseTimer(LCMNode):
 
     def handle_control(self, channel, data):
         msg = forseti2.Button.decode(data)
-        self.button_pressed = msg.button_pressed 
+        self.button_pressed = msg.pressed 
 
     def handle_time(self,channel,data):
         msg = forseti2.Time.decode(data)
