@@ -10,5 +10,15 @@ windows:
       - python lcm_ws_bridge.py
       - python timer.py
       - python heartbeat.py
+      - python robot_controller.py
+      - commands:
+        - cd ../../daemon/runtime
+        - python runtime.py
+      - commands:
+        - cd ../../daemon/dawn
+        - npm run-script watch
+      - commands:
+        - cd ../../daemon/dawn
+        - npm start
       - echo hello world
 

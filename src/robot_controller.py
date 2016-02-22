@@ -86,7 +86,7 @@ class RobotControllerNode(LCMNode):
                 msg = forseti2.RobotControl()
                 msg.estop, msg.autonomous, msg.enabled = robot.state
                 self.lc.publish("%s/RobotControl" % channel, msg.encode())
-            time.sleep(.03)
+            time.sleep(.3)
 
 def main():
     print "Robot Controller Started"

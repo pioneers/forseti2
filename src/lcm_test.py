@@ -22,7 +22,7 @@ lc.publish("Match/Init", match_init.encode())
 
 match_start = forseti2.TimeControl()
 match_start.command_name = "start"
-lc.publish("Match/Init", match_init.encode())
+#lc.publish("Match/Init", match_init.encode())
 lc.publish("Timer/Control", match_start.encode())
 
 #lc.subscribe(".*", handle_all)
