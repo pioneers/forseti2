@@ -18,31 +18,32 @@ LCMNode = LCMNode.LCMNode
 class Game_Button(LCMNode):
 
     def __init__(self):
-    	self.send_channel = "Game_Button/Button"
+        self.send_channel = "Game_Button/Button"
         self.button = forseti2.Button()
         self.button.pressed = False
         self.lc = lcm.LCM(settings.LCM_URI)
 
     def run(self):
-    	#if (self.button.pressed):
+        #if (self.button.pressed):
         if True:
-    		# self.button = self.button
-    		while True:
-				self.lc.publish(self.send_channel, self.button.encode())
-				self.button.pressed = not self.button.pressed
+            # self.button = self.button
+            while True:
+                time.sleep(0.3)
+                self.lc.publish(self.send_channel, self.button.encode())
+                self.button.pressed = not self.button.pressed
 
-	def press(self):
-		self.button.pressed = True
+    def press(self):
+        self.button.pressed = True
 
-	def depress(self):
-		self.button.pressed = False
+    def depress(self):
+        self.button.pressed = False
 
 
 class Game_Motor(LCMNode):
 
     def __init__(self):
-    	self.send_channel = "Game_Motor/Motor"
-    	self.receive_channel = "Timer/Time"
+        self.send_channel = "Game_Motor/Motor"
+        self.receive_channel = "Timer/Time"
         self.motor = forseti2.Motor()
         self.motor.activated = False
         self.lc = lcm.LCM(settings.LCM_URI)
@@ -50,7 +51,7 @@ class Game_Motor(LCMNode):
         # subscribe channel same or different from publish?
 
     def handle_control(self, channel, data):
-    	msg = forseti2.Time.decode(data)
+        msg = forseti2.Time.decode(data)
         print('Received command', msg.command_name)
         func = {
             'activate': self.activate,
@@ -59,25 +60,26 @@ class Game_Motor(LCMNode):
         func()
 
     def run(self):
-    	#if (self.motor.activated):
+        #if (self.motor.activated):
         if True:
-    		# self.motor = self.motor.encode()
-    		while True:
-				self.lc.publish(self.send_channel, self.motor.encode())
-				self.motor.activated = not self.motor.activated
+            # self.motor = self.motor.encode()
+            while True:
+                time.sleep(0.3)
+                self.lc.publish(self.send_channel, self.motor.encode())
+                self.motor.activated = not self.motor.activated
 
-	def deactivate(self):
-		self.motor.activated = False
+    def deactivate(self):
+        self.motor.activated = False
 
-	def activate(self):
-		self.motor.activated = True
+    def activate(self):
+        self.motor.activated = True
 
 
 def main():
-	button = Game_Button()
-	motor = Game_Motor()
-	# button.run()
-	motor.run()
+    button = Game_Button()
+    motor = Game_Motor()
+    button.run()
+    # motor.run()
 
 main()
 
@@ -113,16 +115,16 @@ pressed = True
 activate = True
 
 def handle_motor(channel, data):
-	pass
+    pass
 
 lc.subscribe('Motor', self.handle_motor)
 while True:
-	if button_state:
-		lc.publish("Button/Press", pressed_button if pressed else unpressed_button)
-		button_state = not button_state
-		pressed = not pressed
-	else: 
-		lc.publish("Motor", activated_motor if activate else unactivated_motor)
-		motor_state = not motor_state
-		activate = not activate
-		"""
+    if button_state:
+        lc.publish("Button/Press", pressed_button if pressed else unpressed_button)
+        button_state = not button_state
+        pressed = not pressed
+    else: 
+        lc.publish("Motor", activated_motor if activate else unactivated_motor)
+        motor_state = not motor_state
+        activate = not activate
+        """

@@ -4,7 +4,7 @@
 timer.py
 Created on Wed Apr 24 12:00:00 2013
 
-@author: kyle
+@author: RJ
 
 
 """
@@ -29,7 +29,7 @@ class Timer(object):
 
     def __init__(self):
         self.start_time = time.time()
-        self.current_time = self.start_time
+        self.current_time = 0
         self.running = False
 
     def time(self):
@@ -50,32 +50,40 @@ class Timer(object):
         self.current_time = time.time() - self.start_time
         return self
 
-
+#TODO: Subscribe to Peter's two button channels. Publish which team pushed button
 class LighthouseTimer(LCMNode):
     def __init__(self, lc):
         self.lc = lc
         self.timer = Timer()
         self.stage_name = ""
+        self.button_pressed = False
         self.lc.subscribe("Game_Button/Button", self.handle_control)
         self.lc.subscribe("Timer/Time", self.handle_time)
-        self.button_pressed = True
+        self.start_thread()
+        
 
     def run(self):
         while 1:
             time.sleep(0.3)
-            if self.stage_name == "Paused" or self.stage_name == "End":
-                return
             msg = forseti2.LighthouseTime()
+            if self.stage_name == "Paused" or self.stage_name == "End":
+                msg.is_lighthouse_on = "Game has not started"
+                msg.time_left = 0
+                self.lc.publish('GameObjectTimer/LighthouseTime', msg.encode())
+                continue
+                
             if self.button_pressed:
                 self.timer.start()
-            lighthouse_time = int(self.timer.time())
-            if lighthouse_time > 10:
-                msg.lighthouse_on_time = 0
+            lighthouse_time = self.timer.time()
+            time_left = 10*1000 - lighthouse_time*1000
+            if time_left <= 0:
+                #print("asdff")
+                msg.time_left = 0
                 msg.is_lighthouse_on = "Lighthouse is available"
                 self.lc.publish('GameObjectTimer/LighthouseTime', msg.encode())
                 self.timer.pause()
             else:
-                msg.lighthouse_on_time = lighthouse_time * 1000
+                msg.time_left = time_left
                 msg.is_lighthouse_on = "Lighthouse is unavailable"
                 self.lc.publish('GameObjectTimer/LighthouseTime', msg.encode())
          
