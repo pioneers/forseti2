@@ -60,13 +60,14 @@ class LighthouseTimer(LCMNode):
         self.lc.subscribe("Game_Button/Button", self.handle_control)
         self.lc.subscribe("Timer/Time", self.handle_time)
         self.start_thread()
-        
+        self.counter = random.randInt(0, 1000000)
 
     def run(self):
         while 1:
             time.sleep(0.3)
             msg = forseti2.LighthouseTime()
-            if self.stage_name == "Paused" or self.stage_name == "End":
+
+            if self.stage.name in ["Setup", "Paused", "End"]:
                 msg.is_lighthouse_on = "Game has not started"
                 msg.time_left = 0
                 self.lc.publish('GameObjectTimer/LighthouseTime', msg.encode())
@@ -74,14 +75,18 @@ class LighthouseTimer(LCMNode):
                 
             if self.button_pressed:
                 self.timer.start()
+
             lighthouse_time = self.timer.time()
             time_left = 10*1000 - lighthouse_time*1000
             if time_left <= 0:
-                #print("asdff")
+                self.timer.pause()
+
+            if not self.timer.running:
                 msg.time_left = 0
+                self.counter += 1
+                msg.randNum = self.counter
                 msg.is_lighthouse_on = "Lighthouse is available"
                 self.lc.publish('GameObjectTimer/LighthouseTime', msg.encode())
-                self.timer.pause()
             else:
                 msg.time_left = time_left
                 msg.is_lighthouse_on = "Lighthouse is unavailable"
