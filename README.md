@@ -75,6 +75,11 @@ Outputs:
 
 ### lcm_ws_bridge.py ###
 
+TODO:
+
+- Optimization/stress testing
+- Packet sniffer for testing
+
 Bridges lcm to websockets so javascript applications can access the network
 
 Inputs:
@@ -106,6 +111,56 @@ Outputs:
 
 - Robot[0-3]/RobotControl: RobotControl
   + publishes (every .3 secs) the state of the robot (estop?, autonomous?, enabled?)
+
+### GameObjectTimer.py ###
+
+A timer for the buttons on the field
+
+TODO:
+
+- Publish which button triggered the timer
+- Help field_control.py identify when to spin motors (maybe generate a uid for each unique run of the timer)
+
+Inputs:
+
+- Game_Button[0-1]/Button: Button
+  + uses button status to trigger the timer
+- Timer/Time: Time
+  + only triggers on button presses during teleop and autonomous phases of a match
+
+Outputs:
+
+- GameObjectTimer/LighthouseTime: LighthouseTime
+  + publishes (every .3 secs) the state of the timer
+  + describes which button triggered the timer and how much time is left, or that the buttons are available
+
+### field_control.py ###
+
+Manages electronics on the field
+
+TODO:
+
+- Business logic regarding only spinning the motor once per button press and avoiding race conditions (maybe the timer can send UIDs?)
+- Actual interfacing with hardware
+
+Inputs:
+
+- GameObjectTimer/LighthouseTime: LighthouseTime
+  + uses timer info to determine when to dump balls onto field
+- Timer/Time: Time
+  + only dumps balls onto field during teleop and autonomous phases
+
+Outputs:
+
+- Game_Button[0-1]/Button: Button
+  + publishes (every .3 secs) the state of a button
+- Game_Motor[0-1]/Motor: Motor
+  + publishes (every .3 secs) the state of a motor
+
+Notes:
+
+- There may be multiple instances of this node, each controlling a different field element
+- There may be other things to add to the field later, such as status lights.
 
 ### heartbeat.py ###
 
