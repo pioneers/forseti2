@@ -15,22 +15,25 @@ Node = LCMNode.Node
 LCMNode = LCMNode.LCMNode
 # changes here go to network_monitor, lighthouse timer 
 # lcm channel names are "[Class-name]/[.lcm file name]"
-class Game_Button(LCMNode):
+class Game_Button(Node):
 
-    def __init__(self):
-        self.send_channel = "Game_Button/Button"
+    def __init__(self, channel_name): #TODO: give channel_name
+    	self.send_channel = channel_name
         self.button = forseti2.Button()
         self.button.pressed = False
         self.lc = lcm.LCM(settings.LCM_URI)
+        self.start_thread() #runs overridden loop function from LCMNode.py
 
-    def run(self):
-        #if (self.button.pressed):
-        if True:
-            # self.button = self.button
-            while True:
-                time.sleep(0.3)
-                self.lc.publish(self.send_channel, self.button.encode())
-                self.button.pressed = not self.button.pressed
+    #TODO: check the button
+    def checkButton(self):
+        return False
+
+    def _loop(self):
+		while True:
+            time.sleep(0.3)
+			self.lc.publish(self.send_channel, self.button.encode())
+			self.button.pressed = not self.button.pressed
+>>>>>>> Stashed changes
 
     def press(self):
         self.button.pressed = True
@@ -41,45 +44,36 @@ class Game_Button(LCMNode):
 
 class Game_Motor(LCMNode):
 
-    def __init__(self):
-        self.send_channel = "Game_Motor/Motor"
-        self.receive_channel = "Timer/Time"
+    #TODO: if button pressed and time since button press < 5 seconds, motor should be on, should only be on again if timer ends
+    def __init__(self, channel_name): #TODO: give send_channels
+    	self.send_channel = channel_name
+    	self.receive_channel = "Timer/Time"
         self.motor = forseti2.Motor()
         self.motor.activated = False
         self.lc = lcm.LCM(settings.LCM_URI)
-        self.lc.subscribe(self.receive_channel, self.handle_control) 
-        # subscribe channel same or different from publish?
+        self.lc.subscribe(self.receive_channel, self.handle_control)
+        self.counter = None 
 
     def handle_control(self, channel, data):
-        msg = forseti2.Time.decode(data)
-        print('Received command', msg.command_name)
-        func = {
-            'activate': self.activate,
-            'deactivate': self.deactivate,
-        }[msg.command_name]
-        func()
+    	msg = forseti2.Time.decode(data)
+        print('Received command', msg.counter) #TODO: check that the timer has stopped before starting motor
+        if msg.counter != self.counter:
+            self.motor.activated = True
+        else:
+            self.motor.activated = False
 
     def run(self):
-        #if (self.motor.activated):
-        if True:
-            # self.motor = self.motor.encode()
-            while True:
-                time.sleep(0.3)
-                self.lc.publish(self.send_channel, self.motor.encode())
-                self.motor.activated = not self.motor.activated
+        start_time = time.time()
+        elapsed_time = 0
+        while True and self.motor.activated:
+		    while elapsed_time < 5: #TODO: add time set amount for running motor 
+                elapsed_time = time.time() - start_time
+			    self.lc.publish(self.send_channel, self.motor.encode())
 
-    def deactivate(self):
-        self.motor.activated = False
-
-    def activate(self):
-        self.motor.activated = True
-
-
-def main():
-    button = Game_Button()
-    motor = Game_Motor()
-    button.run()
-    # motor.run()
+    def main():
+	   button = Game_Button("Game_Button/Button") #automatically starts looping
+	   motor = Game_Motor("Game_Motor/Motor") 
+	   motor.run() #runs 
 
 main()
 
