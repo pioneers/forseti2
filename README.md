@@ -96,6 +96,10 @@ Outputs:
 
 Maintains state of each robot
 
+TODO:
+
+- How to balance multiple sources of estop
+
 Inputs:
 
 - Timer/Time: Time
@@ -174,3 +178,62 @@ Outputs:
 - Heartbeat/Beat: Heartbeat
   + oscillates between True and False every second
 
+
+## Functions of Modified Dawn ##
+
+### Set Robot State ###
+
+- Listen to a specific Robot[0-3]/RobotControl channel and sends messages to robot accordingly
+- TODO: Set team flags on robot
+
+### Connect to Correct Robot Automatically ###
+
+- Either receive the correct robot IP from the field or configure so each driver station corresponds to a static robot ip
+- Give meaningful feedback to field and students about robot connection status
+
+### Display Information from Field ###
+
+- Match state and timer
+- Lighthouse availability and timer
+- Team's robot state
+- If other team's robots were manually disabled/estopped?
+- Which motor on the field is spinning
+- Video feed from field
+- Heartbeat
+
+### Publish Information to Field
+
+- Connection status of robot
+
+### Disable Dawn Features
+
+- Text editor and upload/run functionality
+- Stop button should always be enabled
+
+### Communication with field operators? (help button / chat)
+
+## UI nodes ##
+
+### TODO: ALL OF THESE!!! (Except Network Monitor) ###
+
+### Network Monitor ###
+
+- Displays live plots of messages/second on each channel
+
+### Judge Console ###
+
+- Allow score input for current match
+- Display field info like Dawn?
+
+### Field Console ###
+
+- View robot states and allow for manual overriding and estop
+- Allow control of match timer and robot enumeration (telling dawn to connect to robots)
+
+### Stream Overlay ###
+
+- Display field info (like dawn), scores, and upcoming matches
+
+### Audience UI ###
+
+- Like the stream overlay but as standalone webpage
