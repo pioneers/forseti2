@@ -73,10 +73,10 @@ class Period(object):
 
 class MatchTimer(LCMNode):
 
-    def __init__(self, lc, match):
+    def __init__(self, lc, robot_controller):
         self.stage_ended = False
         self.lc = lc
-        self.match = match
+        self.robot_controller = robot_controller
         self.stages = [Period('Setup', 0),
             Period('Autonomous', settings.AUTONOMOUS_LENGTH_SECONDS, True), Period('Paused', 0),
             Period('Teleop', settings.TELEOP_LENGTH_SECONDS, True), Period('End', 0)]
@@ -92,6 +92,7 @@ class MatchTimer(LCMNode):
         self.stage_index = 0
         self.match_timer.reset()
         self.stage_timer.reset()
+        self.robot_controller.reset()
         self.on_stage_change(self.stages[self.stage_index], self.stages[0])
         self.stage_ended = True
 
@@ -108,26 +109,11 @@ class MatchTimer(LCMNode):
                     self.stages[self.stage_index])
                 self.pause()
             else:
-                #print('Stage = ', self.current_stage().name)
                 self.pause()
 
     def on_stage_change(self, old_stage, new_stage):
-        if new_stage.name == 'Setup':
-            self.match.stage = 'Autonomous'
-            self.match.disable_all()
-            self.pause()
-        elif new_stage.name == 'Autonomous':
-            self.match.stage = 'Autonomous'
-            self.match.enable_all()
-        elif new_stage.name == 'Paused':
-            self.match.stage = 'Paused'
-            self.match.disable_all()
-            self.pause()
-        elif new_stage.name == 'Teleop':
-            self.match.stage = 'Teleop'
-            self.match.enable_all()
-        elif new_stage.name == 'End':
-            self.match.stage = 'End'
+        self.robot_controller.set_stage(new_stage.name)
+        if new_stage.name in ['Setup', 'Paused', 'End']:
             self.pause()
 
     def start(self):
@@ -156,13 +142,13 @@ class MatchTimer(LCMNode):
         while self.stage_index < len(self.stages):
             time.sleep(0.3)
             self.check_for_stage_change()
-            self.match.time = int(self.match_timer.time())
             msg = forseti2.Time()
             msg.game_time_so_far = self.match_timer.time() * 1000
             msg.stage_time_so_far = self.stage_timer.time() * 1000
             msg.total_stage_time = self.current_stage().length * 1000
             msg.stage_name = self.current_stage().name
             self.lc.publish('Timer/Time', msg.encode())
+            self.robot_controller.publish()
 
     def handle_control(self, channel, data):
         msg = forseti2.TimeControl.decode(data)
@@ -178,117 +164,108 @@ class MatchTimer(LCMNode):
     def handle_init(self, channel, data):
         print("match init received")
         msg = forseti2.Match.decode(data)
-        self.match.teams = [Team(msg.team_numbers[i], msg.team_names[i]) for i in range(4)]
         self.reset()
 
-class Team(object):
 
-    def __init__(self, number, name=None):
-        self.number = number
-        if name is None:
-            self.name = configurator.get_team_name(number)
-        else:
-            self.name = name
-        self.teleop = False
-        self.halt_radio = False
-        self.auto = False
-        self.enabled = False
-
-    def toggle(self):
-        self.enabled = not self.enabled
-
-
-class Match(object):
-
-    def __init__(self, team_numbers):
-        self.teams = [Team(num) for num in team_numbers]
-        self.stage = 'Setup'
-        self.time = 0
-
-    def get_team(self, team_number):
-        for team in self.teams:
-            if team.number == team_number:
-                return team
-
-    def enable_all(self):
-        for team in self.teams:
-            team.enabled = True
-
-    def disable_all(self):
-        for team in self.teams:
-            team.enabled = False
-
-
-
-class ControlDataSender(Node):
-
-    def __init__(self, lc, match, timer):
-        self.lc = lc
-        self.match = match
-        self.timer = timer
-        self.thread = threading.Thread()
-        self.thread.daemon = True
-        self.start_thread()
-        self.seq = 0;
-
-    def _loop(self):
-        while True:
-            time.sleep(0.5)
-            for i in range(len(self.match.teams)):
-                self.send(i + 1, self.match.teams[i])
-
-    def send(self, piemos_num, team):
-        #print('Sending')
-        msg = forseti2.ControlData()
-        msg.TeleopEnabled = self.match.stage in ['Teleop', 'Paused']
-        msg.HaltRadio = False
-        msg.AutonomousEnabled = self.match.stage == 'Autonomous'
-        msg.RobotEnabled = self.timer.match_timer.running
-        msg.Stage = self.match.stage
-        msg.Time = self.match.time
-        """
-        msg = forseti2.piemos_cmd()
-        msg.header = forseti2.header()
-        msg.header.seq = self.seq;
-        self.seq += 1;
-        msg.header.time = time.time()
-        msg.auton = self.match.stage == 'Autonomous'
-        msg.enabled = self.timer.match_timer.running"""
-        self.lc.publish('piemos/Control', msg.encode())
-
-
-'''
-TODO This does not appear to be used anywhere.
-
-'''
-class RemoteTimer(object):
+# handles business logic of robot state
+# deals with emergency stop, manual override by field operators, and game state from timers
+# TODO karthik-shanmugam: should e-stopped robot be treated differently from disabled?
+class Robot(object):
 
     def __init__(self):
-        self.lc = lcm.LCM(settings.LCM_URI)
+        self.enabled = False
+        self.autonomous = True
+        self.overridden = False
+        self.estop = False
 
-    def send(self, command):
-        print('Sending', command)
-        msg = forseti2.TimeControl()
-        msg.command_name = command
-        self.lc.publish('Timer/Control', msg.encode())
+    def reset(self):
+        self.__init__()
 
-    def pause(self):
-        self.send('pause')
+    def set_stage(self, stage_name):
+        if not self.overridden:
+            if stage_name in ["Setup", "Paused", "End"]:
+                self.enabled = False
+            elif stage_name == "Autonomous":
+                self.autonomous = True
+                self.enabled = True
+            elif stage_name == "Teleop":
+                self.autonomous = False
+                self.enabled = True
+            else:
+                print("unrecognized stage: %s" % stage_name)
 
-    def start(self):
-        self.send('start')
+    # once estop is set, it cannot be unset until the robot is reset
+    def emergency_stop(self, estop):
+        if estop:
+            self.estop = estop
 
-    def reset_match(self):
-        self.send('reset_match')
+    # for manual overriding of robot state (ignore timers)
+    def override(self, override):
+        self.overridden = override
 
-    def reset_stage(self):
-        self.send('reset_stage')
+    # manually set the state. only works if override is true
+    def set_state(self, autonomous, enabled):
+        if self.overridden:
+            self.autonomous = autonomous
+            self.enabled = enabled
+
+    @property
+    def state(self):
+        if self.estop:
+            self.enabled = False
+        return (self.estop, self.autonomous, self.enabled)
+
+class RobotController(object):
+
+    def __init__(self, lc, channels):
+        self.lc = lc
+        self.channels = channels
+        self.robots = {channel: Robot() for channel in channels}
+        self.lc.subscribe("Estop/Estop", self.handle_field_estop)
+        for channel in channels:
+            self.lc.subscribe("%s/Estop" % channel, self.handle_robot_estop)
+            self.lc.subscribe("%s/Override" % channel, self.handle_override)
+            self.lc.subscribe("%s/RobotState" % channel, self.handle_robot_state)
+    
+    def reset(self):
+        for robot in self.robots.values():
+            robot.reset()
+
+    # called when timer changes stage
+    def set_stage(self, stage_name):
+        for robot in self.robots.values():
+            robot.set_stage(stage_name)
+        self.publish()
+
+    def handle_field_estop(self, channel, data):
+        print("ESTOP RECEIVED")
+        msg = forseti2.Estop.decode(data)
+        for robot in self.robots.values():
+            robot.emergency_stop(msg.estop)
+
+    # these apply to individual robots
+    def handle_robot_estop(self, channel, data):
+        msg = forseti2.Estop.decode(data)
+        self.robots[channel.split('/')[0]].emergency_stop(msg.estop)
+
+    def handle_override(self, channel, data):
+        msg = forseti2.Override.decode(data)
+        self.robots[channel.split('/')[0]].override(msg.override)
+
+    def handle_robot_state(self, channel, data):
+        msg = forseti2.RobotState.decode(data)
+        self.robots[channel.split('/')[0]].set_state(msg.set_state)
+
+    def publish(self):
+        for channel, robot in self.robots.items():
+            msg = forseti2.RobotControl()
+            msg.estop, msg.autonomous, msg.enabled = robot.state
+            self.lc.publish("%s/RobotControl" % channel, msg.encode())
 
 def main():
     lc = lcm.LCM(settings.LCM_URI)
-    match = Match([0] * 4)
-    timer = MatchTimer(lc, match)
-    cd_sender = ControlDataSender(lc, match, timer)
+    robot_controller = RobotController(lc, ["Robot0", "Robot1", "Robot2", "Robot3"])
+    timer = MatchTimer(lc, robot_controller)
     timer.run()
 
 

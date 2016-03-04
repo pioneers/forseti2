@@ -11,7 +11,6 @@ windows:
       - python timer.py
       - python GameObjectTimer.py
       - python heartbeat.py
-      - python robot_controller.py
       - commands:
         - cd ../../daemon/runtime
         - python runtime.py
@@ -21,5 +20,6 @@ windows:
       - commands:
         - cd ../../daemon/dawn
         - npm start
-      - echo hello world
+      - python match_tester.py
+      - python estop.py
 

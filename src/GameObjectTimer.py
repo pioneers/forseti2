@@ -82,7 +82,7 @@ class LighthouseTimer(LCMNode):
                 self.timer.pause()
 
             if not self.timer.running:
-                msg.time_left = 0
+                msg.time_left = 10*1000
                 self.counter += 1
                 msg.counter = self.counter
                 msg.is_lighthouse_on = "Lighthouse is available"
