@@ -18,6 +18,9 @@ import LCMNode
 lc = lcm.LCM(settings.LCM_URI)
 
 match_init = forseti2.Match()
+match_init.match_number = 0
+match_init.team_numbers = [0, 1, 2, 3]
+match_init.team_names = ['test0', 'test1', 'test2', 'test3']
 
 match_start = forseti2.TimeControl()
 match_start.command_name = "start"

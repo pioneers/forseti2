@@ -11,7 +11,6 @@ Created on Wed Apr 24 12:00:00 2013
 from __future__ import print_function
 
 import forseti2
-import configurator
 import json
 import lcm
 import threading
