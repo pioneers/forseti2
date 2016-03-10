@@ -11,8 +11,10 @@ windows:
       - python timer.py
       - python GameObjectTimer.py
       - python heartbeat.py
+      - memcached -p 12357
       - commands:
         - cd ../../daemon/runtime
+        - export PYTHONPATH=$PYTHONPATH:../../hibike
         - python runtime.py
       - commands:
         - cd ../../daemon/dawn
