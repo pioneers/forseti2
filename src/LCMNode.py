@@ -15,10 +15,14 @@ lc_lock = threading.Lock()
 
 class Node(object):
 
-    def start_thread(self):
-        self.thread = threading.Thread(target=self._loop)
-        self.thread.daemon = True
-        self.thread.start()
+    def start_thread(self, target=None):
+        if not target:
+            target = self._loop
+        if not hasattr(self, "threads"):
+            self.threads = []
+        self.threads.append(threading.Thread(target=target))
+        self.threads[-1].daemon = True
+        self.threads[-1].start()
 
     def _loop(self):
         raise NotImplemented()

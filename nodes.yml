@@ -10,6 +10,7 @@ windows:
       - python lcm_ws_bridge.py
       - python timer.py
       - python GameObjectTimer.py
+      - python field_control.py
       - python heartbeat.py
       - memcached -p 12357
       - commands:
