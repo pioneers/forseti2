@@ -23,5 +23,6 @@ windows:
         - cd ../../daemon/dawn
         - npm start
       - python match_tester.py
+      - python test_button.py
       - python estop.py
 

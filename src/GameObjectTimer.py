@@ -74,6 +74,7 @@ class LighthouseTimer(LCMNode):
                 continue
                 
             if self.button_pressed:
+                self.button_pressed = False
                 self.timer.start()
 
             lighthouse_time = self.timer.time()

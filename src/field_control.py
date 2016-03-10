@@ -26,14 +26,13 @@ class Game_Button(Node):
 
     #TODO: check the button
     def checkButton(self):
-        return False
+        return self.button.pressed
 
     def _loop(self):
 		while True:
             time.sleep(0.3)
 			self.lc.publish(self.send_channel, self.button.encode())
 			self.button.pressed = not self.button.pressed
->>>>>>> Stashed changes
 
     def press(self):
         self.button.pressed = True
@@ -70,13 +69,13 @@ class Game_Motor(LCMNode):
                 elapsed_time = time.time() - start_time
 			    self.lc.publish(self.send_channel, self.motor.encode())
 
-    def main():
-	   button = Game_Button("Game_Button/Button") #automatically starts looping
-	   motor = Game_Motor("Game_Motor/Motor") 
-	   motor.run() #runs 
+def main():
+    button = Game_Button("Game_Button/Button") #automatically starts looping
+    motor = Game_Motor("Game_Motor/Motor") 
+    motor.run() #runs 
 
-main()
-
+if __name__ == '__main__':
+    main()
 """import lcm 
 import forseti2
 import settings
