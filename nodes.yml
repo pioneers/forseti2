@@ -9,7 +9,7 @@ windows:
         focus: true
       - python lcm_ws_bridge.py
       - python timer.py
-      - python GameObjectTimer.py
+      - python lighthouse_timer.py
       - python field_control.py
       - python heartbeat.py
       - memcached -p 12357

@@ -20,6 +20,7 @@ import random
 import os
 import settings
 import util
+import re
 import LCMNode
 
 Node = LCMNode.Node
@@ -57,8 +58,7 @@ class LighthouseTimer(LCMNode):
         self.timer = Timer()
         self.stage_name = "Setup"
         self.buttons = [False, False]
-        #self.lc.subscribe("Game_Button/Button", self.handle_control)
-        self.lc.subscribe("Game_Button[0-9]/Button", self.handle_control)
+        self.lc.subscribe(r"Button[0-9]/Button", self.handle_control)
         self.lc.subscribe("Timer/Time", self.handle_time)
         self.start_thread()
         self.counter = random.randint(0, 1000000)
@@ -69,49 +69,59 @@ class LighthouseTimer(LCMNode):
             msg = forseti2.LighthouseTime()
 
             if self.stage_name in ["Setup", "Paused", "End"]:
+                self.timer.pause()
+                msg.enabled = False
                 msg.available = False
+                msg.counter = self.counter
                 msg.time_left = 0
-                self.lc.publish('lighthouseTimer/LighthouseTime', msg.encode())
+                self.lc.publish('LighthouseTimer/LighthouseTime', msg.encode())
                 continue
                 
             if self.buttons[0]:
                 self.buttons[0] = False
                 if not self.timer.running:
+                    self.counter += 1
                     self.timer.start()
-                    msg.buttonIndex = 0
+                    msg.button_index = 0
 
             if self.buttons[1]:
                 self.buttons[1] = False
                 if not self.timer.running:
+                    self.counter += 1
                     self.timer.start()
-                    msg.buttonIndex = 1
+                    msg.button_index = 1
+            self.clear()
 
             lighthouse_time = self.timer.time()
             time_left = 10*1000 - lighthouse_time*1000
             if time_left <= 0:
                 self.timer.pause()
-
+            
+            msg.enabled = True
+            msg.counter = self.counter
             if not self.timer.running:
                 msg.time_left = 10*1000
-                self.counter += 1
-                msg.counter = self.counter
                 msg.available = True
                 self.lc.publish('LighthouseTimer/LighthouseTime', msg.encode())
             else:
                 msg.time_left = time_left
-                msg.is_lighthouse_on = False
+                msg.available = False
                 self.lc.publish('LighthouseTimer/LighthouseTime', msg.encode())
-         
+
+    def press(self, index, pressed):
+        if pressed:
+            self.buttons[index] = True
+
+    def clear(self):
+        self.buttons = [False, False]
 
     def handle_control(self, channel, data):
         msg = forseti2.Button.decode(data)
-        #msg = forseti2.Button1.decode(data)
-        #TODO: Parse channel into two to pass into the arrays, 
-        # using if statements 
-        self.buttons[0] = msg.button.pressed
-        self.buttons[1] = msg.button.pressed
+        match = re.match(r"Button([0-9])/Button", channel)
+        if match:
+            self.press(int(match.groups()[0]), msg.pressed)
 
-    def handle_time(self,channel,data):
+    def handle_time(self, channel, data):
         msg = forseti2.Time.decode(data)
         self.stage_name = msg.stage_name
 
