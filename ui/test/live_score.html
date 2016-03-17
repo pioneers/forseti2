@@ -1,0 +1,93 @@
+<html>
+    <body>
+        <h1>Live Score</h1>
+    
+        <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+        <script type="text/javascript" src="lcm_ws_bridge.js"></script>
+        <script type="text/javascript" charset="utf-8">
+            $(document).ready(function() {
+                var start = new Date()
+                var start_secs = Math.floor(start.getTime() / 1000)
+                start.setMilliseconds(0)
+
+                //console.log('http://' + document.domain + ':' + location.port + "/")
+                var addr = 'localhost'
+                var port = '8000'
+                var uri = '/'
+                var autonomous = true
+                var score = {}
+                //var ws = new WebSocket("ws://" + addr + ":" + port + uri);
+                lcm = new LCM("ws://" + addr + ":" + port + uri)
+                lcm.on_ready(function() {
+                    lcm.subscribe("Timer/Time", "Time", function(msg) {
+                        switch (msg.stage) {
+                            case "Setup":
+                            case "Autonomous":
+                            case "Pause":
+                                autonomous = false;
+                                break;
+                            case "Teleop":
+                            case "End":
+                                autonomous = true;
+                                break;
+                        }
+                    });
+                    lcm.subscribe("LiveScore/LiveScore", "LiveScore", function(msg) {
+                        if (JSON.stringify(score) != JSON.stringify(msg)){
+                            $("#score").html(JSON.stringify(msg, null, 4));
+                            score = msg;
+                            console.log(score);
+                        }
+                    });
+
+                });
+                $("#send_diff").click(function() {
+                    msg = JSON.parse($("#delta").val())
+                    msg.__type__ = "LiveScore";
+                    lcm.publish("LiveScore/ScoreDelta", msg);
+                });
+
+
+                //renderAll()          
+            })
+
+        </script>
+        <button id="send_diff">Start Game</button>
+        <checkbox id="auto">Automatically set matchnumber and game mode
+        <div id = "score"></div><textarea id = "delta" rows="100" cols="80">{
+    "water_autonomous": [
+        0,
+        0,
+        0,
+        0
+    ],
+    "match_number": 0,
+    "water_teleop": [
+        0,
+        0,
+        0,
+        0
+    ],
+    "treasure_autonomous": [
+        0,
+        0,
+        0,
+        0
+    ],
+    "treasure_teleop": [
+        0,
+        0,
+        0,
+        0
+    ],
+    "pearl": [
+        0,
+        0,
+        0,
+        0
+    ]
+}</textarea>
+        
+    </body>
+</html>

@@ -20,6 +20,7 @@ import os
 import settings
 import util
 import LCMNode
+from operator import add
 
 Node = LCMNode.Node
 LCMNode = LCMNode.LCMNode
@@ -72,10 +73,11 @@ class Period(object):
 
 class MatchTimer(LCMNode):
 
-    def __init__(self, lc, robot_controller):
+    def __init__(self, lc, robot_controller, live_score_server):
         self.stage_ended = False
         self.lc = lc
         self.robot_controller = robot_controller
+        self.live_score_server = live_score_server
         self.stages = [Period('Setup', 0),
             Period('Autonomous', settings.AUTONOMOUS_LENGTH_SECONDS, True), Period('Paused', 0),
             Period('Teleop', settings.TELEOP_LENGTH_SECONDS, True), Period('End', 0)]
@@ -87,11 +89,12 @@ class MatchTimer(LCMNode):
         self.start_thread()
         self.on_stage_change(None, self.stages[0])
 
-    def reset(self):
+    def reset(self, match_number):
         self.stage_index = 0
         self.match_timer.reset()
         self.stage_timer.reset()
         self.robot_controller.reset()
+        self.live_score_server.reset(match_number)
         self.on_stage_change(self.stages[self.stage_index], self.stages[0])
         self.stage_ended = True
 
@@ -148,6 +151,7 @@ class MatchTimer(LCMNode):
             msg.stage_name = self.current_stage().name
             self.lc.publish('Timer/Time', msg.encode())
             self.robot_controller.publish()
+            self.live_score_server.publish()
 
     def handle_control(self, channel, data):
         msg = forseti2.TimeControl.decode(data)
@@ -163,7 +167,7 @@ class MatchTimer(LCMNode):
     def handle_init(self, channel, data):
         print("match init received")
         msg = forseti2.Match.decode(data)
-        self.reset()
+        self.reset(msg.match_number)
 
 
 # handles business logic of robot state
@@ -261,11 +265,75 @@ class RobotController(object):
             msg.estop, msg.autonomous, msg.enabled = robot.state
             self.lc.publish("%s/RobotControl" % channel, msg.encode())
 
+
+class LiveScoreState(object):
+
+    def __init__(self, msg=None):
+        self.match_number = 0
+        self.pearl = [0, 0, 0, 0]
+        self.water_autonomous = [0, 0, 0, 0]
+        self.treasure_autonomous = [0, 0, 0, 0]
+        self.water_teleop = [0, 0, 0, 0]
+        self.treasure_teleop = [0, 0, 0, 0]
+        if msg:
+            self.match_number = msg.match_number
+            self.pearl = list(msg.pearl)
+            self.water_autonomous = list(msg.water_autonomous)
+            self.treasure_autonomous = list(msg.treasure_autonomous)
+            self.water_teleop = list(msg.water_teleop)
+            self.treasure_teleop = list(msg.treasure_teleop)
+
+    def __iadd__(self, other):
+        if type(other) != type(self):
+            raise Exception("Invalid type...")
+        if self.match_number != other.match_number:
+            print("mismatched match numbers: %d server, %d client" % (self.match_number, other.match_number))
+            return
+        attributes = ["pearl", "water_autonomous", "treasure_autonomous", "water_teleop", "treasure_teleop"]
+        # element_wise addition
+        for attr in attributes:
+            setattr(self, attr, map(add, getattr(self, attr), getattr(other, attr)))
+        return self
+
+    def reset(self, match_number):
+        self.match_number = match_number
+        self.pearl = [0, 0, 0, 0]
+        self.water_autonomous = [0, 0, 0, 0]
+        self.treasure_autonomous = [0, 0, 0, 0]
+        self.water_teleop = [0, 0, 0, 0]
+        self.treasure_teleop = [0, 0, 0, 0]
+
+    def as_lcm(self):
+        msg = forseti2.LiveScore()
+        for attribute in ["match_number", "pearl", "water_autonomous", "treasure_autonomous", "water_teleop", "treasure_teleop"]:
+            setattr(msg, attribute, getattr(self, attribute))
+        return msg
+
+class LiveScoreServer(object):
+
+    def __init__(self, lc):
+        self.score = LiveScoreState()
+        self.lc = lc
+        self.lc.subscribe("LiveScore/ScoreDelta", self.handle_delta)
+
+    def reset(self, match_number):
+        self.score.reset(match_number)
+        self.publish()
+
+    def handle_delta(self, channel, data):
+        msg = forseti2.LiveScore.decode(data)
+        self.score += LiveScoreState(msg)
+        self.publish()
+
+    def publish(self):
+        self.lc.publish("LiveScore/LiveScore", self.score.as_lcm().encode())
+
 def main():
     lc = lcm.LCM(settings.LCM_URI)
     robot_controller = RobotController(lc, ["Robot0", "Robot1", "Robot2", "Robot3"])
-    timer = MatchTimer(lc, robot_controller)
-    timer.run()
+    live_score_server = LiveScoreServer(lc)
+    match_timer = MatchTimer(lc, robot_controller, live_score_server)
+    match_timer.run()
 
 
 if __name__ == '__main__':
