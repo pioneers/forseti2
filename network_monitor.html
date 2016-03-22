@@ -1,0 +1,105 @@
+<html>
+    <body>
+        <h1>Network Monitor</h1>
+    
+        <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+        <script type="text/javascript" src="lcm_ws_bridge.js"></script>
+        <script type="text/javascript" charset="utf-8">
+            $(document).ready(function() {
+                var start = new Date()
+                var start_secs = Math.floor(start.getTime() / 1000)
+                start.setMilliseconds(0)
+
+                //console.log('http://' + document.domain + ':' + location.port + "/")
+                var addr = 'localhost'
+                var port = '8000'
+                var uri = '/'
+                //var ws = new WebSocket("ws://" + addr + ":" + port + uri);
+                lcm = new LCM("ws://" + addr + ":" + port + uri)
+
+                channels = {
+
+                    "piemos/Control": "ControlData","Timer/Time": "Time", "Robot[0-9]+/RobotControl": "RobotControl", "LighthouseTimer/LighthouseTime": "LighthouseTime", "Game_Button/Button":"Button"
+                    , "Game_Motor/Motor" : "LighthouseTime"
+                }
+                data = {}
+                dataPoints = {}
+                charts = {}
+                for (var channel in channels) {
+                    data[channel] = []
+                    dataPoints[channel] = []
+                    data[channel][0] = {x: start, y:0}
+                    $("#charts").append("<div id='" + channel + "'style='height: 260px; width: 70%;'></div>")
+                    var chart = new CanvasJS.Chart(channel,{
+                        title :{
+                            text: channel
+                        },          
+                        data: [{
+                            type: "line",
+                            dataPoints: dataPoints[channel] 
+                        }]
+                    });
+                    console.log(chart)
+                    charts[channel] = chart
+                }
+                lcm.on_ready(function() {
+                    var temp = {"Timer/Time":0, "piemos/Control":0}
+                    for (var channel in channels) {
+                        (function(channel){
+                            handler = function(msg) {
+                                curr = new Date()
+                                curr.setMilliseconds(0)
+                                index = Math.floor(curr.getTime() / 1000) - start_secs
+                                if (data[channel][index] == undefined) {                                
+                                    data[channel][index] = {x: curr, y:0}
+                                }
+                                data[channel][index].y++
+                            }
+                            lcm.subscribe(channel, channels[channel], handler)
+                        })(channel)
+                    }
+
+                })
+
+                var updateInterval = 200;
+                var dataLength = 60; // number of dataPoints visible at any point
+
+                var renderAll = function () {
+                    // count is number of times loop runs to generate random dataPoints.
+                    
+                    // for (var channel in channels) {
+                    //     for (var i = data[channel].length; i > dataLength; i--) {
+                    //         data[channel].shift()
+                    //     }
+                    // }
+                    for (var channel in charts) {
+                        var start_index = data[channel].length - dataLength
+                        if (start_index < 0) {
+                            start_index = 0;
+                        }
+                        var samples = data[channel].slice(start_index)
+
+                        for (var i = 0; i < samples.length; i++) {
+                            if (samples[i] != undefined) {
+                                dataPoints[channel][i] = samples[i]
+                            } else {
+                                time = new Date()
+                                time.setTime(start.getTime())
+                                time.setSeconds(time.getSeconds + start_index + i)
+                                dataPoints[channel][i] = {x: time, y:0}
+                            }
+                        }
+                        charts[channel].render()
+                    }
+                }
+                setInterval(renderAll, updateInterval)      
+                //renderAll()          
+            })
+
+        </script>
+        <div id="charts"></div>
+        <button onclick="start_game();">Start Game</button>
+    </body>
+</html>
