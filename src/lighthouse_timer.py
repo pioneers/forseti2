@@ -75,6 +75,7 @@ class LighthouseTimer(LCMNode):
                 msg.counter = self.counter
                 msg.time_left = 0
                 self.lc.publish('LighthouseTimer/LighthouseTime', msg.encode())
+                self.clear()
                 continue
                 
             if self.buttons[0]:
