@@ -74,6 +74,8 @@ class Period(object):
 class MatchTimer(LCMNode):
 
     def __init__(self, lc, robot_controller, live_score_server):
+        self.match = None
+        self.match_number = -1
         self.stage_ended = False
         self.lc = lc
         self.robot_controller = robot_controller
@@ -90,6 +92,7 @@ class MatchTimer(LCMNode):
         self.on_stage_change(None, self.stages[0])
 
     def reset(self, match_number):
+        self.match_number = match_number
         self.stage_index = 0
         self.match_timer.reset()
         self.stage_timer.reset()
@@ -145,11 +148,14 @@ class MatchTimer(LCMNode):
             time.sleep(0.3)
             self.check_for_stage_change()
             msg = forseti2.Time()
+            msg.match_number = self.match_number
             msg.game_time_so_far = self.match_timer.time() * 1000
             msg.stage_time_so_far = self.stage_timer.time() * 1000
             msg.total_stage_time = self.current_stage().length * 1000
             msg.stage_name = self.current_stage().name
             self.lc.publish('Timer/Time', msg.encode())
+            if self.match:
+                self.lc.publish('Timer/Match', self.match.encode())
             self.robot_controller.publish()
             self.live_score_server.publish()
 
@@ -168,6 +174,7 @@ class MatchTimer(LCMNode):
         print("match init received")
         msg = forseti2.Match.decode(data)
         self.reset(msg.match_number)
+        self.match = msg
 
 
 # handles business logic of robot state
@@ -288,7 +295,7 @@ class LiveScoreState(object):
             raise Exception("Invalid type...")
         if self.match_number != other.match_number:
             print("mismatched match numbers: %d server, %d client" % (self.match_number, other.match_number))
-            return
+            return self
         attributes = ["pearl", "water_autonomous", "treasure_autonomous", "water_teleop", "treasure_teleop"]
         # element_wise addition
         for attr in attributes:
