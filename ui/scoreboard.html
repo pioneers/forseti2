@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>Live Scoring</title>
+    <title>Scoreboard</title>
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
     <!-- Latest compiled and minified CSS -->
@@ -13,9 +13,12 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
     <script type="text/javascript" src="lcm_ws_bridge.js"></script>
     <style>
-    .progress {
+    .progress, .progress-bar {
         text-align: center;
+        transition: width 0.3s linear !important;
+
     }
+
     
     .progress span {
         position: absolute;
@@ -319,9 +322,31 @@
 
 <body>
     <!-- <button id="send_diff">Start Game</button> -->
+    <nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand pull-left" href="../index.html"><img alt="Brand" src="favicon.ico"></a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Scoreboard <span class="sr-only">(current)</span></a></li>
+        <li><a href="live_score.html">Live Scoring</a></li>
+        <li><a href="network_monitor.html">Network Monitor</a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
     <div class="container">
-        <h1>Live Scoring <small><span class="glyphicon glyphicon-heart heartbeat" aria-hidden="true"></span></small></h1>
-        <h2>Match State</h2>
+        <h1>Scoreboard<small><span class="glyphicon glyphicon-heart heartbeat" aria-hidden="true"></span></small></h1>
         <div class="row">
             <div class="col-xs-12 col-md-12">
                 <div class="row">
@@ -373,83 +398,6 @@
                         <span>Offline</span>
                     </div>
                 </div>
-            </div>
-        </div>
-        <h2>Settings</h2>
-        <div class="checkbox">
-            <label>
-                <input type="checkbox" class="auto" checked="">Automatically Set Match Number and Phase</label>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="input-group">
-                    <span class="input-group-addon">Match Number</span>
-                    <input type="match" class="form-control match" placeholder="Offine" aria-describedby="basic-addon1">
-                </div>
-            </div>
-            <div class="col-md-3 col-md-offset-0">
-                <select class="form-control phase">
-                    <option value="Offline" disabled selected>Phase</option>
-                    <option value="Autonomous">Autonomous</option>
-                    <option value="Teleop">Teleop</option>
-                </select>
-            </div>
-            <div class="col-md-3 col-md-offset-0">
-                <div class="input-group">
-                    <span class="input-group-addon">ws://</span>
-                    <input type="text" class="form-control" id="address" placeholder="server address" value="localhost" aria-describedby="basic-addon2">
-                    <span class="input-group-addon" id="basic-addon2">:8000</span>
-                </div>
-            </div>
-        </div>
-        <h2>Balls Scored</h2>
-        <div class="row">
-            <div class="col-md-3">
-                <h3>Blue Alliance</h3>
-                <ul class="list-group">
-                    <li class="list-group-item blue" id="gold">
-                        <span class="">Gold</span>
-                        <span class="badge score-teleop">T: 0</span>
-                        <span class="badge score-autonomous">A: 0</span>
-                        <div class="btn-group btn-group-xs" role="group">
-                            <button class="btn btn-success inc">+</button>
-                            <button class="btn btn-danger dec">-</button>
-                        </div>
-                    </li>
-                    <li class="list-group-item blue" id="pirate">
-                        Pirate
-                        <div class="btn-group btn-group-xs" role="group">
-                            <button class="btn btn-success inc">+</button>
-                            <button class="btn btn-danger dec">-</button>
-                        </div>
-                        <span class="badge score-teleop">T: 0</span>
-                        <span class="badge score-autonomous">A: 0</span>
-                    </li>
-                </ul>
-            </div>
-            <div class="col-md-3 col-md-offset-0">
-                <h3>Gold Alliance</h3>
-                <ul class="list-group">
-                    <li class="list-group-item gold" id="gold">
-
-                        <span class="">Gold</span>
-                        <div class="btn-group btn-group-xs" role="group">
-                            <button class="btn btn-success inc">+</button>
-                            <button class="btn btn-danger dec">-</button>
-                        </div>
-                        <span class="badge score-teleop">T: 0</span>
-                        <span class="badge score-autonomous">A: 0</span>
-                    </li>
-                    <li class="list-group-item gold" id="pirate">
-                        Pirate
-                        <div class="btn-group btn-group-xs" role="group">
-                            <button class="btn btn-success inc">+</button>
-                            <button class="btn btn-danger dec">-</button>
-                        </div>
-                        <span class="badge score-teleop">T: 0</span>
-                        <span class="badge score-autonomous">A: 0</span>
-                    </li>
-                </ul>
             </div>
         </div>
     </div>

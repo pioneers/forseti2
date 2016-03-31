@@ -41,12 +41,15 @@ class Button(Node):
 
     def _loop(self):
         while True:
-            time.sleep(0.05)
+            time.sleep(0.1)
             self.check_button()
             if time.time() - self.start_time > .3:
+                print(self.pin.read())
                 self.start_time = time.time()
                 #print(self.pressed)
                 self.button.pressed = self.pressed
+                # if self.button.pressed:
+                #     print("pressed! %d" % random.randint(0, 100))
                 self.clear()
                 self.lc.publish(self.send_channel, self.button.encode())
 

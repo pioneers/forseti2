@@ -51,7 +51,6 @@ class Timer(object):
         self.current_time = time.time() - self.start_time
         return self
 
-#TODO: Subscribe to Peter's two button channels. Publish which team pushed button
 class LighthouseTimer(LCMNode):
     def __init__(self, lc):
         self.lc = lc
@@ -79,14 +78,12 @@ class LighthouseTimer(LCMNode):
                 continue
                 
             if self.buttons[0]:
-                self.buttons[0] = False
                 if not self.timer.running:
                     self.counter += 1
                     self.timer.start()
                     msg.button_index = 0
 
             if self.buttons[1]:
-                self.buttons[1] = False
                 if not self.timer.running:
                     self.counter += 1
                     self.timer.start()

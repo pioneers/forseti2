@@ -10,7 +10,7 @@ windows:
       - python lcm_ws_bridge.py
       - python timer.py
       - python lighthouse_timer.py
-      - python field_control.py -b 0
+      - python field_control.py -b 0 /dev/cu.usbmodem1411
       - python heartbeat.py
       - memcached -p 12357
       - commands:
