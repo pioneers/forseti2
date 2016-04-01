@@ -10,20 +10,10 @@ windows:
       - python lcm_ws_bridge.py
       - python timer.py
       - python lighthouse_timer.py
-      - python status_lights_driver.py /dev/cu.usbserial-AH01KY1G
-      - python field_control.py -b 0 /dev/tty.usbmodem1421
+      - echo "for status_lights driver"
+      - echo "for buttons"
+      - python field_control.py -l 0 -l 1
       - python heartbeat.py
-      - memcached -p 12357
-      - commands:
-        - cd ../../daemon/runtime
-        - export PYTHONPATH=$PYTHONPATH:../../hibike
-        - python runtime.py
-      - commands:
-        - cd ../../daemon/dawn
-        - npm run-script watch
-      - commands:
-        - cd ../../daemon/dawn
-        - npm start
       - python match_tester.py
       - python test_button.py
       - python estop.py

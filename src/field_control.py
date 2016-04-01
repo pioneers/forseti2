@@ -20,12 +20,12 @@ LCMNode = LCMNode.LCMNode
 
 class Button(Node):
 
-    def __init__(self, index, arduino_path=None, use_arduino=False):
+    def __init__(self, lc, index, arduino_path=None, use_arduino=False):
         self.use_arduino = use_arduino
         self.send_channel = "Button%d/Button" % index
         self.button = forseti2.Button()
         self.pressed = False
-        self.lc = lcm.LCM(settings.LCM_URI)
+        self.lc = lc
         if self.use_arduino:
             self.ser = serial.Serial(arduino_path, 9600)
             # self.board = pyfirmata.Arduino(arduino_path)
@@ -39,7 +39,8 @@ class Button(Node):
 
     def check_button(self):
         if self.use_arduino and self.ser.inWaiting() > 0:
-            reading = int(self.ser.read(self.ser.inWaiting())[-1])
+            byte = self.ser.read(self.ser.inWaiting())[-1]
+            reading = int(str(byte))
             self.update(1-reading)
 
 
@@ -66,20 +67,19 @@ class Button(Node):
 
 
 
-class Motor(LCMNode):
+class Motor(Node):
 
-    def __init__(self, index, grizzly_addr=None, use_grizzly=False):
+    def __init__(self, lc, index, grizzly_addr=None, use_grizzly=False):
         self.index = index
         self.send_channel = "Motor%d/Motor" % index
         self.receive_channel = "LighthouseTimer/LighthouseTime"
         self.motor = forseti2.Motor()
         self.motor.activated = False
-        self.lc = lcm.LCM(settings.LCM_URI)
+        self.lc = lc
         self.lc.subscribe(self.receive_channel, self.handle_control)
         self.counter = None 
         self.start_time = time.time()
-        self.start_thread()
-        self.start_thread(target=self.run())
+        self.start_thread(target=self.run)
         if use_grizzly:
             self.grizzly = grizzly.Grizzly(grizzly_addr)
             self.grizzly.set_mode(ControlMode.NO_PID, DriveMode.DRIVE_BRAKE)
@@ -122,13 +122,13 @@ class Motor(LCMNode):
             self.lc.publish(self.send_channel, self.motor.encode())
             time.sleep(.03)
 
-class LightHouseStatusLight(LCMNode):
+class LightHouseStatusLight(Node):
 
-    def __init__(self, index):
+    def __init__(self, lc, index):
         self.index = index
         self.receive_channel = "LighthouseTimer/LighthouseTime"
-        self.send_channel = "StatusLight%d/StatusLight"% (index + 4)
-        self.lc = lcm.LCM(settings.LCM_URI)
+        self.send_channel = "StatusLight%d/StatusLight" % (index + 4)
+        self.lc = lc
         self.lc.subscribe(self.receive_channel, self.handle_lighthouse_time)
         self.lc.subscribe("Button%d/Button" % index, self.handle_button)
         self.counter = None 
@@ -140,8 +140,7 @@ class LightHouseStatusLight(LCMNode):
         self.green = False
         self.buzzer = False
         self.green_timeout = 3
-        self.start_thread()
-        self.start_thread(target=self.run())
+        self.start_thread(target=self.run)                        
     # def deactivateStatusLight(self):
     #     if self.statusLight.activated:
     #         self.statusLight.activated = False
@@ -162,7 +161,9 @@ class LightHouseStatusLight(LCMNode):
     def handle_lighthouse_time(self, channel, data):
         msg = forseti2.LighthouseTime.decode(data)
         if msg.enabled and not msg.available:
-            if msg.button_index == self.index: 
+
+
+            if msg.button_index == self.index:
                 if msg.counter != self.counter:
                     self.counter = msg.counter
                     self.green = True
@@ -200,17 +201,23 @@ class LightHouseStatusLight(LCMNode):
 
 
 def main():
+    lc = lcm.LCM(settings.LCM_URI)
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--button', action='append', nargs='+', metavar=('index', 'arduino_path'), help="create a button with optional arduino location")
     parser.add_argument('-m', '--motor', action='append', nargs='+', metavar=('index', 'grizzly_id'), help="create a motor with optional grizzly id")
+    parser.add_argument('-l', '--light', action='append', nargs='+', metavar=('index'), help="create a node that sends signals to the status light driver for specified lighthouse")
     args = parser.parse_args()
     if args.button:
-        buttons = [Button(int(button[0]), button[1], True) if len(button) > 1 else Button(int(button[0])) for button in args.button]
+        buttons = [Button(lc, int(button[0]), button[1], True) if len(button) > 1 else Button(int(button[0])) for button in args.button]
     if args.motor:
-        motors = [Motor(int(motor[0]), motor[1], True) if len(motor) > 1 else Motor(int(motor[0])) for motor in args.motor]
-    lights = [LightHouseStatusLight(0), LightHouseStatusLight(1)]
+        motors = [Motor(lc, int(motor[0]), motor[1], True) if len(motor) > 1 else Motor(int(motor[0])) for motor in args.motor]
+    if args.light:
+        lights = [LightHouseStatusLight(lc, int(light[0])) for light in args.light]
     while True:
-        time.sleep(1)
+        lc.handle()
+        time.sleep(.01)
+
     #button0 = Button(0, "/dev/tty.usbmodem1421", True)
     #buttons = [Button(i) for i in range(2)] #automatically starts looping
     #motors = [Motor(0, 0, True), Motor(1, 1, False)]

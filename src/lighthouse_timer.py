@@ -57,6 +57,7 @@ class LighthouseTimer(LCMNode):
         self.timer = Timer()
         self.stage_name = "Setup"
         self.buttons = [False, False]
+        self.button_index = 0
         self.lc.subscribe(r"Button[0-9]/Button", self.handle_control)
         self.lc.subscribe("Timer/Time", self.handle_time)
         self.start_thread()
@@ -81,13 +82,13 @@ class LighthouseTimer(LCMNode):
                 if not self.timer.running:
                     self.counter += 1
                     self.timer.start()
-                    msg.button_index = 0
+                    self.button_index = 0
 
             if self.buttons[1]:
                 if not self.timer.running:
                     self.counter += 1
                     self.timer.start()
-                    msg.button_index = 1
+                    self.button_index = 1
             self.clear()
 
             lighthouse_time = self.timer.time()
@@ -97,6 +98,7 @@ class LighthouseTimer(LCMNode):
             
             msg.enabled = True
             msg.counter = self.counter
+            msg.button_index = self.button_index
             if not self.timer.running:
                 msg.time_left = 10*1000
                 msg.available = True
