@@ -1,0 +1,8 @@
+package forseti2;
+
+struct StatusLight {
+    boolean red;
+    boolean yellow;
+    boolean green;
+    boolean buzzer;
+}

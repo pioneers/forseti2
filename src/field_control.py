@@ -12,6 +12,7 @@ import settings
 import util
 import LCMNode
 import grizzly
+import serial
 import pyfirmata
 
 Node = LCMNode.Node
@@ -26,25 +27,28 @@ class Button(Node):
         self.pressed = False
         self.lc = lcm.LCM(settings.LCM_URI)
         if self.use_arduino:
-            self.board = pyfirmata.Arduino(arduino_path)
-            self.pin = self.board.get_pin('d:4:i')
-            self.it = pyfirmata.util.Iterator(self.board)
-            self.it.start()
-            self.pin.enable_reporting()
+            self.ser = serial.Serial(arduino_path, 9600)
+            # self.board = pyfirmata.Arduino(arduino_path)
+            # self.pin = self.board.get_pin('d:4:i')
+            # self.it = pyfirmata.util.Iterator(self.board)
+            # self.it.start()
+            #self.pin.enable_reporting()
         self.start_thread()
         self.start_time = time.time()
 
 
     def check_button(self):
-        if self.use_arduino:
-            self.update(self.pin.read())
+        if self.use_arduino and self.ser.inWaiting() > 0:
+            reading = int(self.ser.read(self.ser.inWaiting())[-1])
+            self.update(1-reading)
+
 
     def _loop(self):
         while True:
             time.sleep(0.1)
             self.check_button()
-            if time.time() - self.start_time > .3:
-                print(self.pin.read())
+            if time.time() - self.start_time > .1:
+                #print(self.pin.read())
                 self.start_time = time.time()
                 #print(self.pressed)
                 self.button.pressed = self.pressed
@@ -118,76 +122,82 @@ class Motor(LCMNode):
             self.lc.publish(self.send_channel, self.motor.encode())
             time.sleep(.03)
 
-class Light(LCMNode):
+class LightHouseStatusLight(LCMNode):
 
-    def __init__(self, index, arduino_path=None, use_arduino=False):
+    def __init__(self, index):
         self.index = index
         self.receive_channel = "LighthouseTimer/LighthouseTime"
-        self.statusLight = forseti2.StatusLight()
-        self.statusLight.activated = False
+        self.send_channel = "StatusLight%d/StatusLight"% (index + 4)
         self.lc = lcm.LCM(settings.LCM_URI)
-        self.lc.subscribe(self.receive_channel, self.handle_control)
+        self.lc.subscribe(self.receive_channel, self.handle_lighthouse_time)
+        self.lc.subscribe("Button%d/Button" % index, self.handle_button)
         self.counter = None 
         self.start_time = time.time()
+
+
+        self.red = False
+        self.yellow = False
+        self.green = False
+        self.buzzer = False
+        self.green_timeout = 3
         self.start_thread()
         self.start_thread(target=self.run())
-        self.use_arduino = use_arduino
-        if self.use_arduino:
-            self.board = pyfirmata.Arduino(arduino_path)
-            #Driver station light 1
-            self.pin2 = board.get_pin('d:2:p')
-            #Driver station light 2
-            self.pin3 = board.get_pin('d:3:p')
-            #Driver station light 3
-            self.pin4 = board.get_pin('d:4:p')
-            #Driver station light 4
-            self.pin5 = board.get_pin('d:5:p')
-            #Status Light 1
-            self.pin6 = board.get_pin('d:6:p')
-            #Status Light 2
-            self.pin7 = board.get_pin('d:7:p')
-
-
-    def deactivateStatusLight(self):
-        if self.statusLight.activated:
-            self.statusLight.activated = False
-            self.pin6.write(0)
-            self.pin7.write(0)
-            print(time.strftime('Status Light deactivated at %l:%M:%S %p'))
+    # def deactivateStatusLight(self):
+    #     if self.statusLight.activated:
+    #         self.statusLight.activated = False
+    #         self.pin6.write(0)
+    #         self.pin7.write(0)
+    #         print(time.strftime('Status Light deactivated at %l:%M:%S %p'))
             
-    def activateStatusLight(self):
-        if not self.statusLight.activated:
-            self.statusLight.activated = True
-            self.start_time = time.time()
-            print(time.strftime('Status Light Activated at %l:%M:%S %p'))
+    # def activateStatusLight(self):
+    #     if not self.statusLight.activated:
+    #         self.statusLight.activated = True
+    #         self.start_time = time.time()
+    #         print(time.strftime('Status Light Activated at %l:%M:%S %p'))
     
-    def check(self, timeout=10):
-        if self.statusLight.activated and time.time() - self.start_time >= timeout:
-            self.deactivate()        
+    def check_timeout(self, timeout=10):
+        if self.green and time.time() - self.start_time >= timeout:
+            self.green = False      
 
-    def handle_control(self, channel, data):
+    def handle_lighthouse_time(self, channel, data):
         msg = forseti2.LighthouseTime.decode(data)
-        # turns out there's only one shooter for now, so we can bypass this check
-        if msg.button_index == self.index or True:
-            if msg.enabled and not msg.available: 
+        if msg.enabled and not msg.available:
+            if msg.button_index == self.index: 
                 if msg.counter != self.counter:
                     self.counter = msg.counter
-                    self.activateStatusLight()
+                    self.green = True
+                    self.start_time = time.time()
             else:
-                self.deactivateStatusLight()
+                self.green = False
+            self.yellow = True
+        else:
+            self.yellow = False
+            self.green = False
+        self.update_light()
+
+    def handle_button(self, channel, data):
+        msg = forseti2.Button.decode(data)
+        if msg.pressed:
+            self.red = True
+        else:
+            self.red = False
+        self.update_light()
+
+    def update_light(self):
+        msg = forseti2.StatusLight()
+        msg.red = self.red
+        msg.yellow = self.yellow
+        msg.green = self.green
+        msg.buzzer = self.buzzer
+        self.lc.publish(self.send_channel, msg.encode())
 
     def run(self):
         start_time = time.time()
         while True:
-            self.check()
-            if self.statusLight.activated:
-                self.statusLight_glow()
-            time.sleep(.03)
+            #self.check_timeout(self.green_timeout)
+            self.update_light()
+            time.sleep(.3)
 
-    def statusLight_glow(self):
-        print("It glows!")
-        self.pin6.write(1)
-        self.pin7.write(1)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -198,6 +208,9 @@ def main():
         buttons = [Button(int(button[0]), button[1], True) if len(button) > 1 else Button(int(button[0])) for button in args.button]
     if args.motor:
         motors = [Motor(int(motor[0]), motor[1], True) if len(motor) > 1 else Motor(int(motor[0])) for motor in args.motor]
+    lights = [LightHouseStatusLight(0), LightHouseStatusLight(1)]
+    while True:
+        time.sleep(1)
     #button0 = Button(0, "/dev/tty.usbmodem1421", True)
     #buttons = [Button(i) for i in range(2)] #automatically starts looping
     #motors = [Motor(0, 0, True), Motor(1, 1, False)]

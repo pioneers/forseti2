@@ -223,3 +223,13 @@ Outputs:
 ### Audience UI ###
 
 - Like the stream overlay but as standalone webpage
+
+## Status Light Behavior ##
+
+### Lighthouse Chief Lights ##
+
+- All lights normally off
+- Red light on when button is currently pressed
+- Green light flashes for 3s when button triggers a lighthouse chief
+- Yellow light on when lighthouse on cooldown
+

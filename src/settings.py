@@ -12,6 +12,11 @@ BLUE_PIRATE = 1
 GOLD_GOLD = 2
 GOLD_PIRATE = 3
 
+# enumeration of driver station lights
+STATION_LIGHTS = [0, 1, 2, 3]
+
+LIGHTHOUSE_CHIEF_LIGHTS = [4, 5]
+
 # # Servo angular values for the two states
 # SERVO_HELD = 10
 # SERVO_RELEASED = 90
