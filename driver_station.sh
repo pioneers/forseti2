@@ -15,7 +15,7 @@ git checkout 2016
 cd ..
 
 # get daemon
-git clone https://github.com/rjli13/daemon.gitt
+git clone https://github.com/rjli13/daemon.git
 cd daemon
 git checkout field-control
 cd ..
