@@ -135,7 +135,7 @@ class MatchTimer(LCMNode):
         self.match_timer.pause()
 
     def reset_stage(self):
-        self.match_timer.stop()
+        #self.match_timer.stop()
         self.stage_timer.reset()
 
     def reset_match(self):

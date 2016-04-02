@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>Scoreboard</title>
+    <title>Match Control</title>
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
     <!-- Latest compiled and minified CSS -->
@@ -13,12 +13,9 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
     <script type="text/javascript" src="lcm_ws_bridge.js"></script>
     <style>
-    .progress, .progress-bar {
+    .progress {
         text-align: center;
-        transition: width 0.3s linear !important;
-
     }
-
     
     .progress span {
         position: absolute;
@@ -31,7 +28,7 @@
     }
     
     .heartbeat {
-        color: red;
+        color: red !important ;
     }
     
     .heartbeat.contracted {
@@ -183,6 +180,23 @@
 
 
         }
+        function makeMatch() {
+            var matchNumber = parseInt($("#new-match-num").val())
+            var teamNames = [$("#blue-0-name").val(), $("#blue-1-name").val(), $("#gold-0-name").val(), $("#gold-1-name").val()]
+            var teamNumbers = [parseInt($("#blue-0-number").val()), parseInt($("#blue-1-number").val()), parseInt($("#gold-0-number").val()), parseInt($("#gold-1-number").val())]
+            msg = {
+                __type__: "Match",
+                match_number: matchNumber,
+                team_names: teamNames,
+                team_numbers: teamNumbers
+            }
+            lcm.publish("Match/Init", msg)
+        }
+        function sendCommand(command) {
+            msg = {__type__: "TimeControl", command_name: command}
+            console.log(msg)
+            lcm.publish("Timer/Control", msg)
+        }
 
         function updateLiveScoreBreakdown() {
             for (alliance in alliances) {
@@ -273,6 +287,23 @@
         $(".match").keypress(function() {
             $(".auto").prop("checked", false)
         })
+        $("#create-match").click(makeMatch)
+
+
+        $("#match-start").click(function() {
+            sendCommand("start")
+        })
+        $("#match-pause").click(function() {
+            sendCommand("pause")
+        })
+        $("#match-reset").click(function() {
+            sendCommand("reset_match")
+        })
+        $("#match-reset-stage").click(function() {
+            sendCommand("reset_stage")
+        })
+
+
         $("#address").change(function() {
                 makeLCM($("#address").val())
             })
@@ -338,17 +369,18 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="scoreboard.html">Scoreboard</a></li>
+        <li><a href="scoreboard.html">Scoreboard</a></li>
         <li><a href="live_score.html">Live Scoring</a></li>
-        <li><a href="match_control.html">Match Control</a></li>
+        <li class="active"><a href="match_control.html">Match Control</a></li>
         <li><a href="network_monitor.html">Network Monitor</a></li>        
       </ul>
     </div><!-- /.navbar-collapse -->
     
   </div><!-- /.container-fluid -->
 </nav>
+
     <div class="container">
-        <h1>Scoreboard<small><span class="glyphicon glyphicon-heart heartbeat" aria-hidden="true"></span></small></h1>
+        <h1>Match Creator <small><span class="glyphicon glyphicon-heart heartbeat" aria-hidden="true"></span></small></h1>
         <div class="row">
             <div class="col-xs-12 col-md-12">
                 <div class="row">
@@ -413,6 +445,103 @@
                 </div>
             </div>
         </div>
+        <h2>New Match Parameters</h2>
+        <div class="row">
+<div class="col-md-9"><div class="input-group">
+  <span class="input-group-addon" id="basic-addon1">Blue 0</span>
+  <input type="text"   class="form-control" id="blue-0-name" placeholder="Team name" aria-describedby="basic-addon1">
+  <input type="number" class="form-control" id="blue-0-number" placeholder="Team number" aria-describedby="basic-addon1">
+</div>
+</div> 
+<div class="col-md-9"><div class="input-group">
+  <span class="input-group-addon" id="basic-addon1">Blue 1</span>
+  <input type="text"   class="form-control" id="blue-1-name" placeholder="Team name" aria-describedby="basic-addon1">
+  <input type="number" class="form-control" id="blue-1-number" placeholder="Team number" aria-describedby="basic-addon1">
+</div>
+</div> 
+<div class="col-md-9"><div class="input-group">
+  <span class="input-group-addon" id="basic-addon1">Gold 0</span>
+  <input type="text"   class="form-control" id="gold-0-name" placeholder="Team name" aria-describedby="basic-addon1">
+  <input type="number" class="form-control" id="gold-0-number" placeholder="Team number" aria-describedby="basic-addon1">
+</div>
+</div> 
+<div class="col-md-9"><div class="input-group">
+  <span class="input-group-addon" id="basic-addon1">Gold 1</span>
+  <input type="text"   class="form-control" id="gold-1-name" placeholder="Team name" aria-describedby="basic-addon1">
+  <input type="number" class="form-control" id="gold-1-number" placeholder="Team number" aria-describedby="basic-addon1">
+</div>
+</div>
+<div class="col-md-9"><div class="input-group">
+<span class="input-group-addon" id="basic-addon1">Match Number:</span>
+  <input type="number" class="form-control" id="new-match-num"placeholder="Match number" aria-describedby="basicaddon1">
+  <span class="input-group-btn">
+    <button class="btn btn-default" id="create-match" type="button">Create Match</button>
+  </span>
+</div>
+</div><!-- /input-group -->
+
+        </div>
+<h2>Match Control</h2>
+<div class="row">
+<div class="col-md-9">
+    <div class="btn-group" role="group" aria-label="...">
+  <button type="button" class="btn btn-default" id="match-start"><span class="glyphicon glyphicon-play" aria-hidden="true"></span>Start</button>
+  <button type="button" class="btn btn-default" id="match-pause"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span>Pause</button>
+  <button type="button" class="btn btn-default" id="match-reset-stage"><span class="glyphicon glyphicon-step-backward" aria-hidden="true"></span>Reset Stage</button>
+  <button type="button" class="btn btn-default" id="match-reset"><span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span>Reset Match</button>
+
+</div>
+</div></div>
+<!--         <h2>Balls Scored</h2>
+        <div class="row">
+            <div class="col-md-3">
+                <h3>Blue Alliance</h3>
+                <ul class="list-group">
+                    <li class="list-group-item blue" id="gold">
+                        <span class="">Gold</span>
+                        <span class="badge score-teleop">T: 0</span>
+                        <span class="badge score-autonomous">A: 0</span>
+                        <div class="btn-group btn-group-xs" role="group">
+                            <button class="btn btn-success inc">+</button>
+                            <button class="btn btn-danger dec">-</button>
+                        </div>
+                    </li>
+                    <li class="list-group-item blue" id="pirate">
+                        Pirate
+                        <div class="btn-group btn-group-xs" role="group">
+                            <button class="btn btn-success inc">+</button>
+                            <button class="btn btn-danger dec">-</button>
+                        </div>
+                        <span class="badge score-teleop">T: 0</span>
+                        <span class="badge score-autonomous">A: 0</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-3 col-md-offset-0">
+                <h3>Gold Alliance</h3>
+                <ul class="list-group">
+                    <li class="list-group-item gold" id="gold">
+
+                        <span class="">Gold</span>
+                        <div class="btn-group btn-group-xs" role="group">
+                            <button class="btn btn-success inc">+</button>
+                            <button class="btn btn-danger dec">-</button>
+                        </div>
+                        <span class="badge score-teleop">T: 0</span>
+                        <span class="badge score-autonomous">A: 0</span>
+                    </li>
+                    <li class="list-group-item gold" id="pirate">
+                        Pirate
+                        <div class="btn-group btn-group-xs" role="group">
+                            <button class="btn btn-success inc">+</button>
+                            <button class="btn btn-danger dec">-</button>
+                        </div>
+                        <span class="badge score-teleop">T: 0</span>
+                        <span class="badge score-autonomous">A: 0</span>
+                    </li>
+                </ul>
+            </div>
+        </div> -->
     </div>
 </body>
 
