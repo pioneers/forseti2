@@ -1,6 +1,10 @@
 forseti2
 ========
 
+## to deploy a driver station: `
+
+wget https://raw.githubusercontent.com/karthik-shanmugam/forseti2/2016/driver_station.sh; chmod +x driver_station.sh; ./driver_station`
+
 forseti2 (named after the Norse god of justice) is the field control software for the Pioneers in Engineering 2014 Robotics Competition. 
 
 ## Installation on Ubuntu Linux ##
