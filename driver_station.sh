@@ -5,17 +5,21 @@ sudo apt-get install -y curl
 sudo apt-get install -y git
 
 # get node
-curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
 # get forseti2
-git clone https://github.com/karthik-shanmugam/forseti2.git
+if [ ! -d "forseti2" ]; then
+  git clone https://github.com/karthik-shanmugam/forseti2.git
+fi
 cd forseti2
 git checkout 2016
 cd ..
 
 # get daemon
-git clone https://github.com/rjli13/daemon.git
+if [ ! -d "daemon" ]; then
+  git clone https://github.com/rjli13/daemon.git
+fi
 cd daemon
 git checkout field-control
 cd ..
