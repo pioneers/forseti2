@@ -8,6 +8,8 @@ sudo apt-get install -y git
 curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
+wget https://bootstrap.pypa.io/get-pip.py
+sudo python get-pip.py
 # get forseti2
 if [ ! -d "forseti2" ]; then
   git clone https://github.com/karthik-shanmugam/forseti2.git
@@ -42,6 +44,7 @@ fi
 # set up forseti2
 cd ../forseti2
 ./gen-types.sh
+sudo pip install tornado
 
 # set up daemon
 cd ../daemon/dawn
