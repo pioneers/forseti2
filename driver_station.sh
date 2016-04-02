@@ -52,5 +52,5 @@ sudo npm install -g electron-prebuilt
 sudo npm install
 npm run-script build
 cd
-
+echo "sudo route add -net 224.0.0.0 netmask 240.0.0.0 dev eth0" > /etc/rc.local
 echo "Driver station deployed"
