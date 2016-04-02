@@ -28,13 +28,16 @@ cd ..
 sudo apt-get install -y build-essential
 sudo apt-get install -y libglib2.0-dev
 sudo apt-get install -y python-dev
-wget https://github.com/lcm-proj/lcm/releases/download/v1.3.1/lcm-1.3.1.zip
-unzip lcm-1.3.1
-cd lcm-1.3.1
-./configure
-make
-sudo make install
-sudo ldconfig
+
+if [ ! -d "lcm-1.3.1" ]; then
+  wget https://github.com/lcm-proj/lcm/releases/download/v1.3.1/lcm-1.3.1.zip
+  unzip lcm-1.3.1
+  cd lcm-1.3.1
+  ./configure
+  make
+  sudo make install
+  sudo ldconfig
+fi
 
 # set up forseti2
 cd ../forseti2
