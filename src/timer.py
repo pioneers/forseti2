@@ -153,6 +153,7 @@ class MatchTimer(LCMNode):
             msg.stage_time_so_far = self.stage_timer.time() * 1000
             msg.total_stage_time = self.current_stage().length * 1000
             msg.stage_name = self.current_stage().name
+            self.robot_controller.set_stage(self.current_stage().name)
             self.lc.publish('Timer/Time', msg.encode())
             if self.match:
                 self.lc.publish('Timer/Match', self.match.encode())
@@ -264,7 +265,7 @@ class RobotController(object):
 
     def handle_robot_state(self, channel, data):
         msg = forseti2.RobotState.decode(data)
-        self.robots[channel.split('/')[0]].set_state(msg.set_state)
+        self.robots[channel.split('/')[0]].set_state(msg.autonomous, msg.enabled)
 
     def publish(self):
         for channel, robot in self.robots.items():

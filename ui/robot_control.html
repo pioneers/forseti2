@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>Live Scoring</title>
+    <title>Robot Control</title>
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
     <!-- Latest compiled and minified CSS -->
@@ -240,6 +240,56 @@
             console.log(msg)
             lcm.publish("LiveScore/ScoreDelta", msg);
         }
+        function change_robot_state(robot, state) {
+            if (state == "autonomous") {
+                msg = {
+                    __type__: "RobotState",
+                    autonomous: true,
+                    enabled: true
+                }                
+            } else if (state == "teleop") {
+                msg = {
+                    __type__: "RobotState",
+                    autonomous: false,
+                    enabled: true
+                }                
+            } else if (state == "disabled") {
+                msg = {
+                    __type__: "RobotState",
+                    autonomous: true,
+                    enabled: false
+                }                
+            }
+            lcm.publish("Robot"+robot+"/RobotState", msg)
+        }
+        function make_update_robot_state(index) {
+            function update_robot_state(msg) {
+                $(".robot-" + index + "-autonomous,.robot-" + index + "-teleop,.robot-" + index + "-disabled").removeClass("active");
+                if (!msg.enabled) {
+                    $(".robot-" + index + "-disabled").addClass("active");
+                } else if (msg.autonomous) {
+                    $(".robot-" + index + "-autonomous").addClass("active");
+                } else {
+                    $(".robot-" + index + "-teleop").addClass("active");
+                }
+
+                if (msg.estop) {
+                    $(".robot-" + index + "-estop").addClass("active");
+                } else{
+                    $(".robot-" + index + "-estop").removeClass("active");
+                }
+                // console.log(".robot-" + index + "teleop")
+                // $(".robot-" + index + "teleop").addClass("active");
+            }
+            return update_robot_state;
+        }
+        function override_robot(robot, override) {
+            msg = {__type__: "Override", override: override}
+            lcm.publish("Robot" + robot + "/Override", msg)
+        }
+        function estop_robot(robot) {
+            lcm.publish("Robot" + robot + "/Estop", {__type__: "Estop", estop: true})
+        }
         $(".blue#gold .inc").click(function() {
             increment("blue", "gold", 1)
         });
@@ -270,6 +320,72 @@
         $(".match").keypress(function() {
             $(".auto").prop("checked", false)
         })
+        $(".robot-0-autonomous").click(function() {
+            change_robot_state(0, "autonomous")
+        })
+        $(".robot-0-teleop").click(function() {
+            change_robot_state(0, "teleop")
+        })
+        $(".robot-0-disabled").click(function() {
+            change_robot_state(0, "disabled")
+        })
+
+        $(".robot-1-autonomous").click(function() {
+            change_robot_state(1, "autonomous")
+        })
+        $(".robot-1-teleop").click(function() {
+            change_robot_state(1, "teleop")
+        })
+        $(".robot-1-disabled").click(function() {
+            change_robot_state(1, "disabled")
+        })
+
+        $(".robot-2-autonomous").click(function() {
+            change_robot_state(2, "autonomous")
+        })
+        $(".robot-2-teleop").click(function() {
+            change_robot_state(2, "teleop")
+        })
+        $(".robot-2-disabled").click(function() {
+            change_robot_state(2, "disabled")
+        })
+
+        $(".robot-3-autonomous").click(function() {
+            change_robot_state(3, "autonomous")
+        })
+        $(".robot-3-teleop").click(function() {
+            change_robot_state(3, "teleop")
+        })
+        $(".robot-3-disabled").click(function() {
+            change_robot_state(3, "disabled")
+        })
+
+        $(".robot-0-override").change(function() {
+            override_robot(0, this.checked)
+        })
+        $(".robot-1-override").change(function() {
+            override_robot(1, this.checked)
+        })
+        $(".robot-2-override").change(function() {
+            override_robot(2, this.checked)
+        })
+        $(".robot-3-override").change(function() {
+            override_robot(3, this.checked)
+        })
+
+        $(".robot-0-estop").click(function() {
+            estop_robot(0)
+        })
+        $(".robot-1-estop").click(function() {
+            estop_robot(1)
+        })
+        $(".robot-2-estop").click(function() {
+            estop_robot(2)
+        })
+        $(".robot-3-estop").click(function() {
+            estop_robot(3)
+        })
+
         $("#address").change(function() {
                 makeLCM($("#address").val())
             })
@@ -297,6 +413,10 @@
                 lcm.subscribe("Heartbeat/Beat", "Heartbeat", handleBeat)
                 lcm.subscribe("Timer/Match", "Match", handleMatch)
                 lcm.subscribe("LighthouseTimer/LighthouseTime", "LighthouseTime", updateLighthouse)
+                lcm.subscribe("Robot0/RobotControl", "RobotControl", make_update_robot_state(0))
+                lcm.subscribe("Robot1/RobotControl", "RobotControl", make_update_robot_state(1))
+                lcm.subscribe("Robot2/RobotControl", "RobotControl", make_update_robot_state(2))
+                lcm.subscribe("Robot3/RobotControl", "RobotControl", make_update_robot_state(3))
             }
 
             function reconnect() {
@@ -345,7 +465,7 @@
   </div><!-- /.container-fluid -->
 </nav>
     <div class="container">
-        <h1>Live Scoring <small><span class="glyphicon glyphicon-heart heartbeat" aria-hidden="true"></span></small></h1>
+        <h1>Robot Control<small><span class="glyphicon glyphicon-heart heartbeat" aria-hidden="true"></span></small></h1>
         <div class="row">
             <div class="col-xs-12 col-md-12">
                 <div class="row">
@@ -408,6 +528,94 @@
                     <span class="input-group-addon" id="basic-addon2">:8000</span>
                 </div>
             </div>
+        </div>
+        <h2>Robots</h2>
+
+        <div class="row">
+            <div class="col-md-3"><h4 class="robot-0-name">Robot 0 #000 Test School</h4></div>
+            <div class="col-md-3">
+
+                <div class="btn-group" role="group" aria-label="...">
+                  <button type="button" class="btn btn-default btn-primary robot-0-autonomous">Autonomous</button>
+                  <button type="button" class="btn btn-default btn-success robot-0-teleop">Teleop</button>
+                  <button type="button" class="btn btn-default btn-warning robot-0-disabled active">Disabled</button>
+              </div>
+          </div>
+          <div class='col-md-2'>
+          <div class="checkbox">
+            <label>
+            <input type="checkbox" class="robot-0-override">Manual Override</label>
+            </div>
+            </div>
+            <div class='col-md-1'>
+            <button type="button" class="btn btn-default btn-danger robot-0-estop">Estop</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3"><h4 class="robot-1-name">Robot 1 #111 Test School</h4></div>
+            <div class="col-md-3">
+
+                <div class="btn-group" role="group" aria-label="...">
+                  <button type="button" class="btn btn-default btn-primary robot-1-autonomous">Autonomous</button>
+                  <button type="button" class="btn btn-default btn-success robot-1-teleop">Teleop</button>
+                  <button type="button" class="btn btn-default btn-warning robot-1-disabled active">Disabled</button>
+              </div>
+          </div>
+          <div class='col-md-2'>
+          <div class="checkbox">
+            <label>
+            <input type="checkbox" class="robot-1-override">Manual Override</label>
+            </div>
+            </div>
+            <div class='col-md-1'>
+            <button type="button" class="btn btn-default btn-danger robot-1-estop">Estop</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3"><h4 class="robot-2-name">Robot 2 #222 Test School</h4></div>
+            <div class="col-md-3">
+
+                <div class="btn-group" role="group" aria-label="...">
+                  <button type="button" class="btn btn-default btn-primary robot-2-autonomous">Autonomous</button>
+                  <button type="button" class="btn btn-default btn-success robot-2-teleop">Teleop</button>
+                  <button type="button" class="btn btn-default btn-warning robot-2-disabled active">Disabled</button>
+              </div>
+          </div>
+          <div class='col-md-2'>
+          <div class="checkbox">
+            <label>
+            <input type="checkbox" class="robot-2-override">Manual Override</label>
+            </div>
+            </div>
+            <div class='col-md-1'>
+            <button type="button" class="btn btn-default btn-danger robot-2-estop">Estop</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3"><h4 class="robot-3-name">Robot 3 #333 Test School</h4></div>
+            <div class="col-md-3">
+
+                <div class="btn-group" role="group" aria-label="...">
+                  <button type="button" class="btn btn-default btn-primary robot-3-autonomous">Autonomous</button>
+                  <button type="button" class="btn btn-default btn-success robot-3-teleop">Teleop</button>
+                  <button type="button" class="btn btn-default btn-warning robot-3-disabled active">Disabled</button>
+              </div>
+          </div>
+          <div class='col-md-2'>
+          <div class="checkbox">
+            <label>
+            <input type="checkbox" class="robot-3-override">Manual Override</label>
+            </div>
+            </div>
+            <div class='col-md-1'>
+            <button type="button" class="btn btn-default btn-danger robot-3-estop">Estop</button>
+            </div>
+        </div>
+
+
         </div>
     </div>
 </body>
