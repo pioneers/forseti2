@@ -1,7 +1,12 @@
 package forseti2;
 
 struct RobotControl {
-    boolean estop;
+    // student code running on robots
+    boolean running;
+    
+    // robot set to autonomous/teleop mode  (student code can access joysticks)
     boolean autonomous;
+
+    // robot enabled (student code can write to motors)
     boolean enabled;
 }

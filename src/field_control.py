@@ -80,9 +80,12 @@ class Motor(Node):
         self.counter = None 
         self.start_time = time.time()
         self.start_thread(target=self.run)
-        if use_grizzly:
+        self.use_grizzly = use_grizzly
+        if grizzly_addr is None:
+            self.use_grizzly = False
+        if self.use_grizzly:
             self.grizzly = grizzly.Grizzly(grizzly_addr)
-            self.grizzly.set_mode(ControlMode.NO_PID, DriveMode.DRIVE_BRAKE)
+            self.grizzly.set_mode(grizzly.ControlMode.NO_PID, grizzly.DriveMode.DRIVE_BRAKE)
             self.grizzly.set_target(0)
 
     def handle_control(self, channel, data):
@@ -100,14 +103,15 @@ class Motor(Node):
         if not self.motor.activated:
             self.motor.activated = True
             self.start_time = time.time()
-            if use_grizzly:
-                self.grizzly.set_target(100)
+            if self.use_grizzly:
+                print("target set")
+                self.grizzly.set_target(10)
             print(time.strftime('Motor Activated at %l:%M:%S %p'))
 
     def deactivate(self):
         if self.motor.activated:
             self.motor.activated = False
-            if use_grizzly:
+            if self.use_grizzly:
                 self.grizzly.set_target(0)
             print(time.strftime('Motor Deactivated at %l:%M:%S %p'))
 
@@ -119,7 +123,7 @@ class Motor(Node):
         start_time = time.time()
         while True:
             self.check()
-            self.lc.publish(self.send_channel, self.motor.encode())
+            #self.lc.publish(self.send_channel, self.motor.encode())
             time.sleep(.03)
 
 class LightHouseStatusLight(Node):
@@ -211,7 +215,7 @@ def main():
     if args.button:
         buttons = [Button(lc, int(button[0]), button[1], True) if len(button) > 1 else Button(int(button[0])) for button in args.button]
     if args.motor:
-        motors = [Motor(lc, int(motor[0]), motor[1], True) if len(motor) > 1 else Motor(int(motor[0])) for motor in args.motor]
+        motors = [Motor(lc, int(motor[0]), int(motor[1]), True) if len(motor) > 1 else Motor(int(motor[0])) for motor in args.motor]
     if args.light:
         lights = [LightHouseStatusLight(lc, int(light[0])) for light in args.light]
     while True:

@@ -244,18 +244,21 @@
             if (state == "autonomous") {
                 msg = {
                     __type__: "RobotState",
+                    running: true,
                     autonomous: true,
                     enabled: true
                 }                
             } else if (state == "teleop") {
                 msg = {
                     __type__: "RobotState",
+                    running: true,
                     autonomous: false,
                     enabled: true
                 }                
             } else if (state == "disabled") {
                 msg = {
                     __type__: "RobotState",
+                    running: true,
                     autonomous: true,
                     enabled: false
                 }                

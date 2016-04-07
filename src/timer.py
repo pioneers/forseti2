@@ -144,7 +144,9 @@ class MatchTimer(LCMNode):
         self.match_timer.reset()
 
     def run(self):
+        counter = 0
         while self.stage_index < len(self.stages):
+            counter += 1
             time.sleep(0.3)
             self.check_for_stage_change()
             msg = forseti2.Time()
@@ -155,10 +157,13 @@ class MatchTimer(LCMNode):
             msg.stage_name = self.current_stage().name
             self.robot_controller.set_stage(self.current_stage().name)
             self.lc.publish('Timer/Time', msg.encode())
-            if self.match:
-                self.lc.publish('Timer/Match', self.match.encode())
-            self.robot_controller.publish()
-            self.live_score_server.publish()
+            # hack to throttle event driven channels
+            if counter == 9:
+                counter = 0
+                if self.match:
+                    self.lc.publish('Timer/Match', self.match.encode())               
+                self.robot_controller.publish()
+                self.live_score_server.publish()
 
     def handle_control(self, channel, data):
         msg = forseti2.TimeControl.decode(data)
@@ -176,15 +181,16 @@ class MatchTimer(LCMNode):
         msg = forseti2.Match.decode(data)
         self.reset(msg.match_number)
         self.match = msg
+        self.lc.publish('Timer/Match', self.match.encode())  
 
 
 # handles business logic of robot state
 # deals with emergency stop, manual override by field operators, and game state from timers
-# TODO karthik-shanmugam: should e-stopped robot be treated differently from disabled?
 class Robot(object):
 
     def __init__(self):
         self.enabled = False
+        self.running = False
         self.autonomous = True
         self.overridden = False
         self.estop = False
@@ -194,14 +200,26 @@ class Robot(object):
 
     def set_stage(self, stage_name):
         if not self.overridden:
-            if stage_name in ["Setup", "Paused", "End"]:
+            if stage_name == "Setup":
+                self.running = False
+                self.autonomous = True
                 self.enabled = False
             elif stage_name == "Autonomous":
+                self.running = True
                 self.autonomous = True
                 self.enabled = True
+            elif stage_name == "Paused":
+                self.running = True
+                self.autonomous = True
+                self.enabled = False
             elif stage_name == "Teleop":
+                self.running = True
                 self.autonomous = False
                 self.enabled = True
+            elif stage_name == "End":
+                self.running = False
+                self.autonomous = False
+                self.enabled = False
             else:
                 print("unrecognized stage: %s" % stage_name)
 
@@ -215,16 +233,18 @@ class Robot(object):
         self.overridden = override
 
     # manually set the state. only works if override is true
-    def set_state(self, autonomous, enabled):
+    def set_state(self, running, autonomous, enabled):
         if self.overridden:
+            self.running = running
             self.autonomous = autonomous
             self.enabled = enabled
 
     @property
     def state(self):
         if self.estop:
+            self.running = False
             self.enabled = False
-        return (self.estop, self.autonomous, self.enabled)
+        return (self.running, self.autonomous, self.enabled)
 
 class RobotController(object):
 
@@ -241,6 +261,7 @@ class RobotController(object):
     def reset(self):
         for robot in self.robots.values():
             robot.reset()
+        self.publish()
 
     # called when timer changes stage
     def set_stage(self, stage_name):
@@ -253,11 +274,13 @@ class RobotController(object):
         msg = forseti2.Estop.decode(data)
         for robot in self.robots.values():
             robot.emergency_stop(msg.estop)
+        self.publish()
 
     # these apply to individual robots
     def handle_robot_estop(self, channel, data):
         msg = forseti2.Estop.decode(data)
         self.robots[channel.split('/')[0]].emergency_stop(msg.estop)
+        self.publish()
 
     def handle_override(self, channel, data):
         msg = forseti2.Override.decode(data)
@@ -265,12 +288,13 @@ class RobotController(object):
 
     def handle_robot_state(self, channel, data):
         msg = forseti2.RobotState.decode(data)
-        self.robots[channel.split('/')[0]].set_state(msg.autonomous, msg.enabled)
+        self.robots[channel.split('/')[0]].set_state(msg.running, msg.autonomous, msg.enabled)
+        self.publish()
 
     def publish(self):
         for channel, robot in self.robots.items():
             msg = forseti2.RobotControl()
-            msg.estop, msg.autonomous, msg.enabled = robot.state
+            msg.running, msg.autonomous, msg.enabled = robot.state
             self.lc.publish("%s/RobotControl" % channel, msg.encode())
 
 
