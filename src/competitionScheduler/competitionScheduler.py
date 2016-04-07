@@ -1,16 +1,22 @@
 import csv
 import datetime
 
-class MatchSchedule:
+
+import lcm 
+from forseti2 import Match
+lc = lcm.LCM()
+
+class MatchSchedule(LCMNode):
   defaultMatchSchedule = "matchSchedule.csv"
   defaultTeamNumbers = "teamNumbers.csv"
 
-  def __init__(self, matchScheduleFile=defaultMatchSchedule, teamNumbersFile=defaultTeamNumbers):
+  def __init__(self, lc, matchScheduleFile=defaultMatchSchedule, teamNumbersFile=defaultTeamNumbers):
+    self.lc = lc
     self.matches = [] # team, team, team, team, time, blueScore, goldScore
     self.labels = []
 
     self.numberToTeam = {}
-    self.teamToNumber = {}
+    self.teamNameToTeam = {}
 
     self.teamRankings = {} # Key: team number -- Value: number:team, ranking points, 
                       # qualification points, wins, ties, losses
@@ -21,19 +27,7 @@ class MatchSchedule:
       scheduleReader = csv.reader(csvfile, delimiter=',')
       labels = scheduleReader.next()
       for match in scheduleReader:
-        match += [0, 0, 0]
-        self.matches.append(match)
-
-    with open(teamNumbersFile, 'r') as csvfile:
-      teamNumbersReader = csv.reader(csvfile, delimiter=',')
-      _ = teamNumbersReader.next()
-      for number, team in teamNumbersReader:
-        number = int(number)
-        self.numberToTeam[number] = team
-        self.teamToNumber[team] = number
-
-    for number, team in numberToTeam.iteritems():
-      self.teamRankings[number] = [("%s:%s" % (number, team))] + [0]*5
+        self.matches.append(MatchData(match[0], match[1], match[2], match[3]))
 
 
   def getCurrentMatchInfo(self):
@@ -50,9 +44,11 @@ class MatchSchedule:
     if self.currentMatch < 0:
       self.currentMatch = 0
 
-  def updateMatch(self, matchNum, time, blueScore, goldScore):
-    match = self.currentMatch[matchNum]
-    match[4:7] = (time, blueScore, goldScore)
+  def updateMatch(self, matchNum, time, goldScore, blueScore):
+    match = self.matches[matchNum]
+    match.matchTime = time
+    match.blueScore = blueScore
+    match.goldScore = goldScore
 
   def readTeamNumbers(teamNumbersFile):
     with open(teamNumbersFile, 'r') as csvfile:
@@ -61,12 +57,24 @@ class MatchSchedule:
         number = int(number)
         newTeam = Team(team, number)
         self.numberToTeam[number] = newTeam
-        self.teamToNumber[team] = number
+        self.teamNameToTeam[team] = newTeam
+
+  def startMatch(self):
+    msg = Match()
+    m = self.matches[self.currentMatch]
+    msg.match_number = self.currentMatch
+    msg.team_names = list[m.goldAlliance + m.blueAlliance]
+    msg.team_numbers = [self.teamNameToTeam[teamName].number for teamName in msg.team_names]
+    self.lc.publish('Match/Init', msg.encode())
+
+  def scoreMatch(self, goldScore, blueScore):
+    match = self.matches[self.currentMatch]
+    match.updateMatch(goldScore, blueScore)
+    self.advanceMatch()
 
 
 
 class Team:
-
   def teamCompare(this, other):
     if this.rankingPoints > other.rankingPoints: 
       return 1
@@ -89,7 +97,7 @@ class Team:
 MATCH_QUALIFICATION, MATCH_ELIMINATION = range(len(2))
 MATCH_GOLD_ALLIANCE, MATCH_BLUE_ALLIANCE = range(len(2))
 
-class Match:
+class MatchData:
   def __init__(self, gold0, gold1, blue0, blue1, matchType=MATCH_QUALIFICATION):
     self.goldAlliance = (gold0, gold1)
     self.blueAlliance = (blue0, blue1)
