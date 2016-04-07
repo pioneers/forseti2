@@ -128,7 +128,7 @@ def main():
         pass
 
 def run_flask_app():
-    app.run(host = '0.0.0.0')
+    app.run(host = '0.0.0.0', port=5002)
 
 if __name__ == '__main__':
     t = threading.Thread(target = main)

@@ -1,7 +1,9 @@
 package forseti2;
 
 struct LighthouseTime {
-	int32_t time_left;
-	string is_lighthouse_on;
-	int32_t counter;
+    int32_t time_left;
+    boolean enabled;
+    boolean available;
+    int32_t button_index;
+    int32_t counter;
 }

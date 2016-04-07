@@ -1,0 +1,17 @@
+package forseti2;
+
+struct LiveScore {
+    int32_t match_number;
+    /* Enumeration of chests
+     * 0: blue alliance gold chest
+     * 1: blue alliance pirate chest
+     * 2: gold alliance gold chest
+     * 3: gold alliance pirate chest
+     */
+    int32_t pearl[4];  // using an array allows these packets to be easily added to each other
+    int32_t water_autonomous[4];
+    int32_t treasure_autonomous[4];
+    int32_t water_teleop[4];
+    int32_t treasure_teleop[4];
+
+}

@@ -1,0 +1,419 @@
+<html>
+
+<head>
+    <title>Scoreboard</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <!-- Optional theme -->
+<!--             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous"> -->
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+    <script type="text/javascript" src="lcm_ws_bridge.js"></script>
+    <style>
+    .progress, .progress-bar {
+        text-align: center;
+        transition: width 0.3s linear !important;
+
+    }
+
+    
+    .progress span {
+        position: absolute;
+        /*        display: block;*/
+        /*        width: 100%;
+*/
+        color: black;
+        right: 0;
+        left: 0;
+    }
+    
+    .heartbeat {
+        color: red;
+    }
+    
+    .heartbeat.contracted {
+        font-size: 75%;
+    }
+    
+    .chest-name {
+        width: 100px;
+    }
+    
+    .pioneers-blue {
+        background-color: #363895;
+    }
+    
+    .pioneers-gold {
+        background-color: #c7aa36;
+    }
+    
+    .pioneers-blue,
+    .pioneers-gold {
+        color: white;
+    }
+    
+    .clock div {
+        margin-top: 0px;
+        font-size: 30px;
+    }
+    
+    .clock {
+        padding: 0px;
+    }
+    </style>
+    <script type="text/javascript" charset="utf-8">
+    $(document).ready(function() {
+        var start = new Date()
+        var start_secs = Math.floor(start.getTime() / 1000)
+        start.setMilliseconds(0)
+            //console.log('http://' + document.domain + ':' + location.port + "/")
+        var addr = 'localhost'
+        var port = '8000'
+        var uri = '/'
+        var score = {}
+        var match_number = -1;
+        var autonomous = true;
+        var lcm = null; //new LCM("ws://" + addr + ":" + port + uri)
+        var alliances = {
+            "blue": 0,
+            "gold": 2
+        }
+        var chests = {
+            "gold": 0,
+            "pirate": 1
+        }
+
+        function updateTimer(msg) {
+            // $(".phase-display").text(msg.stage_name);
+            var width = 100;
+            var text = msg.stage_name;
+            var active = false;
+            var time = 0;
+            switch (msg.stage_name) {
+                case "Autonomous":
+                case "Teleop":
+                    width = 100 * (msg.total_stage_time - msg.stage_time_so_far) / msg.total_stage_time;
+                    text = msg.stage_name
+                    time = ((msg.total_stage_time - msg.stage_time_so_far) / 1000).toFixed(1);
+                    active = true;
+                    break;
+            }
+            if (active) {
+                $(".timer div").addClass("active")
+                if (width > 20) {
+                    $(".timer div").addClass("progress-bar-success")
+                    $(".timer div").removeClass("progress-bar-info")
+                    $(".timer div").removeClass("progress-bar-warning")
+                    $(".timer div").removeClass("progress-bar-danger")
+                } else if (width > 5) {
+                    $(".timer div").addClass("progress-bar-warning")
+                    $(".timer div").removeClass("progress-bar-success")
+                    $(".timer div").removeClass("progress-bar-info")
+                    $(".timer div").removeClass("progress-bar-danger")
+                } else {
+                    $(".timer div").addClass("progress-bar-danger")
+                    $(".timer div").removeClass("progress-bar-success")
+                    $(".timer div").removeClass("progress-bar-info")
+                    $(".timer div").removeClass("progress-bar-warning")
+                }
+            } else {
+                $(".timer div").removeClass("active")
+                $(".timer div").addClass("progress-bar-info")
+                $(".timer div").removeClass("progress-bar-success")
+                $(".timer div").removeClass("progress-bar-warning")
+                $(".timer div").removeClass("progress-bar-danger")
+            }
+            $(".timer div").width(width + "%");
+            $(".timer span").text(text);
+            $(".clock div").text(time);
+        }
+
+        function handleTime(msg) {
+            updateTimer(msg);
+
+            if (!$(".auto").prop('checked')) {
+                return;
+            }
+            switch (msg.stage_name) {
+                case "Setup":
+                case "Autonomous":
+                case "Pause":
+                    autonomous = true;
+                    break;
+                case "Teleop":
+                case "End":
+                    autonomous = false;
+                    break;
+            }
+            if (autonomous) {
+                $(".phase").val("Autonomous");
+            } else {
+                $(".phase").val("Teleop");
+            }
+            match_number = msg.match_number;
+            $(".match").val(match_number);
+        }
+
+        function handleScore(msg) {
+            console.log("NEWSCORE!")
+            score = msg;
+            updateLiveScore(msg);
+            updateLiveScoreBreakdown();
+        }
+
+        function handleBeat(msg) {
+            $(".heartbeat").toggleClass("contracted", msg.state)
+        }
+
+        function handleMatch(msg) {
+            $(".team-0").text(msg.team_numbers[0] + " " + msg.team_names[0])
+            $(".team-1").text(msg.team_numbers[1] + " " + msg.team_names[1])
+            $(".team-2").text(msg.team_names[2] + " " + msg.team_numbers[2])
+            $(".team-3").text(msg.team_names[3] + " " + msg.team_numbers[3])
+        }
+
+        function updateLiveScore(msg) {
+            var blue = 20 * msg.treasure_autonomous[0] + 15 * msg.treasure_autonomous[1] + 10 * msg.treasure_teleop[0] + 5 * msg.treasure_teleop[1];
+            var gold = 20 * msg.treasure_autonomous[2] + 15 * msg.treasure_autonomous[3] + 10 * msg.treasure_teleop[2] + 5 * msg.treasure_teleop[3];
+            $(".score-blue").text(blue);
+            $(".score-gold").text(gold);
+
+
+        }
+
+        function updateLiveScoreBreakdown() {
+            for (alliance in alliances) {
+                for (chest in chests) {
+                    $("." + alliance + "#" + chest + " .score-autonomous").text("A: " + score.treasure_autonomous[alliances[alliance] + chests[chest]])
+                    $("." + alliance + "#" + chest + " .score-teleop").text("T: " + score.treasure_teleop[alliances[alliance] + chests[chest]])
+                }
+            }
+            //$(".blue#gold .score-autonomous").text("A: " + score.treasure_autonomous[0])
+        }
+
+        function updateLighthouse(msg) {
+            var status = 'Offline'
+            if (msg.enabled) {
+                
+                if (msg.available) {
+                    $(".lighthouse-timer div").removeClass("active")
+                    $(".lighthouse-timer div").width("100%");
+                    $(".lighthouse-timer div").addClass("progress-bar-success");
+                    $(".lighthouse-timer div").removeClass("progress-bar-danger");
+                    $(".lighthouse-timer div").removeClass("progress-bar-info");
+                    status = 'Lighthouse Chief Available'
+                } else {
+                    $(".lighthouse-timer div").addClass("active")
+                    $(".lighthouse-timer div").width(100 * msg.time_left / 10000 + "%");
+                    $(".lighthouse-timer div").addClass("progress-bar-danger");
+                    $(".lighthouse-timer div").removeClass("progress-bar-success");
+                    $(".lighthouse-timer div").removeClass("progress-bar-info");
+                    status = 'Lighthouse Chief Unavailable for ' + (msg.time_left / 1000).toFixed(1)
+                }
+            } else {
+                $(".lighthouse-timer div").removeClass("active")
+                $(".lighthouse-timer div").width("100%");
+                $(".lighthouse-timer div").addClass("progress-bar-info");
+                $(".lighthouse-timer div").removeClass("progress-bar-danger");
+                $(".lighthouse-timer div").removeClass("progress-bar-success");
+                status = 'Lighthouse Chief Disabled'
+            }
+            $(".lighthouse-timer span").text(status)
+        }
+
+        function increment(alliance, chest, amount) {
+            msg = {
+                __type__: "LiveScore",
+                match_number: parseInt($(".match").val()),
+                pearl: [0, 0, 0, 0],
+                water_autonomous: [0, 0, 0, 0],
+                treasure_autonomous: [0, 0, 0, 0],
+                water_teleop: [0, 0, 0, 0],
+                treasure_teleop: [0, 0, 0, 0]
+            }
+            if ($(".phase").val() == "Autonomous") {
+                msg.treasure_autonomous[alliances[alliance] + chests[chest]] += amount;
+            }
+            if ($(".phase").val() == "Teleop") {
+                msg.treasure_teleop[alliances[alliance] + chests[chest]] += amount;
+            }
+            console.log(msg)
+            lcm.publish("LiveScore/ScoreDelta", msg);
+        }
+        $(".blue#gold .inc").click(function() {
+            increment("blue", "gold", 1)
+        });
+        $(".blue#pirate .inc").click(function() {
+            increment("blue", "pirate", 1)
+        });
+        $(".gold#gold .inc").click(function() {
+            increment("gold", "gold", 1)
+        });
+        $(".gold#pirate .inc").click(function() {
+            increment("gold", "pirate", 1)
+        });
+        $(".blue#gold .dec").click(function() {
+            increment("blue", "gold", -1)
+        });
+        $(".blue#pirate .dec").click(function() {
+            increment("blue", "pirate", -1)
+        });
+        $(".gold#gold .dec").click(function() {
+            increment("gold", "gold", -1)
+        });
+        $(".gold#pirate .dec").click(function() {
+            increment("gold", "pirate", -1)
+        });
+        $(".match,.phase").change(function() {
+            $(".auto").prop("checked", false)
+        })
+        $(".match").keypress(function() {
+            $(".auto").prop("checked", false)
+        })
+        $("#address").change(function() {
+                makeLCM($("#address").val())
+            })
+            // lcm.on_ready(function() {
+            //     lcm.subscribe("Timer/Time", "Time", handleTime);
+            //     lcm.subscribe("LiveScore/LiveScore", "LiveScore", function(msg) {
+            //         if (JSON.stringify(score) != JSON.stringify(msg)){
+            //             $("#score").html(JSON.stringify(msg, null, 4));
+            //             score = msg;
+            //             console.log(score);
+            //         }
+            //     });
+            // });
+        function makeLCM(url) {
+            console.log('attempting to connect to ' + url)
+            if (url == undefined) {
+                url = 'localhost'
+            }
+            lcm = new LCM('ws://' + url + ':8000/');
+
+            function subscribeAll() {
+                console.log('Connected to LCM Bridge')
+                lcm.subscribe("Timer/Time", "Time", handleTime)
+                lcm.subscribe("LiveScore/LiveScore", "LiveScore", handleScore)
+                lcm.subscribe("Heartbeat/Beat", "Heartbeat", handleBeat)
+                lcm.subscribe("Timer/Match", "Match", handleMatch)
+                lcm.subscribe("LighthouseTimer/LighthouseTime", "LighthouseTime", updateLighthouse)
+            }
+
+            function reconnect() {
+                return;
+                makeLCM(url)
+            }
+            lcm.on_ready(subscribeAll)
+            lcm.on_close(reconnect)
+        }
+        makeLCM()
+        $("#send_diff").click(function() {
+            msg = JSON.parse($("#delta").val())
+            msg.__type__ = "LiveScore";
+            lcm.publish("LiveScore/ScoreDelta", msg);
+        });
+        //renderAll()
+    })
+    </script>
+</head>
+
+<body>
+    <!-- <button id="send_diff">Start Game</button> -->
+    <nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand pull-left" href="index.html"><img alt="Brand" src="favicon.ico"></a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="scoreboard.html">Scoreboard</a></li>
+        <li><a href="live_score.html">Live Scoring</a></li>
+        <li><a href="match_control.html">Match Control</a></li>
+        <li><a href="network_monitor.html">Network Monitor</a></li>        
+      </ul>
+    </div><!-- /.navbar-collapse -->
+    
+  </div><!-- /.container-fluid -->
+</nav>
+    <div class="container">
+        <h1>Scoreboard<small><span class="glyphicon glyphicon-heart heartbeat" aria-hidden="true"></span></small></h1>
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="row">
+                    <div class="col-xs-5 col-sm-4">
+                        <div class="panel panel-default pioneers-blue">
+                            <div class="row">
+                                <div class="col-md-7 col-xs-5">
+                                    <div class="team-0">-1 Offline</div>
+                                    <div class="team-1">-1 Offline</div>
+                                </div>
+                                <div class="col-md-1 col-md-offset-3 col-xs-1 col-xs-offset-4">
+                                    <div class="score-blue text-right" style="">?</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-2 col-sm-4 clock">
+                        <div class="text-center">1:00</div>
+                    </div>
+                    <div class="col-xs-5 col-sm-4">
+                        <div class="panel panel-default pioneers-gold">
+                            <div class="row">
+                                <div class="col-md-1 col-xs-1">
+                                    <div class="score-gold" style="">?</div>
+                                </div>
+                                <div class="col-md-7  col-md-offset-3 col-xs-5 col-xs-offset-4">
+                                    <div class="team-2 text-right">-1 Offline</div>
+                                    <div class="team-3 text-right">-1 Offline</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="progress timer">
+                    <div class="progress-bar progress-bar-striped progress-bar-info" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                        <span>Offline</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="progress lighthouse-timer">
+                    <div class="progress-bar progress-bar-striped progress-bar-info" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                        <span>Offline</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h2>Settings</h2>
+
+        <div class="row">
+            <div class="col-md-3 col-md-offset-0">
+                <div class="input-group">
+                    <span class="input-group-addon">ws://</span>
+                    <input type="text" class="form-control" id="address" placeholder="server address" value="localhost" aria-describedby="basic-addon2">
+                    <span class="input-group-addon" id="basic-addon2">:8000</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

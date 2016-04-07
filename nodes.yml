@@ -9,19 +9,11 @@ windows:
         focus: true
       - python lcm_ws_bridge.py
       - python timer.py
-      - python GameObjectTimer.py
+      - python lighthouse_timer.py
+      - echo "for status_lights driver"
+      - echo "for buttons"
+      - python field_control.py -l 0 -l 1
       - python heartbeat.py
-      - memcached -p 12357
-      - commands:
-        - cd ../../daemon/runtime
-        - export PYTHONPATH=$PYTHONPATH:../../hibike
-        - python runtime.py
-      - commands:
-        - cd ../../daemon/dawn
-        - npm run-script watch
-      - commands:
-        - cd ../../daemon/dawn
-        - npm start
       - python match_tester.py
       - python test_button.py
       - python estop.py

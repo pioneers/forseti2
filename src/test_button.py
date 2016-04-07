@@ -16,7 +16,7 @@ button.pressed = True
 
 while True:
     raw_input("press enter to press the button")
-    lc.publish("Game_Button/Button", button.encode())
+    lc.publish("Button1/Button", button.encode())
 
 
 
