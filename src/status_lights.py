@@ -80,6 +80,42 @@ class LightHouseStatusLight(Node):
             self.update_light()
             time.sleep(.3)
 
+# NEW CLASS For sending messages to drivers
+class DriverStatusLight(Node):
+
+    def __init__(self, lc, index):
+        self.index = index
+        self.lc = lc
+        self.receive_channel = "Robot%d/RobotStatus" % (index)
+        self.lc.subscribe(self.receive_channel, self.handle_robot)
+        self.send_channel = "StatusLight%d/StatusLight" % (index)
+        self.red = True
+        self.green = False
+        self.yellow = False
+        self.buzzer = False
+        self.start_thread(target=self.run)
+
+    def handle_robot(self, channel, data):
+        msg = forseti2.RobotState.decode(data)
+        if msg.connected != "Disconnected":
+            self.red = False
+            self.green = True
+            self.update_light()
+
+    def update_light(self):
+        msg = forseti2.StatusLight()
+        msg.red = self.red
+        msg.yellow = self.yellow
+        msg.green = self.green
+        msg.buzzer = self.buzzer
+        self.lc.publish(self.send_channel, msg.encode())
+
+    def run(self):
+        while True:
+            self.update_light()
+            time.sleep(.3)
+
+#END CHANGES
 
 def main():
     lc = lcm.LCM(settings.LCM_URI)
