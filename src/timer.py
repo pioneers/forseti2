@@ -199,9 +199,10 @@ class Robot(object):
         self.__init__()
 
     def set_stage(self, stage_name):
+        old = (self.running, self.autonomous, self.enabled)
         if not self.overridden:
             if stage_name == "Setup":
-                self.running = False
+                self.running = True
                 self.autonomous = True
                 self.enabled = False
             elif stage_name == "Autonomous":
@@ -222,6 +223,7 @@ class Robot(object):
                 self.enabled = False
             else:
                 print("unrecognized stage: %s" % stage_name)
+        return old != (self.running, self.autonomous, self.enabled)
 
     # once estop is set, it cannot be unset until the robot is reset
     def emergency_stop(self, estop):
@@ -265,12 +267,14 @@ class RobotController(object):
 
     # called when timer changes stage
     def set_stage(self, stage_name):
+        change = False
         for robot in self.robots.values():
-            robot.set_stage(stage_name)
-        self.publish()
+            change = robot.set_stage(stage_name) or change
+        if change:
+            self.publish()
 
     def handle_field_estop(self, channel, data):
-        print("ESTOP RECEIVED")
+        print("ESTOP RECEIVED ON %s" % channel)
         msg = forseti2.Estop.decode(data)
         for robot in self.robots.values():
             robot.emergency_stop(msg.estop)
@@ -278,6 +282,7 @@ class RobotController(object):
 
     # these apply to individual robots
     def handle_robot_estop(self, channel, data):
+        print("ESTOP RECEIVED ON %s" % channel)
         msg = forseti2.Estop.decode(data)
         self.robots[channel.split('/')[0]].emergency_stop(msg.estop)
         self.publish()
@@ -292,6 +297,7 @@ class RobotController(object):
         self.publish()
 
     def publish(self):
+        print("publishing robot states %s" % str(time.time()))
         for channel, robot in self.robots.items():
             msg = forseti2.RobotControl()
             msg.running, msg.autonomous, msg.enabled = robot.state
