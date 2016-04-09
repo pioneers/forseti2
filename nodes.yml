@@ -12,7 +12,7 @@ windows:
       - python lighthouse_timer.py
       - echo "for status_lights driver"
       - echo "for buttons"
-      - python field_control.py -l 0 -l 1
+      - python status_lights.py
       - python heartbeat.py
       - python match_tester.py
       - python test_button.py

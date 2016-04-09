@@ -14,6 +14,7 @@ import LCMNode
 import grizzly
 import serial
 import pyfirmata
+from usb.core import USBError
 
 Node = LCMNode.Node
 LCMNode = LCMNode.LCMNode
@@ -81,11 +82,13 @@ class Motor(Node):
         self.start_time = time.time()
         self.start_thread(target=self.run)
         self.use_grizzly = use_grizzly
-        if grizzly_addr is None:
+        self.grizzly_addr = grizzly_addr
+        if self.grizzly_addr is None:
             self.use_grizzly = False
         if self.use_grizzly:
-            self.grizzly = grizzly.Grizzly(grizzly_addr)
-            self.grizzly.set_mode(grizzly.ControlMode.NO_PID, grizzly.DriveMode.DRIVE_BRAKE)
+            self.grizzly = grizzly.Grizzly(self.grizzly_addr)
+            self.grizzly.set_mode(grizzly.ControlMode.NO_PID, grizzly.DriveMode.DRIVE_COAST)
+            self.grizzly.limit_acceleration(1)
             self.grizzly.set_target(0)
 
     def handle_control(self, channel, data):
@@ -105,7 +108,7 @@ class Motor(Node):
             self.start_time = time.time()
             if self.use_grizzly:
                 print("target set")
-                self.grizzly.set_target(10)
+                self.grizzly.set_target(100)
             print(time.strftime('Motor Activated at %l:%M:%S %p'))
 
     def deactivate(self):
@@ -116,13 +119,20 @@ class Motor(Node):
             print(time.strftime('Motor Deactivated at %l:%M:%S %p'))
 
     def check(self, timeout=5):
-        if self.motor.activated and time.time() - self.start_time >= 5:
-            self.deactivate()
-
+        try:
+            if self.motor.activated and time.time() - self.start_time >= timeout:
+                self.deactivate()
+        except USBError as e:
+            print("GRIZZLY %d CRASHED!" % self.grizzly_addr)
+            time.sleep(0.4)
+            self.grizzly = grizzly.Grizzly(self.grizzly_addr)
+            self.grizzly.set_mode(grizzly.ControlMode.NO_PID, grizzly.DriveMode.DRIVE_COAST)
+            self.grizzly.limit_acceleration(1)
+            self.grizzly.set_target(0)
     def run(self):
         start_time = time.time()
         while True:
-            self.check()
+            self.check(10)
             #self.lc.publish(self.send_channel, self.motor.encode())
             time.sleep(.03)
 
@@ -208,14 +218,14 @@ def main():
     lc = lcm.LCM(settings.LCM_URI)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-b', '--button', action='append', nargs='+', metavar=('index', 'arduino_path'), help="create a button with optional arduino location")
-    parser.add_argument('-m', '--motor', action='append', nargs='+', metavar=('index', 'grizzly_id'), help="create a motor with optional grizzly id")
+    parser.add_argument('-b', '--button', action='append', nargs='+', metavar=('index', 'arduino_path'), help="create a button with index and arduino serial path")
+    parser.add_argument('-m', '--motor', action='append', nargs='+', metavar=('grizzly_id'), help="create a motor with grizzly id")
     parser.add_argument('-l', '--light', action='append', nargs='+', metavar=('index'), help="create a node that sends signals to the status light driver for specified lighthouse")
     args = parser.parse_args()
     if args.button:
-        buttons = [Button(lc, int(button[0]), button[1], True) if len(button) > 1 else Button(int(button[0])) for button in args.button]
+        buttons = [Button(lc, int(button[0]), button[1], True) for button in args.button]
     if args.motor:
-        motors = [Motor(lc, int(motor[0]), int(motor[1]), True) if len(motor) > 1 else Motor(int(motor[0])) for motor in args.motor]
+        motors = [Motor(lc, 0, int(motor[0]), True) for motor in args.motor]
     if args.light:
         lights = [LightHouseStatusLight(lc, int(light[0])) for light in args.light]
     while True:
