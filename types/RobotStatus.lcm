@@ -1,0 +1,5 @@
+package forseti2;
+
+struct RobotStatus {
+    boolean connected;
+}
