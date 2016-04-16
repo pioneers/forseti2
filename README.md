@@ -5,6 +5,8 @@ forseti2
 
 `rm ./driver_station.sh; wget https://raw.githubusercontent.com/karthik-shanmugam/forseti2/2016/driver_station.sh; chmod +x driver_station.sh; sudo ./driver_station.sh`
 
+[driver station binary](https://www.dropbox.com/s/g9ohjmtcfc2ooay/dawn-linux-x64.tar.gz?dl=0)
+
 
 forseti2 (named after the Norse god of justice) is the field control software for the Pioneers in Engineering 2014 Robotics Competition. 
 
