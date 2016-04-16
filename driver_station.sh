@@ -1,5 +1,5 @@
 cd
-wget https://dl.dropboxusercontent.com/s/g9ohjmtcfc2ooay/dawn-linux-x64.tar.gz?dl=0
+wget https://dl.dropboxusercontent.com/s/g9ohjmtcfc2ooay/dawn-linux-x64.tar.gz
 sudo tar -xvzf dawn-linux-x64.tar.gz
 sudo cp -r dawn-linux-x64 /opt/driver_station
 # # get curl
