@@ -86,18 +86,35 @@
             "pirate": 1
         }
         /* For Sound Playback when stage ends (?) */
-        var sound = new Audio("sound/loop.mp3");
+        sounds = {eecs: new Audio("sound/loop.mp3"), bell: new Audio("sound/bell2.wav"), end: new Audio("sound/end2.wav")}
         var lastStage = "Paused";
 
         function handleSound(msg) {
             console.log("Sound is in handler");
             if (lastStage !== msg.stage_name) {
                 lastStage = msg.stage_name
-                sound.play()
-                setTimeout(function() {
-                    sound.pause();
-                    sound.currentTime = 0;
-                }, 3000)
+                for (var sound in sounds) {
+                  if (sounds.hasOwnProperty(sound)) {
+                    sounds[sound].pause()
+                    sounds[sound].currentTime = 0;
+                  }
+                }
+                if (lastStage == "Autonomous" || lastStage == "Teleop") {
+                    sounds['bell'].currentTime = 0;
+                    sounds['bell'].play()
+                    setTimeout(function() {
+                        sounds['bell'].pause();
+                        sounds['bell'].currentTime = 0;
+                    }, 3000)
+                }
+                if (lastStage == "Paused" || lastStage == "End") {
+                    sounds['end'].currentTime = 5.5;
+                    sounds['end'].play()
+                    setTimeout(function() {
+                        sounds['end'].pause();
+                        sounds['end'].currentTime = 0;
+                    }, 3000)
+                }
             }
         }
 
