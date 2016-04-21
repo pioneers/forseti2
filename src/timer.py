@@ -246,7 +246,7 @@ class Robot(object):
         if self.estop:
             self.running = False
             self.enabled = False
-        return (self.running, self.autonomous, self.enabled)
+        return (self.estop, self.running, self.autonomous, self.enabled)
 
 class RobotController(object):
 
@@ -297,10 +297,9 @@ class RobotController(object):
         self.publish()
 
     def publish(self):
-        print("publishing robot states %s" % str(time.time()))
         for channel, robot in self.robots.items():
             msg = forseti2.RobotControl()
-            msg.running, msg.autonomous, msg.enabled = robot.state
+            msg.estop, msg.running, msg.autonomous, msg.enabled = robot.state
             self.lc.publish("%s/RobotControl" % channel, msg.encode())
 
 

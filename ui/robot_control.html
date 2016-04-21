@@ -237,7 +237,6 @@
             if ($(".phase").val() == "Teleop") {
                 msg.treasure_teleop[alliances[alliance] + chests[chest]] += amount;
             }
-            console.log(msg)
             lcm.publish("LiveScore/ScoreDelta", msg);
         }
         function change_robot_state(robot, state) {
@@ -267,7 +266,8 @@
         }
         function make_update_robot_state(index) {
             function update_robot_state(msg) {
-                $(".robot-" + index + "-autonomous,.robot-" + index + "-teleop,.robot-" + index + "-disabled").removeClass("active");
+                $(".robot-" + index + "-estop,.robot-" + index + "-autonomous,.robot-" + index + "-teleop,.robot-" + index + "-disabled").removeClass("active");
+                if (msg.running) {
                 if (!msg.enabled) {
                     $(".robot-" + index + "-disabled").addClass("active");
                 } else if (msg.autonomous) {
@@ -281,11 +281,16 @@
                 } else{
                     $(".robot-" + index + "-estop").removeClass("active");
                 }
+                }
+                if (msg.estop) {
+                    $(".robot-" + index + "-estop").addClass("active");
+                }
                 // console.log(".robot-" + index + "teleop")
                 // $(".robot-" + index + "teleop").addClass("active");
             }
             return update_robot_state;
         }
+
         function override_robot(robot, override) {
             msg = {__type__: "Override", override: override}
             lcm.publish("Robot" + robot + "/Override", msg)

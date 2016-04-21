@@ -1,6 +1,9 @@
 package forseti2;
 
 struct RobotControl {
+    // whether or not a robot has been estopped
+    boolean estop;
+
     // student code running on robots
     boolean running;
     
