@@ -85,6 +85,21 @@
             "gold": 0,
             "pirate": 1
         }
+        /* For Sound Playback when stage ends (?) */
+        var sound = new Audio("sound/loop.mp3");
+        var lastStage = "Paused";
+
+        function handleSound(msg) {
+            console.log("Sound is in handler");
+            if (lastStage !== msg.stage_name) {
+                lastStage = msg.stage_name
+                sound.play()
+                setTimeout(function() {
+                    sound.pause();
+                    sound.currentTime = 0;
+                }, 3000)
+            }
+        }
 
         function updateTimer(msg) {
             // $(".phase-display").text(msg.stage_name);
@@ -300,6 +315,7 @@
                 lcm.subscribe("Heartbeat/Beat", "Heartbeat", handleBeat)
                 lcm.subscribe("Timer/Match", "Match", handleMatch)
                 lcm.subscribe("LighthouseTimer/LighthouseTime", "LighthouseTime", updateLighthouse)
+                lcm.subscribe("Timer/Time", "Time", handleSound)
             }
 
             function reconnect() {
