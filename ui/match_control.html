@@ -11,6 +11,7 @@
     <!-- Latest compiled and minified JavaScript -->
     <script src="bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+    <script type="text/javascript" src="tabletop.js"></script>
     <script type="text/javascript" src="lcm_ws_bridge.js"></script>
     <style>
     .progress {
@@ -82,6 +83,24 @@
             "gold": 0,
             "pirate": 1
         }
+
+        // Access to Google Spreadsheet
+        // THIS DATA MAY CHANGE FROM YEAR TO YEAR
+        var schoolSheetName = 'schools';
+        var qualSheetName = 'qual_matches';
+        var elimSheetName = 'elim_matches';
+        var rankSheetName = 'team_rankings';
+        var public_spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1329UhQ9onylGly0lnkjUD2fN81QuIyWS_f8ZapCtbg0/pubhtml';
+
+        tabletop = Tabletop.init({
+            key: public_spreadsheet_url,
+            callback: function (){
+                // no-op
+            },
+            simpleSheet: false,
+            debug: true
+          });
+
 
         function updateTimer(msg) {
             // $(".phase-display").text(msg.stage_name);
@@ -257,6 +276,55 @@
             console.log(msg)
             lcm.publish("LiveScore/ScoreDelta", msg);
         }
+
+        function populateMatch() {
+            var matchNumber = $("#new-match-num").val()
+            var isQuals = parseInt(matchNumber) < 100;
+            var matchFound = false;
+            if (isQuals) {
+                var data = tabletop.sheets(qualSheetName);
+                var qualMatches = data.all();
+                for (var i = 0; i < qualMatches.length; i ++) {
+                    if (qualMatches[i]['MatchNumber'] == matchNumber) {
+                        $("#blue-0-number").val(qualMatches[i]['Blue1Number']);
+                        $("#blue-1-number").val(qualMatches[i]['Blue2Number']);
+                        $("#gold-0-number").val(qualMatches[i]['Gold1Number']);
+                        $("#gold-1-number").val(qualMatches[i]['Gold2Number']);
+
+                        $("#blue-0-name").val(qualMatches[i]['Blue1Name']);
+                        $("#blue-1-name").val(qualMatches[i]['Blue2Name']);
+                        $("#gold-0-name").val(qualMatches[i]['Gold1Name']);
+                        $("#gold-1-name").val(qualMatches[i]['Gold2Name']);
+                        matchFound = true;
+                        break;
+                    }
+                }
+            } else {
+                // Elimination matches
+                var data = tabletop.sheets(elimSheetName);
+                var elimMatches = data.all();
+                var i = matchNumber - 100 - 2;
+
+                if (i < elimMatches.length) {
+                    matchFound = true;
+                    $("#blue-0-number").val(elimMatches[i]['Blue1Number']);
+                    $("#blue-1-number").val(elimMatches[i]['Blue2Number']);
+                    $("#gold-0-number").val(elimMatches[i]['Gold1Number']);
+                    $("#gold-1-number").val(elimMatches[i]['Gold2Number']);
+
+                    $("#blue-0-name").val(elimMatches[i]['Blue1Name']);
+                    $("#blue-1-name").val(elimMatches[i]['Blue2Name']);
+                    $("#gold-0-name").val(elimMatches[i]['Gold1Name']);
+                    $("#gold-1-name").val(elimMatches[i]['Gold2Name']);
+
+                }
+            }
+
+            if (!matchFound) {
+                alert(isQuals ? "Qualification match not found" : "Elimination match not found");
+            }
+        }
+
         $(".blue#gold .inc").click(function() {
             increment("blue", "gold", 1)
         });
@@ -287,6 +355,7 @@
         $(".match").keypress(function() {
             $(".auto").prop("checked", false)
         })
+        $("#populate-match").click(populateMatch)
         $("#create-match").click(makeMatch)
 
 
@@ -476,6 +545,7 @@
 <span class="input-group-addon" id="basic-addon1">Match Number:</span>
   <input type="number" class="form-control" id="new-match-num"placeholder="Match number" aria-describedby="basicaddon1">
   <span class="input-group-btn">
+    <button class="btn btn-default" id="populate-match" type="button">Populate</button>
     <button class="btn btn-default" id="create-match" type="button">Create Match</button>
   </span>
 </div>
