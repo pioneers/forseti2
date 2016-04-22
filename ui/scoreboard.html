@@ -137,6 +137,18 @@
             }
         }
 
+        function handleLighthouseSound(msg) {
+            console.log("Sound is in lighthousehandlge");
+            if (msg.enabled && msg.available) {
+                lighthouse_flag = false;
+            }
+
+            if (msg.enabled && !msg.available && !lighthouse_flag) {
+                lighthouse_flag = true;
+                playSound(sounds['lighthouse'], 3000)
+            }
+        }
+
         function updateTimer(msg) {
             // $(".phase-display").text(msg.stage_name);
             var width = 100;
@@ -351,6 +363,7 @@
                 lcm.subscribe("Heartbeat/Beat", "Heartbeat", handleBeat)
                 lcm.subscribe("Timer/Match", "Match", handleMatch)
                 lcm.subscribe("LighthouseTimer/LighthouseTime", "LighthouseTime", updateLighthouse)
+                lcm.subscribe("LighthouseTimer/LighthouseTime", "LighthouseTime", handleLighthouseSound)
                 lcm.subscribe("Timer/Time", "Time", handleTimerSound)
             }
 
