@@ -86,8 +86,7 @@ class Shooter(Node):
             self.use_arduino = False
         if self.use_arduino:
             self.ser = serial.Serial(arduino_path, 9600)
-            self.ser.write(0)
-            self.ser.write(0)
+            self.ser.write('0')
 
     def handle_control(self, channel, data):
         msg = forseti2.LighthouseTime.decode(data)
@@ -105,21 +104,19 @@ class Shooter(Node):
             self.motor.activated = True
             self.start_time = time.time()
             if self.use_arduino:
-                print("target set")
-                self.grizzly.set_target(100)
+                self.ser.write('1')
             print(time.strftime('Motor Activated at %l:%M:%S %p'))
 
     def deactivate(self):
         if self.motor.activated:
             self.motor.activated = False
             if self.use_arduino:
-                self.grizzly.set_target(0)
+                self.ser.write('0')
             print(time.strftime('Motor Deactivated at %l:%M:%S %p'))
 
     def check(self, timeout=5):
-        try:
-            if self.motor.activated and time.time() - self.start_time >= timeout:
-                self.deactivate()
+        if self.motor.activated and time.time() - self.start_time >= timeout:
+            self.deactivate()
         # except USBError as e:
         #     print("GRIZZLY %d CRASHED!" % self.arduino_path)
         #     time.sleep(0.4)
@@ -130,7 +127,7 @@ class Shooter(Node):
     def run(self):
         start_time = time.time()
         while True:
-            self.check(4)
+            self.check(10)
             #self.lc.publish(self.send_channel, self.motor.encode())
             time.sleep(.03)
 
@@ -287,12 +284,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--button', action='append', nargs='+', metavar=('index', 'arduino_path'), help="create a button with index and arduino serial path")
     parser.add_argument('-m', '--motor', action='append', nargs='+', metavar=('grizzly_id'), help="create a motor with grizzly id")
+    parser.add_argument('-s', '--shooter', action='append', nargs='+', metavar=('arduino_path'), help="create a shooter arduino path")
     parser.add_argument('-l', '--light', action='append', nargs='+', metavar=('index'), help="create a node that sends signals to the status light driver for specified lighthouse")
     args = parser.parse_args()
     if args.button:
         buttons = [Button(lc, int(button[0]), button[1], True) for button in args.button]
     if args.motor:
         motors = [Motor(lc, 0, int(motor[0]), True) for motor in args.motor]
+    if args.shooter:
+        shooters = [Shooter(lc, 0, shooter[0], True) for shooter in args.shooter]
     if args.light:
         lights = [LightHouseStatusLight(lc, int(light[0])) for light in args.light]
     while True:
