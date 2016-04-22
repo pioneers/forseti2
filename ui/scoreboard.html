@@ -86,35 +86,54 @@
             "pirate": 1
         }
         /* For Sound Playback when stage ends (?) */
-        sounds = {eecs: new Audio("sound/loop.mp3"), bell: new Audio("sound/bell2.wav"), end: new Audio("sound/end2.wav")}
+        sounds = {
+            eecs: new Audio("sound/loop.mp3"), 
+            bell: new Audio("sound/bell2.wav"), 
+            end: new Audio("sound/end2.wav"), 
+            autonomous_start: new Audio("sound/autonomous-start.wav"),
+            autonomous_end: new Audio("sound/autonomous-end.wav"),
+            teleop_start: new Audio("sound/teleop-start.wav"),
+            lighthouse: new Audio("sound/lighthouse.wav"),
+            warning: new Audio("sound/warning.mp3")
+        }
         var lastStage = "Paused";
+        var lighthouse_flag = false;
+        var warning_flag = false;
 
-        function handleSound(msg) {
+        function playSound(sound, duration) {
+            sound.pause()
+            sound.currentTime = 0
+            sound.play()
+            setTimeout(function() {sound.pause()}, duration)
+        }
+
+        function handleTimerSound(msg) {
             console.log("Sound is in handler");
             if (lastStage !== msg.stage_name) {
+                warning_flag = false
                 lastStage = msg.stage_name
-                for (var sound in sounds) {
-                  if (sounds.hasOwnProperty(sound)) {
-                    sounds[sound].pause()
-                    sounds[sound].currentTime = 0;
-                  }
+                switch(msg.stage_name) {
+                    case "Setup":
+                        break;
+                    case "Autonomous":
+                        playSound(sounds['autonomous_start'], 3000)
+                        break;
+                    case "Paused":
+                        playSound(sounds['autonomous_end'], 3000)
+                        break;
+                    case "Teleop":
+                        playSound(sounds['teleop_start'], 3000)
+                        break;
+                    case "End":
+                        playSound(sounds['end'], 3000)
+                        break;
+                    default:
+                        console.log("ERROR BAD STAGE NAME")
                 }
-                if (lastStage == "Autonomous" || lastStage == "Teleop") {
-                    sounds['bell'].currentTime = 0;
-                    sounds['bell'].play()
-                    setTimeout(function() {
-                        sounds['bell'].pause();
-                        sounds['bell'].currentTime = 0;
-                    }, 3000)
-                }
-                if (lastStage == "Paused" || lastStage == "End") {
-                    sounds['end'].currentTime = 5.5;
-                    sounds['end'].play()
-                    setTimeout(function() {
-                        sounds['end'].pause();
-                        sounds['end'].currentTime = 0;
-                    }, 3000)
-                }
+            }
+            if (lastStage == "Teleop" && (msg.total_stage_time - msg.stage_time_so_far) < 15000 && !warning_flag) {
+                warning_flag = true;
+                playSound(sounds['warning'], 3000)
             }
         }
 
@@ -332,7 +351,7 @@
                 lcm.subscribe("Heartbeat/Beat", "Heartbeat", handleBeat)
                 lcm.subscribe("Timer/Match", "Match", handleMatch)
                 lcm.subscribe("LighthouseTimer/LighthouseTime", "LighthouseTime", updateLighthouse)
-                lcm.subscribe("Timer/Time", "Time", handleSound)
+                lcm.subscribe("Timer/Time", "Time", handleTimerSound)
             }
 
             function reconnect() {

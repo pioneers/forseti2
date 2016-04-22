@@ -67,6 +67,73 @@ class Button(Node):
             self.pressed = True
 
 
+class Shooter(Node):
+
+    def __init__(self, lc, index, arduino_path=None, use_arduino=False):
+        self.index = index
+        self.send_channel = "Motor%d/Motor" % index
+        self.receive_channel = "LighthouseTimer/LighthouseTime"
+        self.motor = forseti2.Motor()
+        self.motor.activated = False
+        self.lc = lc
+        self.lc.subscribe(self.receive_channel, self.handle_control)
+        self.counter = None 
+        self.start_time = time.time()
+        self.start_thread(target=self.run)
+        self.use_arduino = use_arduino
+        self.arduino_path = arduino_path
+        if self.arduino_path is None:
+            self.use_arduino = False
+        if self.use_arduino:
+            self.ser = serial.Serial(arduino_path, 9600)
+            self.ser.write(0)
+            self.ser.write(0)
+
+    def handle_control(self, channel, data):
+        msg = forseti2.LighthouseTime.decode(data)
+        # turns out there's only one shooter for now, so we can bypass this check
+        if msg.button_index == self.index or True:
+            if msg.enabled and not msg.available: 
+                if msg.counter != self.counter:
+                    self.counter = msg.counter
+                    self.activate()
+            else:
+                self.deactivate()
+
+    def activate(self):
+        if not self.motor.activated:
+            self.motor.activated = True
+            self.start_time = time.time()
+            if self.use_arduino:
+                print("target set")
+                self.grizzly.set_target(100)
+            print(time.strftime('Motor Activated at %l:%M:%S %p'))
+
+    def deactivate(self):
+        if self.motor.activated:
+            self.motor.activated = False
+            if self.use_arduino:
+                self.grizzly.set_target(0)
+            print(time.strftime('Motor Deactivated at %l:%M:%S %p'))
+
+    def check(self, timeout=5):
+        try:
+            if self.motor.activated and time.time() - self.start_time >= timeout:
+                self.deactivate()
+        # except USBError as e:
+        #     print("GRIZZLY %d CRASHED!" % self.arduino_path)
+        #     time.sleep(0.4)
+        #     self.grizzly = grizzly.Grizzly(self.arduino_path)
+        #     self.grizzly.set_mode(grizzly.ControlMode.NO_PID, grizzly.DriveMode.DRIVE_COAST)
+        #     self.grizzly.limit_acceleration(1)
+        #     self.grizzly.set_target(0)
+    def run(self):
+        start_time = time.time()
+        while True:
+            self.check(4)
+            #self.lc.publish(self.send_channel, self.motor.encode())
+            time.sleep(.03)
+
 
 class Motor(Node):
 
