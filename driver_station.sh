@@ -1,5 +1,7 @@
 cd
+rm scan_wifi.sh*
 wget https://raw.githubusercontent.com/pioneers/forseti2/2016/scan_wifi.sh
+sudo chmod 777 scan_wifi.sh
 rm dawn-linux-x64.tar.gz*
 wget https://dl.dropboxusercontent.com/s/g9ohjmtcfc2ooay/dawn-linux-x64.tar.gz
 sudo tar -xvzf dawn-linux-x64.tar.gz
