@@ -1,0 +1,606 @@
+<html>
+
+<head>
+    <title>Scoreboard</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <script type="text/javascript" src="jquery-1.12.3.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="bootstrap-3.3.6-dist/css/bootstrap.min.css">
+    <!-- Optional theme -->
+<!--             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous"> -->
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+    <script type="text/javascript" src="tabletop.js"></script>
+    <script type="text/javascript" src="lcm_ws_bridge.js"></script>
+    <style>
+    
+    #game-clock {
+        font-size: 60px;
+    }
+    .score-heading>th {
+        width: 33.333%;
+    }
+    .score {
+        width : 100%;
+        font-size: 40px;
+    }
+
+    #score-container td{
+        width: 33.3%;
+    }
+
+    .team {
+        font-size: 20px
+    }
+    .pioneers-blue {
+        background-color: #363895;
+    }
+    .pioneers-gold {
+        background-color: #c7aa36;
+    }
+    .pioneers-blue , .pioneers-gold {
+        color: white;
+    }
+
+    .score.btn:hover {
+        
+    }
+
+
+
+
+
+
+
+
+
+
+    .progress, .progress-bar {
+        text-align: center;
+        transition: width 0.3s linear !important;
+
+    }
+
+    
+    .progress span {
+        position: absolute;
+        /*        display: block;*/
+        /*        width: 100%;
+*/
+        color: black;
+        right: 0;
+        left: 0;
+    }
+
+
+    
+    .heartbeat {
+        color: red;
+    }
+    
+    .heartbeat.contracted {
+        font-size: 75%;
+    }
+    
+    .chest-name {
+        width: 100px;
+    }
+    
+    .pioneers-blue {
+        background-color: #363895;
+    }
+    
+    .pioneers-gold {
+        background-color: #c7aa36;
+    }
+    
+    .pioneers-blue,
+    .pioneers-gold {
+        color: white;
+    }
+    
+    .clock div {
+        margin-top: 0px;
+        font-size: 30px;
+    }
+    
+    .clock {
+        padding: 0px;
+    }
+
+    .team-0,.team-1,.team-2,.team-3,.score-blue,.score-gold{
+        font-size: 30px;
+    }
+    .team-0,.team-1,.score-gold{
+        text-align: left;
+    }
+    .team-2,.team-3,.score-blue,.rig{
+        text-align: right;
+
+    }
+    </style>
+    <script type="text/javascript" charset="utf-8">
+    $(document).ready(function() {
+        var start = new Date()
+        var start_secs = Math.floor(start.getTime() / 1000)
+        start.setMilliseconds(0)
+            //console.log('http://' + document.domain + ':' + location.port + "/")
+        var addr = '192.168.0.101'
+        var port = '8000'
+        var uri = '/'
+        var score = {}
+        var match_number = -1;
+        var autonomous = true;
+        var lcm = null; //new LCM("ws://" + addr + ":" + port + uri)
+        var alliances = {
+            "blue": 0,
+            "gold": 2
+        }
+        var chests = {
+            "gold": 0,
+            "pirate": 1
+        }
+        /* For Sound Playback when stage ends (?) */
+        sounds = {
+            eecs: new Audio("sound/loop.mp3"), 
+            bell: new Audio("sound/bell2.wav"), 
+            end: new Audio("sound/end2.wav"), 
+            autonomous_start: new Audio("sound/autonomous-start.wav"),
+            autonomous_end: new Audio("sound/autonomous-end.wav"),
+            teleop_start: new Audio("sound/teleop-start.wav"),
+            lighthouse: new Audio("sound/lighthouse.wav"),
+            warning: new Audio("sound/warning.mp3")
+        }
+        var lastStage = "Paused";
+        var lighthouse_flag = false;
+        var warning_flag = false;
+
+        var schoolSheetName = 'schools';
+        var qualSheetName = 'qual_matches';
+        var elimSheetName = 'elim_matches';
+        var rankSheetName = 'team_rankings';
+        var public_spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1329UhQ9onylGly0lnkjUD2fN81QuIyWS_f8ZapCtbg0/pubhtml';
+
+        tabletop = Tabletop.init({
+            key: public_spreadsheet_url,
+            callback: function (){
+                // no-op
+            },
+            simpleSheet: false,
+            debug: true
+          });
+
+        function playSound(sound, duration) {
+            sound.pause()
+            sound.currentTime = 0
+            sound.play()
+            setTimeout(function() {sound.pause()}, duration)
+        }
+
+        function handleTimerSound(msg) {
+            console.log("Sound is in handler");
+            if (lastStage !== msg.stage_name) {
+                warning_flag = false
+                lastStage = msg.stage_name
+                switch(msg.stage_name) {
+                    case "Setup":
+                        break;
+                    case "Autonomous":
+                        playSound(sounds['autonomous_start'], 3000)
+                        break;
+                    case "Paused":
+                        playSound(sounds['autonomous_end'], 3000)
+                        break;
+                    case "Teleop":
+                        playSound(sounds['teleop_start'], 3000)
+                        break;
+                    case "End":
+                        playSound(sounds['end'], 3000)
+                        break;
+                    default:
+                        console.log("ERROR BAD STAGE NAME")
+                }
+            }
+            if (lastStage == "Teleop" && (msg.total_stage_time - msg.stage_time_so_far) < 15000 && !warning_flag) {
+                warning_flag = true;
+                playSound(sounds['warning'], 3000)
+            }
+        }
+
+        function handleLighthouseSound(msg) {
+            console.log("Sound is in lighthousehandlge");
+            if (msg.enabled && msg.available) {
+                lighthouse_flag = false;
+            }
+
+            if (msg.enabled && !msg.available && !lighthouse_flag) {
+                lighthouse_flag = true;
+                playSound(sounds['lighthouse'], 3000)
+            }
+        }
+        var time = 0
+        //var clock = "0:0.0"
+        var timestamp = Date.now()
+        function updateTimer(msg) {
+            // $(".phase-display").text(msg.stage_name);
+            var width = 100;
+            var text = msg.stage_name;
+            var active = false;
+            time = 0;
+            timestamp = Date.now()
+            switch (msg.stage_name) {
+                case "Autonomous":
+                case "Teleop":
+                    width = 100 * (msg.total_stage_time - msg.stage_time_so_far) / msg.total_stage_time;
+                    text = msg.stage_name
+                    time = ((msg.total_stage_time - msg.stage_time_so_far) / 1000).toFixed(1);
+                    active = true;
+                    break;
+            }
+            if (active) {
+                $(".timer div").addClass("active")
+                if (width > 20) {
+                    $(".timer div").addClass("progress-bar-success")
+                    $(".timer div").removeClass("progress-bar-info")
+                    $(".timer div").removeClass("progress-bar-warning")
+                    $(".timer div").removeClass("progress-bar-danger")
+                } else if (width > 5) {
+                    $(".timer div").addClass("progress-bar-warning")
+                    $(".timer div").removeClass("progress-bar-success")
+                    $(".timer div").removeClass("progress-bar-info")
+                    $(".timer div").removeClass("progress-bar-danger")
+                } else {
+                    $(".timer div").addClass("progress-bar-danger")
+                    $(".timer div").removeClass("progress-bar-success")
+                    $(".timer div").removeClass("progress-bar-info")
+                    $(".timer div").removeClass("progress-bar-warning")
+                }
+            } else {
+                $(".timer div").removeClass("active")
+                $(".timer div").addClass("progress-bar-info")
+                $(".timer div").removeClass("progress-bar-success")
+                $(".timer div").removeClass("progress-bar-warning")
+                $(".timer div").removeClass("progress-bar-danger")
+            }
+            $(".timer div").width(width + "%");
+            $(".timer span").text(text);
+            var clock = Math.floor(time/60) + ":"  + (Math.floor(time % 60) < 10 ? "0" : "") +  Math.floor(time % 60) + "." + Math.floor((10*time) % 10)
+            $(".clock").text(clock);
+        }
+        // setInterval(function(){
+        //     var temp = time - (Date.now() - timestamp)/1000;
+        //     if (time == 0) {
+        //         temp = 0;
+        //     }
+        //     var clock = Math.floor(temp/60) + ":" + (Math.floor(temp % 60) < 10 ? "0" : "")  + Math.floor(temp % 60) + "." + Math.floor((10*temp) % 10)
+        //     $(".clock").text(clock);
+        // }, 20);
+
+        function handleTime(msg) {
+            updateTimer(msg);
+
+            if (!$(".auto").prop('checked')) {
+                return;
+            }
+            switch (msg.stage_name) {
+                case "Setup":
+                case "Autonomous":
+                case "Pause":
+                    autonomous = true;
+                    break;
+                case "Teleop":
+                case "End":
+                    autonomous = false;
+                    break;
+            }
+            if (autonomous) {
+                $(".phase").val("Autonomous");
+            } else {
+                $(".phase").val("Teleop");
+            }
+            match_number = msg.match_number;
+            $(".match").val(match_number);
+        }
+
+        function handleScore(msg) {
+            console.log("NEWSCORE!")
+            score = msg;
+            updateLiveScore(msg);
+            updateLiveScoreBreakdown();
+        }
+
+        function handleBeat(msg) {
+            $(".heartbeat").toggleClass("contracted", msg.state)
+        }
+
+        function handleMatch(msg) {
+            $(".team-0").text(msg.team_numbers[0] + " " + msg.team_names[0])
+            $(".team-1").text(msg.team_numbers[1] + " " + msg.team_names[1])
+            $(".team-2").text(msg.team_names[2] + " " + msg.team_numbers[2])
+            $(".team-3").text(msg.team_names[3] + " " + msg.team_numbers[3])
+            $(".match-num").text("Match " + msg.match_number)
+        }
+
+        function updateLiveScore(msg) {
+            var blue = 20 * msg.treasure_autonomous[0] + 15 * msg.treasure_autonomous[1] + 10 * msg.treasure_teleop[0] + 5 * msg.treasure_teleop[1];
+            var gold = 20 * msg.treasure_autonomous[2] + 15 * msg.treasure_autonomous[3] + 10 * msg.treasure_teleop[2] + 5 * msg.treasure_teleop[3];
+            $(".score-blue").text(blue);
+            $(".score-gold").text(gold);
+
+
+        }
+
+        function updateLiveScoreBreakdown() {
+            for (alliance in alliances) {
+                for (chest in chests) {
+                    $("." + alliance + "#" + chest + " .score-autonomous").text("A: " + score.treasure_autonomous[alliances[alliance] + chests[chest]])
+                    $("." + alliance + "#" + chest + " .score-teleop").text("T: " + score.treasure_teleop[alliances[alliance] + chests[chest]])
+                }
+            }
+            //$(".blue#gold .score-autonomous").text("A: " + score.treasure_autonomous[0])
+        }
+
+        function updateLighthouse(msg) {
+            var status = 'Offline'
+            if (msg.enabled) {
+                
+                if (msg.available) {
+                    $(".lighthouse-timer div").removeClass("active")
+                    $(".lighthouse-timer div").width("100%");
+                    $(".lighthouse-timer div").addClass("progress-bar-success");
+                    $(".lighthouse-timer div").removeClass("progress-bar-danger");
+                    $(".lighthouse-timer div").removeClass("progress-bar-info");
+                    status = 'Lighthouse Chief Available'
+                } else {
+                    $(".lighthouse-timer div").addClass("active")
+                    $(".lighthouse-timer div").width(100 * msg.time_left / 10000 + "%");
+                    $(".lighthouse-timer div").addClass("progress-bar-danger");
+                    $(".lighthouse-timer div").removeClass("progress-bar-success");
+                    $(".lighthouse-timer div").removeClass("progress-bar-info");
+                    status = 'Lighthouse Chief Unavailable for ' + (msg.time_left / 1000).toFixed(1)
+                }
+            } else {
+                $(".lighthouse-timer div").removeClass("active")
+                $(".lighthouse-timer div").width("100%");
+                $(".lighthouse-timer div").addClass("progress-bar-info");
+                $(".lighthouse-timer div").removeClass("progress-bar-danger");
+                $(".lighthouse-timer div").removeClass("progress-bar-success");
+                status = 'Lighthouse Chief Disabled'
+            }
+            $(".lighthouse-timer span").text(status)
+        }
+
+        function increment(alliance, chest, amount) {
+            msg = {
+                __type__: "LiveScore",
+                match_number: parseInt($(".match").val()),
+                pearl: [0, 0, 0, 0],
+                water_autonomous: [0, 0, 0, 0],
+                treasure_autonomous: [0, 0, 0, 0],
+                water_teleop: [0, 0, 0, 0],
+                treasure_teleop: [0, 0, 0, 0]
+            }
+            if ($(".phase").val() == "Autonomous") {
+                msg.treasure_autonomous[alliances[alliance] + chests[chest]] += amount;
+            }
+            if ($(".phase").val() == "Teleop") {
+                msg.treasure_teleop[alliances[alliance] + chests[chest]] += amount;
+            }
+            console.log(msg)
+            lcm.publish("LiveScore/ScoreDelta", msg);
+        }
+        $(".blue#gold .inc").click(function() {
+            increment("blue", "gold", 1)
+        });
+        $(".blue#pirate .inc").click(function() {
+            increment("blue", "pirate", 1)
+        });
+        $(".gold#gold .inc").click(function() {
+            increment("gold", "gold", 1)
+        });
+        $(".gold#pirate .inc").click(function() {
+            increment("gold", "pirate", 1)
+        });
+        $(".blue#gold .dec").click(function() {
+            increment("blue", "gold", -1)
+        });
+        $(".blue#pirate .dec").click(function() {
+            increment("blue", "pirate", -1)
+        });
+        $(".gold#gold .dec").click(function() {
+            increment("gold", "gold", -1)
+        });
+        $(".gold#pirate .dec").click(function() {
+            increment("gold", "pirate", -1)
+        });
+        $(".match,.phase").change(function() {
+            $(".auto").prop("checked", false)
+        })
+        $(".match").keypress(function() {
+            $(".auto").prop("checked", false)
+        })
+        $("#address").change(function() {
+                makeLCM($("#address").val())
+            })
+            // lcm.on_ready(function() {
+            //     lcm.subscribe("Timer/Time", "Time", handleTime);
+            //     lcm.subscribe("LiveScore/LiveScore", "LiveScore", function(msg) {
+            //         if (JSON.stringify(score) != JSON.stringify(msg)){
+            //             $("#score").html(JSON.stringify(msg, null, 4));
+            //             score = msg;
+            //             console.log(score);
+            //         }
+            //     });
+            // });
+        // makeLCM()
+        $("#send_diff").click(function() {
+            msg = JSON.parse($("#delta").val())
+            msg.__type__ = "LiveScore";
+            lcm.publish("LiveScore/ScoreDelta", msg);
+        });
+
+
+        $("#populate-score").click(function() {
+            var matchNumber = $("#new-match-num").val()
+            var isQuals = parseInt(matchNumber) < 100;
+            var match = null;
+            tabletop.fetch();
+            if (isQuals) {
+                var data = tabletop.sheets(qualSheetName);
+                var qualMatches = data.all();
+                for (var i = 0; i < qualMatches.length; i ++) {
+                    if (qualMatches[i]['MatchNumber'] == matchNumber) {
+                        match = qualMatches[i];
+                        break;
+                    }
+                }
+            } else {
+                // Elimination matches
+                var data = tabletop.sheets(elimSheetName);
+                var elimMatches = data.all();
+                var i = matchNumber - 100 - 2;
+
+                if (i < elimMatches.length) {
+                    match = elimMatches[i];
+                }
+            }
+
+
+            var blue1_name = match['Blue1Name'];
+            var blue2_name = match['Blue2Name'];
+            var gold1_name = match['Gold1Name'];
+            var gold2_name = match['Gold2Name'];
+
+            var blue1_number = match['Blue1Number'];
+            var blue2_number = match['Blue2Number'];
+            var gold1_number = match['Gold1Number'];
+            var gold2_number = match['Gold2Number'];
+
+
+            var blue_score = match['BlueScore'];
+            var gold_score = match['GoldScore'];
+
+            $(".team-0").text(blue1_number + " " + blue1_name);
+            $(".team-1").text(blue2_number + " " + blue2_name);
+            $(".team-2").text(gold1_name + " " + gold1_number);
+            $(".team-3").text(gold2_name + " " + gold2_number);
+            $(".match-num").text("Match " + match_number);
+            $(".score-blue").text(blue_score);
+            $(".score-gold").text(gold_score);  
+
+        })
+        //renderAll()
+    })
+    </script>
+</head>
+
+<body>
+    <!-- <button id="send_diff">Start Game</button> -->
+    <nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand pull-left" href="index.html"><img alt="Brand" src="favicon.ico"></a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="scoreboard.html">Scoreboard</a></li>
+        <li><a href="live_score.html">Live Scoring</a></li>
+        <li><a href="match_control.html">Match Control</a></li>
+        <li><a href="robot_control.html">Robot Control</a></li>
+        <li><a href="network_monitor.html">Network Monitor</a></li>        
+      </ul>
+    </div><!-- /.navbar-collapse -->
+    
+  </div><!-- /.container-fluid -->
+</nav>
+    <div class="container" style="width: 90%">
+        <h1>Scoreboard<small><span class="glyphicon glyphicon-heart heartbeat" aria-hidden="true"></span></small></h1>
+
+
+
+
+
+
+
+
+
+                    <div class="panel"> 
+                        <div class="panel-body">
+                  <table style="width:100%">
+                    <tr id="score-container">
+                      <td>
+                        <div class="text-center pioneers-blue btn score" style="float:left">
+                          <div style="float:left; text-align:left">
+                            <div class="team team-0" id="team3">Test
+                            </div>
+                            <div class="team team-1" id="team2">Test
+                            </div>
+                          </div>
+                          <div id="blue-total-score" class="score-blue" style="float:right">6
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div id="game-clock" class="text-center clock" style="font-size: 50px;">Final Score</div>
+                        <div class="text-center match-num" style="font-size: 30px;">Match -1</div>
+                      </td>
+                      <td>
+                        <div class="text-center pioneers-gold btn score" style="float:left">
+                          <div id="gold-total-score" class="score-gold" style="float:left">7
+                          </div>
+                          <div style="float:right; text-align:right">
+                            <div class="team team-2" id="team1">Test
+                            </div>
+                            <div class="team team-3" id="team0">Test
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+
+
+        <div class="row" style="padding-top: 20px;">
+            <div class="col-xs-12 col-md-12">
+                <div class="progress timer">
+                    <div class="progress-bar progress-bar-striped progress-bar-info" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                        <span>End</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="progress lighthouse-timer">
+                    <div class="progress-bar progress-bar-striped progress-bar-info" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                        <span>Post Match</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h2>Settings</h2>
+
+        <div class="row">
+            <div class="col-md-6"><div class="input-group">
+                <span class="input-group-addon" id="basic-addon1">Match Number:</span>
+                  <input type="number" class="form-control" id="new-match-num"placeholder="Match number" aria-describedby="basicaddon1">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" id="populate-score" type="button">Populate</button>
+                  </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
