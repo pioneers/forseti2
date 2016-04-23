@@ -6,6 +6,14 @@ rm dawn-linux-x64.tar.gz*
 sudo rm -rf /opt/driver_station
 sudo mv dawn-linux-x64 /opt/driver_station
 sudo chmod -r 777 /opt/driver_station
+DEFAULT_FIELD_IP=192.168.0.101
+echo -n "Field IP (default $DEFAULT_FIELD_IP) ?"
+read FIELD_IP
+[ -z $FIELD_IP ] && FIELD_IP="$DEFAULT_FIELD_IP"
+echo -n "$FIELD_IP" > /opt/driver_station/lcm_bridge_addr.txt
+echo -n "Station number ?"
+read STATION_NUMBER
+echo -n "$STATION_NUMBER" > /opt/driver_station/station_number.txt
 # # get curl
 # sudo apt-get install -y curl
 
