@@ -13,5 +13,4 @@ struct LiveScore {
     int32_t treasure_autonomous[4];
     int32_t water_teleop[4];
     int32_t treasure_teleop[4];
-
 }

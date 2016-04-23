@@ -240,6 +240,23 @@
             console.log(msg)
             lcm.publish("LiveScore/ScoreDelta", msg);
         }
+
+        function increment_raw(alliance, amount) {
+            msg = {
+                __type__: "LiveScore",
+                match_number: parseInt($(".match").val()),
+                pearl: [0, 0, 0, 0],
+                water_autonomous: [0, 0, 0, 0],
+                treasure_autonomous: [0, 0, 0, 0],
+                water_teleop: [0, 0, 0, 0],
+                treasure_teleop: [0, 0, 0, 0]
+            }
+
+            msg.treasure_teleop[alliances[alliance] + chests['pirate']] += amount;
+            console.log(msg)
+            lcm.publish("LiveScore/ScoreDelta", msg);
+        }
+
         $(".blue#gold .inc").click(function() {
             increment("blue", "gold", 1)
         });
@@ -263,6 +280,18 @@
         });
         $(".gold#pirate .dec").click(function() {
             increment("gold", "pirate", -1)
+        });
+        $(".blue#5 .inc").click(function() {
+            increment_raw("blue", 1)
+        });
+        $(".gold#5 .inc").click(function() {
+            increment_raw("gold", 1)
+        });
+        $(".blue#5 .dec").click(function() {
+            increment_raw("blue", -1)
+        });
+        $(".gold#5 .dec").click(function() {
+            increment_raw("gold", -1)
         });
         $(".match,.phase").change(function() {
             $(".auto").prop("checked", false)
@@ -451,6 +480,13 @@
                         <span class="badge score-teleop">T: 0</span>
                         <span class="badge score-autonomous">A: 0</span>
                     </li>
+                    <li class="list-group-item blue" id="5">
+                        5
+                        <div class="btn-group btn-group-xs" role="group">
+                            <button class="btn btn-success inc">+</button>
+                            <button class="btn btn-danger dec">-</button>
+                        </div>
+                    </li>
                 </ul>
             </div>
             <div class="col-md-3 col-md-offset-0">
@@ -474,6 +510,13 @@
                         </div>
                         <span class="badge score-teleop">T: 0</span>
                         <span class="badge score-autonomous">A: 0</span>
+                    </li>
+                    <li class="list-group-item gold" id="5">
+                        5
+                        <div class="btn-group btn-group-xs" role="group">
+                            <button class="btn btn-success inc">+</button>
+                            <button class="btn btn-danger dec">-</button>
+                        </div>
                     </li>
                 </ul>
             </div>
