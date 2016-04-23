@@ -1,0 +1,633 @@
+<html>
+
+<head>
+    <title>Robot Control</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <script type="text/javascript" src="jquery-1.12.3.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="bootstrap-3.3.6-dist/css/bootstrap.min.css">
+    <!-- Optional theme -->
+<!--             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous"> -->
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+    <script type="text/javascript" src="lcm_ws_bridge.js"></script>
+    <style>
+    .progress {
+        text-align: center;
+    }
+    
+    .progress span {
+        position: absolute;
+        /*        display: block;*/
+        /*        width: 100%;
+*/
+        color: black;
+        right: 0;
+        left: 0;
+    }
+    
+    .heartbeat {
+        color: red !important ;
+    }
+    
+    .heartbeat.contracted {
+        font-size: 75%;
+    }
+    
+    .chest-name {
+        width: 100px;
+    }
+    
+    .pioneers-blue {
+        background-color: #363895;
+    }
+    
+    .pioneers-gold {
+        background-color: #c7aa36;
+    }
+    
+    .pioneers-blue,
+    .pioneers-gold {
+        color: white;
+    }
+    
+    .clock div {
+        margin-top: 0px;
+        font-size: 30px;
+    }
+    
+    .clock {
+        padding: 0px;
+    }
+    </style>
+    <script type="text/javascript" charset="utf-8">
+    $(document).ready(function() {
+        var start = new Date()
+        var start_secs = Math.floor(start.getTime() / 1000)
+        start.setMilliseconds(0)
+            //console.log('http://' + document.domain + ':' + location.port + "/")
+        var addr = '192.168.0.101'
+        var port = '8000'
+        var uri = '/'
+        var score = {}
+        var match_number = -1;
+        var autonomous = true;
+        var lcm = null; //new LCM("ws://" + addr + ":" + port + uri)
+        var alliances = {
+            "blue": 0,
+            "gold": 2
+        }
+        var chests = {
+            "gold": 0,
+            "pirate": 1
+        }
+
+        function updateTimer(msg) {
+            // $(".phase-display").text(msg.stage_name);
+            var width = 100;
+            var text = msg.stage_name;
+            var active = false;
+            var time = 0;
+            switch (msg.stage_name) {
+                case "Autonomous":
+                case "Teleop":
+                    width = 100 * (msg.total_stage_time - msg.stage_time_so_far) / msg.total_stage_time;
+                    text = msg.stage_name
+                    time = ((msg.total_stage_time - msg.stage_time_so_far) / 1000).toFixed(1);
+                    active = true;
+                    break;
+            }
+            if (active) {
+                $(".timer div").addClass("active")
+                if (width > 20) {
+                    $(".timer div").addClass("progress-bar-success")
+                    $(".timer div").removeClass("progress-bar-info")
+                    $(".timer div").removeClass("progress-bar-warning")
+                    $(".timer div").removeClass("progress-bar-danger")
+                } else if (width > 5) {
+                    $(".timer div").addClass("progress-bar-warning")
+                    $(".timer div").removeClass("progress-bar-success")
+                    $(".timer div").removeClass("progress-bar-info")
+                    $(".timer div").removeClass("progress-bar-danger")
+                } else {
+                    $(".timer div").addClass("progress-bar-danger")
+                    $(".timer div").removeClass("progress-bar-success")
+                    $(".timer div").removeClass("progress-bar-info")
+                    $(".timer div").removeClass("progress-bar-warning")
+                }
+            } else {
+                $(".timer div").removeClass("active")
+                $(".timer div").addClass("progress-bar-info")
+                $(".timer div").removeClass("progress-bar-success")
+                $(".timer div").removeClass("progress-bar-warning")
+                $(".timer div").removeClass("progress-bar-danger")
+            }
+            $(".timer div").width(width + "%");
+            $(".timer span").text(text);
+            $(".clock div").text(time);
+        }
+
+        function handleTime(msg) {
+            updateTimer(msg);
+
+            if (!$(".auto").prop('checked')) {
+                return;
+            }
+            switch (msg.stage_name) {
+                case "Setup":
+                case "Autonomous":
+                case "Pause":
+                    autonomous = true;
+                    break;
+                case "Teleop":
+                case "End":
+                    autonomous = false;
+                    break;
+            }
+            if (autonomous) {
+                $(".phase").val("Autonomous");
+            } else {
+                $(".phase").val("Teleop");
+            }
+            match_number = msg.match_number;
+            $(".match").val(match_number);
+        }
+
+        function handleScore(msg) {
+            console.log("NEWSCORE!")
+            score = msg;
+            updateLiveScore(msg);
+            updateLiveScoreBreakdown();
+        }
+
+        function handleBeat(msg) {
+            $(".heartbeat").toggleClass("contracted", msg.state)
+        }
+
+        function handleMatch(msg) {
+            $(".team-0").text(msg.team_numbers[0] + " " + msg.team_names[0])
+            $(".team-1").text(msg.team_numbers[1] + " " + msg.team_names[1])
+            $(".team-2").text(msg.team_names[2] + " " + msg.team_numbers[2])
+            $(".team-3").text(msg.team_names[3] + " " + msg.team_numbers[3])
+        }
+
+        function updateLiveScore(msg) {
+            var blue = 20 * msg.treasure_autonomous[0] + 15 * msg.treasure_autonomous[1] + 10 * msg.treasure_teleop[0] + 5 * msg.treasure_teleop[1];
+            var gold = 20 * msg.treasure_autonomous[2] + 15 * msg.treasure_autonomous[3] + 10 * msg.treasure_teleop[2] + 5 * msg.treasure_teleop[3];
+            $(".score-blue").text(blue);
+            $(".score-gold").text(gold);
+
+
+        }
+
+        function updateLiveScoreBreakdown() {
+            for (alliance in alliances) {
+                for (chest in chests) {
+                    $("." + alliance + "#" + chest + " .score-autonomous").text("A: " + score.treasure_autonomous[alliances[alliance] + chests[chest]])
+                    $("." + alliance + "#" + chest + " .score-teleop").text("T: " + score.treasure_teleop[alliances[alliance] + chests[chest]])
+                }
+            }
+            //$(".blue#gold .score-autonomous").text("A: " + score.treasure_autonomous[0])
+        }
+
+        function updateLighthouse(msg) {
+            var status = 'Offline'
+            if (msg.enabled) {
+                
+                if (msg.available) {
+                    $(".lighthouse-timer div").removeClass("active")
+                    $(".lighthouse-timer div").width("100%");
+                    $(".lighthouse-timer div").addClass("progress-bar-success");
+                    $(".lighthouse-timer div").removeClass("progress-bar-danger");
+                    $(".lighthouse-timer div").removeClass("progress-bar-info");
+                    status = 'Lighthouse Chief Available'
+                } else {
+                    $(".lighthouse-timer div").addClass("active")
+                    $(".lighthouse-timer div").width(100 * msg.time_left / 10000 + "%");
+                    $(".lighthouse-timer div").addClass("progress-bar-danger");
+                    $(".lighthouse-timer div").removeClass("progress-bar-success");
+                    $(".lighthouse-timer div").removeClass("progress-bar-info");
+                    status = 'Lighthouse Chief Unavailable for ' + (msg.time_left / 1000).toFixed(1)
+                }
+            } else {
+                $(".lighthouse-timer div").removeClass("active")
+                $(".lighthouse-timer div").width("100%");
+                $(".lighthouse-timer div").addClass("progress-bar-info");
+                $(".lighthouse-timer div").removeClass("progress-bar-danger");
+                $(".lighthouse-timer div").removeClass("progress-bar-success");
+                status = 'Lighthouse Chief Disabled'
+            }
+            $(".lighthouse-timer span").text(status)
+        }
+
+        function increment(alliance, chest, amount) {
+            msg = {
+                __type__: "LiveScore",
+                match_number: parseInt($(".match").val()),
+                pearl: [0, 0, 0, 0],
+                water_autonomous: [0, 0, 0, 0],
+                treasure_autonomous: [0, 0, 0, 0],
+                water_teleop: [0, 0, 0, 0],
+                treasure_teleop: [0, 0, 0, 0]
+            }
+            if ($(".phase").val() == "Autonomous") {
+                msg.treasure_autonomous[alliances[alliance] + chests[chest]] += amount;
+            }
+            if ($(".phase").val() == "Teleop") {
+                msg.treasure_teleop[alliances[alliance] + chests[chest]] += amount;
+            }
+            lcm.publish("LiveScore/ScoreDelta", msg);
+        }
+        function change_robot_state(robot, state) {
+            if (state == "autonomous") {
+                msg = {
+                    __type__: "RobotState",
+                    running: true,
+                    autonomous: true,
+                    enabled: true
+                }                
+            } else if (state == "teleop") {
+                msg = {
+                    __type__: "RobotState",
+                    running: true,
+                    autonomous: false,
+                    enabled: true
+                }                
+            } else if (state == "disabled") {
+                msg = {
+                    __type__: "RobotState",
+                    running: true,
+                    autonomous: true,
+                    enabled: false
+                }                
+            }
+            lcm.publish("Robot"+robot+"/RobotState", msg)
+        }
+        function make_update_robot_state(index) {
+            function update_robot_state(msg) {
+                $(".robot-" + index + "-estop,.robot-" + index + "-autonomous,.robot-" + index + "-teleop,.robot-" + index + "-disabled").removeClass("active");
+                if (msg.running) {
+                if (!msg.enabled) {
+                    $(".robot-" + index + "-disabled").addClass("active");
+                } else if (msg.autonomous) {
+                    $(".robot-" + index + "-autonomous").addClass("active");
+                } else {
+                    $(".robot-" + index + "-teleop").addClass("active");
+                }
+
+                if (msg.estop) {
+                    $(".robot-" + index + "-estop").addClass("active");
+                } else{
+                    $(".robot-" + index + "-estop").removeClass("active");
+                }
+                }
+                if (msg.estop) {
+                    $(".robot-" + index + "-estop").addClass("active");
+                }
+                // console.log(".robot-" + index + "teleop")
+                // $(".robot-" + index + "teleop").addClass("active");
+            }
+            return update_robot_state;
+        }
+
+        function override_robot(robot, override) {
+            msg = {__type__: "Override", override: override}
+            lcm.publish("Robot" + robot + "/Override", msg)
+        }
+        function estop_robot(robot) {
+            lcm.publish("Robot" + robot + "/Estop", {__type__: "Estop", estop: true})
+        }
+        $(".blue#gold .inc").click(function() {
+            increment("blue", "gold", 1)
+        });
+        $(".blue#pirate .inc").click(function() {
+            increment("blue", "pirate", 1)
+        });
+        $(".gold#gold .inc").click(function() {
+            increment("gold", "gold", 1)
+        });
+        $(".gold#pirate .inc").click(function() {
+            increment("gold", "pirate", 1)
+        });
+        $(".blue#gold .dec").click(function() {
+            increment("blue", "gold", -1)
+        });
+        $(".blue#pirate .dec").click(function() {
+            increment("blue", "pirate", -1)
+        });
+        $(".gold#gold .dec").click(function() {
+            increment("gold", "gold", -1)
+        });
+        $(".gold#pirate .dec").click(function() {
+            increment("gold", "pirate", -1)
+        });
+        $(".match,.phase").change(function() {
+            $(".auto").prop("checked", false)
+        })
+        $(".match").keypress(function() {
+            $(".auto").prop("checked", false)
+        })
+        $(".robot-0-autonomous").click(function() {
+            change_robot_state(0, "autonomous")
+        })
+        $(".robot-0-teleop").click(function() {
+            change_robot_state(0, "teleop")
+        })
+        $(".robot-0-disabled").click(function() {
+            change_robot_state(0, "disabled")
+        })
+
+        $(".robot-1-autonomous").click(function() {
+            change_robot_state(1, "autonomous")
+        })
+        $(".robot-1-teleop").click(function() {
+            change_robot_state(1, "teleop")
+        })
+        $(".robot-1-disabled").click(function() {
+            change_robot_state(1, "disabled")
+        })
+
+        $(".robot-2-autonomous").click(function() {
+            change_robot_state(2, "autonomous")
+        })
+        $(".robot-2-teleop").click(function() {
+            change_robot_state(2, "teleop")
+        })
+        $(".robot-2-disabled").click(function() {
+            change_robot_state(2, "disabled")
+        })
+
+        $(".robot-3-autonomous").click(function() {
+            change_robot_state(3, "autonomous")
+        })
+        $(".robot-3-teleop").click(function() {
+            change_robot_state(3, "teleop")
+        })
+        $(".robot-3-disabled").click(function() {
+            change_robot_state(3, "disabled")
+        })
+
+        $(".robot-0-override").change(function() {
+            override_robot(0, this.checked)
+        })
+        $(".robot-1-override").change(function() {
+            override_robot(1, this.checked)
+        })
+        $(".robot-2-override").change(function() {
+            override_robot(2, this.checked)
+        })
+        $(".robot-3-override").change(function() {
+            override_robot(3, this.checked)
+        })
+
+        $(".robot-0-estop").click(function() {
+            estop_robot(0)
+        })
+        $(".robot-1-estop").click(function() {
+            estop_robot(1)
+        })
+        $(".robot-2-estop").click(function() {
+            estop_robot(2)
+        })
+        $(".robot-3-estop").click(function() {
+            estop_robot(3)
+        })
+
+        $("#address").change(function() {
+                makeLCM($("#address").val())
+            })
+            // lcm.on_ready(function() {
+            //     lcm.subscribe("Timer/Time", "Time", handleTime);
+            //     lcm.subscribe("LiveScore/LiveScore", "LiveScore", function(msg) {
+            //         if (JSON.stringify(score) != JSON.stringify(msg)){
+            //             $("#score").html(JSON.stringify(msg, null, 4));
+            //             score = msg;
+            //             console.log(score);
+            //         }
+            //     });
+            // });
+        function makeLCM(url) {
+            console.log('attempting to connect to ' + url)
+            if (url == undefined) {
+                url = '192.168.0.101'
+            }
+            lcm = new LCM('ws://' + url + ':8000/');
+
+            function subscribeAll() {
+                console.log('Connected to LCM Bridge')
+                lcm.subscribe("Timer/Time", "Time", handleTime)
+                lcm.subscribe("LiveScore/LiveScore", "LiveScore", handleScore)
+                lcm.subscribe("Heartbeat/Beat", "Heartbeat", handleBeat)
+                lcm.subscribe("Timer/Match", "Match", handleMatch)
+                lcm.subscribe("LighthouseTimer/LighthouseTime", "LighthouseTime", updateLighthouse)
+                lcm.subscribe("Robot0/RobotControl", "RobotControl", make_update_robot_state(0))
+                lcm.subscribe("Robot1/RobotControl", "RobotControl", make_update_robot_state(1))
+                lcm.subscribe("Robot2/RobotControl", "RobotControl", make_update_robot_state(2))
+                lcm.subscribe("Robot3/RobotControl", "RobotControl", make_update_robot_state(3))
+            }
+
+            function reconnect() {
+                return;
+                makeLCM(url)
+            }
+            lcm.on_ready(subscribeAll)
+            lcm.on_close(reconnect)
+        }
+        makeLCM()
+        $("#send_diff").click(function() {
+            msg = JSON.parse($("#delta").val())
+            msg.__type__ = "LiveScore";
+            lcm.publish("LiveScore/ScoreDelta", msg);
+        });
+        //renderAll()
+    })
+    </script>
+</head>
+
+<body>
+    <!-- <button id="send_diff">Start Game</button> -->
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand pull-left" href="index.html"><img alt="Brand" src="favicon.ico"></a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="activex"><a href="scoreboard.html">Scoreboard</a></li>
+        <li class="activex"><a href="live_score.html">Live Scoring</a></li>
+        <li class="activex"><a href="match_control.html">Match Control</a></li>
+        <li class="active"><a href="robot_control.html">Robot Control</a></li>
+        <li class="activex"><a href="network_monitor.html">Network Monitor</a></li>
+        <li class="activex"><a href="post_match_scoreboard.html">Post Match</a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+    
+  </div><!-- /.container-fluid -->
+</nav>
+    <div class="container">
+        <h1>Robot Control<small><span class="glyphicon glyphicon-heart heartbeat" aria-hidden="true"></span></small></h1>
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="row">
+                    <div class="col-xs-5 col-sm-4">
+                        <div class="panel panel-default pioneers-blue">
+                            <div class="row">
+                                <div class="col-md-7 col-xs-5">
+                                    <div class="team-0">-1 Offline</div>
+                                    <div class="team-1">-1 Offline</div>
+                                </div>
+                                <div class="col-md-1 col-md-offset-3 col-xs-1 col-xs-offset-4">
+                                    <div class="score-blue text-right" style="">?</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-2 col-sm-4 clock">
+                        <div class="text-center">1:00</div>
+                    </div>
+                    <div class="col-xs-5 col-sm-4">
+                        <div class="panel panel-default pioneers-gold">
+                            <div class="row">
+                                <div class="col-md-1 col-xs-1">
+                                    <div class="score-gold" style="">?</div>
+                                </div>
+                                <div class="col-md-7  col-md-offset-3 col-xs-5 col-xs-offset-4">
+                                    <div class="team-2 text-right">-1 Offline</div>
+                                    <div class="team-3 text-right">-1 Offline</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="progress timer">
+                    <div class="progress-bar progress-bar-striped progress-bar-info" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                        <span>Offline</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="progress lighthouse-timer">
+                    <div class="progress-bar progress-bar-striped progress-bar-info" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                        <span>Offline</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h2>Settings</h2>
+        <div class="row">
+            <div class="col-md-3 col-md-offset-0">
+                <div class="input-group">
+                    <span class="input-group-addon">ws://</span>
+                    <input type="text" class="form-control" id="address" placeholder="server address" value="192.168.0.101" aria-describedby="basic-addon2">
+                    <span class="input-group-addon" id="basic-addon2">:8000</span>
+                </div>
+            </div>
+        </div>
+        <h2>Robots</h2>
+
+        <div class="row">
+            <div class="col-md-3"><h4 class="robot-0-name">Robot 0 #000 Test School</h4></div>
+            <div class="col-md-3">
+
+                <div class="btn-group" role="group" aria-label="...">
+                  <button type="button" class="btn btn-default btn-primary robot-0-autonomous">Autonomous</button>
+                  <button type="button" class="btn btn-default btn-success robot-0-teleop">Teleop</button>
+                  <button type="button" class="btn btn-default btn-warning robot-0-disabled active">Disabled</button>
+              </div>
+          </div>
+          <div class='col-md-2'>
+          <div class="checkbox">
+            <label>
+            <input type="checkbox" class="robot-0-override">Manual Override</label>
+            </div>
+            </div>
+            <div class='col-md-1'>
+            <button type="button" class="btn btn-default btn-danger robot-0-estop">Estop</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3"><h4 class="robot-1-name">Robot 1 #111 Test School</h4></div>
+            <div class="col-md-3">
+
+                <div class="btn-group" role="group" aria-label="...">
+                  <button type="button" class="btn btn-default btn-primary robot-1-autonomous">Autonomous</button>
+                  <button type="button" class="btn btn-default btn-success robot-1-teleop">Teleop</button>
+                  <button type="button" class="btn btn-default btn-warning robot-1-disabled active">Disabled</button>
+              </div>
+          </div>
+          <div class='col-md-2'>
+          <div class="checkbox">
+            <label>
+            <input type="checkbox" class="robot-1-override">Manual Override</label>
+            </div>
+            </div>
+            <div class='col-md-1'>
+            <button type="button" class="btn btn-default btn-danger robot-1-estop">Estop</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3"><h4 class="robot-2-name">Robot 2 #222 Test School</h4></div>
+            <div class="col-md-3">
+
+                <div class="btn-group" role="group" aria-label="...">
+                  <button type="button" class="btn btn-default btn-primary robot-2-autonomous">Autonomous</button>
+                  <button type="button" class="btn btn-default btn-success robot-2-teleop">Teleop</button>
+                  <button type="button" class="btn btn-default btn-warning robot-2-disabled active">Disabled</button>
+              </div>
+          </div>
+          <div class='col-md-2'>
+          <div class="checkbox">
+            <label>
+            <input type="checkbox" class="robot-2-override">Manual Override</label>
+            </div>
+            </div>
+            <div class='col-md-1'>
+            <button type="button" class="btn btn-default btn-danger robot-2-estop">Estop</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3"><h4 class="robot-3-name">Robot 3 #333 Test School</h4></div>
+            <div class="col-md-3">
+
+                <div class="btn-group" role="group" aria-label="...">
+                  <button type="button" class="btn btn-default btn-primary robot-3-autonomous">Autonomous</button>
+                  <button type="button" class="btn btn-default btn-success robot-3-teleop">Teleop</button>
+                  <button type="button" class="btn btn-default btn-warning robot-3-disabled active">Disabled</button>
+              </div>
+          </div>
+          <div class='col-md-2'>
+          <div class="checkbox">
+            <label>
+            <input type="checkbox" class="robot-3-override">Manual Override</label>
+            </div>
+            </div>
+            <div class='col-md-1'>
+            <button type="button" class="btn btn-default btn-danger robot-3-estop">Estop</button>
+            </div>
+        </div>
+
+
+        </div>
+    </div>
+</body>
+
+</html>
