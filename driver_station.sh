@@ -5,6 +5,7 @@ sudo tar -xvzf dawn-linux-x64.tar.gz
 rm dawn-linux-x64.tar.gz*
 sudo rm -rf /opt/driver_station
 sudo mv dawn-linux-x64 /opt/driver_station
+sudo chmod -r 777 /opt/driver_station
 # # get curl
 # sudo apt-get install -y curl
 
