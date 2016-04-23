@@ -257,6 +257,9 @@
             if (time == 0) {
                 temp = 0;
             }
+            if (temp < 0) {
+                temp = 0;
+            }
             var clock = Math.floor(temp/60) + ":" + (Math.floor(temp % 60) < 10 ? "0" : "")  + Math.floor(temp % 60) + "." + Math.floor((10*temp) % 10)
             $(".clock").text(clock);
         }, 20);
