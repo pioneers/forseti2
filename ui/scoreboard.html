@@ -159,13 +159,16 @@
                 playSound(sounds['lighthouse'], 3000)
             }
         }
-
+        var time = 0
+        //var clock = "0:0.0"
+        var timestamp = Date.now()
         function updateTimer(msg) {
             // $(".phase-display").text(msg.stage_name);
             var width = 100;
             var text = msg.stage_name;
             var active = false;
-            var time = 0;
+            time = 0;
+            timestamp = Date.now()
             switch (msg.stage_name) {
                 case "Autonomous":
                 case "Teleop":
@@ -202,9 +205,17 @@
             }
             $(".timer div").width(width + "%");
             $(".timer span").text(text);
-            var clock = Math.floor(time/60) + ":"  + time % 60
+            var clock = Math.floor(time/60) + ":"  + (Math.floor(time % 60) < 10 ? "0" : "") +  Math.floor(time % 60) + "." + Math.floor((10*time) % 10)
             $(".clock").text(clock);
         }
+        setInterval(function(){
+            var temp = time - (Date.now() - timestamp)/1000;
+            if (time == 0) {
+                temp = 0;
+            }
+            var clock = Math.floor(temp/60) + ":" + (Math.floor(temp % 60) < 10 ? "0" : "")  + Math.floor(temp % 60) + "." + Math.floor((10*temp) % 10)
+            $(".clock").text(clock);
+        }, 20);
 
         function handleTime(msg) {
             updateTimer(msg);
