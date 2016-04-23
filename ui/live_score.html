@@ -67,7 +67,7 @@
         var start_secs = Math.floor(start.getTime() / 1000)
         start.setMilliseconds(0)
             //console.log('http://' + document.domain + ':' + location.port + "/")
-        var addr = 'localhost'
+        var addr = '192.168.0.101'
         var port = '8000'
         var uri = '/'
         var score = {}
@@ -286,7 +286,7 @@
         function makeLCM(url) {
             console.log('attempting to connect to ' + url)
             if (url == undefined) {
-                url = 'localhost'
+                url = '192.168.0.101'
             }
             lcm = new LCM('ws://' + url + ':8000/');
 
@@ -422,7 +422,7 @@
             <div class="col-md-3 col-md-offset-0">
                 <div class="input-group">
                     <span class="input-group-addon">ws://</span>
-                    <input type="text" class="form-control" id="address" placeholder="server address" value="localhost" aria-describedby="basic-addon2">
+                    <input type="text" class="form-control" id="address" placeholder="server address" value="192.168.0.101" aria-describedby="basic-addon2">
                     <span class="input-group-addon" id="basic-addon2">:8000</span>
                 </div>
             </div>
