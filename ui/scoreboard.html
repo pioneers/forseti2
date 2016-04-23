@@ -13,6 +13,48 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
     <script type="text/javascript" src="lcm_ws_bridge.js"></script>
     <style>
+    
+    #game-clock {
+        font-size: 60px;
+    }
+    .score-heading>th {
+        width: 33.333%;
+    }
+    .score {
+        width : 100%;
+        font-size: 40px;
+    }
+
+    #score-container td{
+        width: 33.3%;
+    }
+
+    .team {
+        font-size: 20px
+    }
+    .pioneers-blue {
+        background-color: #363895;
+    }
+    .pioneers-gold {
+        background-color: #c7aa36;
+    }
+    .pioneers-blue , .pioneers-gold {
+        color: white;
+    }
+
+    .score.btn:hover {
+        
+    }
+
+
+
+
+
+
+
+
+
+
     .progress, .progress-bar {
         text-align: center;
         transition: width 0.3s linear !important;
@@ -29,6 +71,8 @@
         right: 0;
         left: 0;
     }
+
+
     
     .heartbeat {
         color: red;
@@ -439,43 +483,52 @@
 </nav>
     <div class="container" style="width: 90%">
         <h1>Scoreboard<small><span class="glyphicon glyphicon-heart heartbeat" aria-hidden="true"></span></small></h1>
-        <div class="row">
-            <div class="col-xs-12 col-md-12">
-                <div class="row">
-                    <div class="col-xs-5 col-sm-4">
-                        <div class="panel panel-default pioneers-blue">
-                            <div class="row">
-                                <div class="col-md-7 col-xs-5">
-                                    <div class="team-0">-1 Offline</div>
-                                    <div class="team-1">-1 Offline</div>
-                                </div>
-                                <div class="rig col-md-1 col-md-offset-3 col-xs-1 col-xs-offset-4">
-                                    <div class="score-blue text-right" style="">?</div>
-                                </div>
+
+
+
+
+
+
+
+
+
+                    <div class="panel"> 
+                        <div class="panel-body">
+                  <table style="width:100%">
+                    <tr id="score-container">
+                      <td>
+                        <div class="text-center pioneers-blue btn score" style="float:left">
+                          <div style="float:left; text-align:left">
+                            <div class="team team-0" id="team3">Test
                             </div>
+                            <div class="team team-1" id="team2">Test
+                            </div>
+                          </div>
+                          <div id="blue-total-score" class="score-blue" style="float:right">6
+                          </div>
                         </div>
-                    </div>
-                    <div class="col-xs-2 col-sm-4">
-                        <div class="text-center clock" style="font-size: 50px;">1:00</div>
+                      </td>
+                      <td>
+                        <div id="game-clock" class="text-center clock" style="font-size: 50px;">1:00</div>
                         <div class="text-center match-num" style="font-size: 30px;">Match -1</div>
-                    </div>
-                    <div class="col-xs-5 col-sm-4">
-                        <div class="panel panel-default pioneers-gold">
-                            <div class="row">
-                                <div class="col-md-1 col-xs-1">
-                                    <div class="score-gold" style="">?</div>
-                                </div>
-                                <div class="rig col-md-7  col-md-offset-3 col-xs-5 col-xs-offset-4">
-                                    <div class="team-2 text-right">-1 Offline</div>
-                                    <div class="team-3 text-right">-1 Offline</div>
-                                </div>
+                      </td>
+                      <td>
+                        <div class="text-center pioneers-gold btn score" style="float:left">
+                          <div id="gold-total-score" class="score-gold" style="float:left">7
+                          </div>
+                          <div style="float:right; text-align:right">
+                            <div class="team team-2" id="team1">Test
                             </div>
+                            <div class="team team-3" id="team0">Test
+                            </div>
+                          </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
+                      </td>
+                    </tr>
+                  </table>
+
+
+        <div class="row" style="padding-top: 20px;">
             <div class="col-xs-12 col-md-12">
                 <div class="progress timer">
                     <div class="progress-bar progress-bar-striped progress-bar-info" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
