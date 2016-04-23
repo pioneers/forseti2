@@ -6,7 +6,7 @@ sudo tar -xvzf dawn-linux-x64.tar.gz
 rm dawn-linux-x64.tar.gz*
 sudo rm -rf /opt/driver_station
 sudo mv dawn-linux-x64 /opt/driver_station
-sudo chmod -r 777 /opt/driver_station
+sudo chmod -R 777 /opt/driver_station
 DEFAULT_FIELD_IP=192.168.0.101
 echo -n "Field IP (default $DEFAULT_FIELD_IP) ?"
 read FIELD_IP
