@@ -1,7 +1,27 @@
 forseti2
 ========
 
-## to deploy a driver station:
+## To deploy a personal computer driver station:
+
+ - Mac driver station https://www.dropbox.com/s/5f0idms5spxxr11/dawn-darwin-x64.tar.gz?dl=0
+ - Linux driver station https://www.dropbox.com/s/g9ohjmtcfc2ooay/dawn-linux-x64.tar.gz?dl=0
+ - Windows driver station https://www.dropbox.com/s/upey5mz3w7kh8pl/dawn-win32-x64.zip?dl=0
+
+INSTRUCTIONS FOR MAC AND LINUX
+ - Unpack the tar file for your os anywhere.
+ - Run this in terminal
+ - `sudo mkdir /opt/driver_station;sudo chmod -R 777 /opt/driver_station;echo -n "10.31.1.187" > /opt/driver_station/lcm_bridge_addr.txt;echo -n "0" > /opt/driver_station/station_number.txt`
+ - Run the dawn executable in the folder you unpacked in step 1
+
+INSTRUCTIONS FOR WINDOWS
+ - Unzip the zip file anywhere
+ - Create the folder C:\driver_station
+ - Create the file C:\driver_station\lcm_bridge_addr.txt and write “10.31.1.187” WITH NO NEWLINE
+ - Create the file C:\driver_station\station_number.txt and write the station number you want to be (0, 1, 2, 3 => blue1, blue2, gold1, gold2)
+
+
+
+## To deploy a chromebook driver station:
 
 `rm ./driver_station.sh; wget https://raw.githubusercontent.com/pioneers/forseti2/2016/driver_station.sh; chmod +x driver_station.sh; ./driver_station.sh`
 
