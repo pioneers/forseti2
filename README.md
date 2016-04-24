@@ -21,9 +21,15 @@ INSTRUCTIONS FOR WINDOWS
 
 
 
-## To deploy a chromebook driver station:
+## Driver station incantations
 
-`rm ./driver_station.sh; wget https://raw.githubusercontent.com/pioneers/forseti2/2016/driver_station.sh; chmod +x driver_station.sh; ./driver_station.sh`
+### linux
+
+`cd;rm ./driver_station.sh; wget https://raw.githubusercontent.com/pioneers/forseti2/2016/driver_station.sh; chmod +x driver_station.sh; ./driver_station.sh`
+
+### osx
+
+`cd;rm ./driver_station_osx.sh; wget https://raw.githubusercontent.com/pioneers/forseti2/2016/driver_station_osx.sh; chmod +x driver_station_osx.sh; ./driver_station_osx.sh`
 
 [driver station binary](https://dl.dropboxusercontent.com/s/g9ohjmtcfc2ooay/dawn-linux-x64.tar.gz?dl=0)
 
