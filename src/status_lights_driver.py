@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-forest_driver.py
-Created on Thu Mar 27 05:40:16 2014
-
-@author: ajc
-"""
 
 from pyfirmata import ArduinoMega
 import pyfirmata
@@ -73,7 +67,6 @@ if __name__ == '__main__':
     lc = lcm.LCM(settings.LCM_URI)
     lights = StatusLights(lc, sys.argv[1], False)
     print "Ready to receive commands"
-    #sub = lc.subscribe(r"StatusLight([0-9])/StatusLight", f._forest_cmd_handler)
 
     while True:
         time.sleep(1)
