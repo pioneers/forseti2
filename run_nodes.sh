@@ -25,6 +25,4 @@ fi
 
 export TEAMOCIL_PATH="$PWD"
 
-echo "This script must be run in a tmux session"
-echo "If there is an error, type 'tmux' and then re-run the script"
-teamocil --layout ./nodes.yml
+teamocil --layout $PWD/nodes.yml

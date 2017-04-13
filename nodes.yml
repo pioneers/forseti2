@@ -4,8 +4,8 @@ windows:
     layout: tiled
     panes:
       - commands:
-        - "watch -c -t echo 'Hit CTRL-C to SHUT DOWN all of field control'"
-        - "tmux kill-window -t field-control"
+        - echo "Hit enter to SHUT DOWN all of field control"
+        - read test && tmux kill-window -t field-control
         focus: true
       - python lcm_ws_bridge.py
       - python timer.py
