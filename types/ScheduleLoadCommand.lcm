@@ -1,5 +1,0 @@
-package forseti2;
-
-struct ScheduleLoadCommand {
-	boolean clear_first;
-}

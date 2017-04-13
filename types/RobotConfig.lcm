@@ -1,7 +1,0 @@
-package forseti2;
-
-struct RobotConfig {
-    int32_t team_number;
-    int32_t team_name;
-    string ip_address;
-}
