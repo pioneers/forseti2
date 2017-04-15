@@ -173,8 +173,8 @@
         }
 
         function updateLiveScore(msg) {
-            var blue = 20 * msg.treasure_autonomous[0] + 15 * msg.treasure_autonomous[1] + 10 * msg.treasure_teleop[0] + 5 * msg.treasure_teleop[1];
-            var gold = 20 * msg.treasure_autonomous[2] + 15 * msg.treasure_autonomous[3] + 10 * msg.treasure_teleop[2] + 5 * msg.treasure_teleop[3];
+            var blue = 10 * msg.treasure_autonomous[0] + 5 * msg.treasure_autonomous[1] + 1 * msg.treasure_autonomous[2];
+            var gold = 10 * msg.treasure_teleop[0] + 5 * msg.treasure_teleop[1] + 1 * msg.treasure_teleop[2];
             $(".score-blue").text(blue);
             $(".score-gold").text(gold);
 
@@ -231,11 +231,11 @@
                 water_teleop: [0, 0, 0, 0],
                 treasure_teleop: [0, 0, 0, 0]
             }
-            if ($(".phase").val() == "Autonomous") {
-                msg.treasure_autonomous[alliances[alliance] + chests[chest]] += amount;
+            if (alliance == 0) {
+              msg.treasure_autonomous[chest] += amount;
             }
-            if ($(".phase").val() == "Teleop") {
-                msg.treasure_teleop[alliances[alliance] + chests[chest]] += amount;
+            if (alliance == 2) {
+              msg.treasure_teleop[chest] += amount;
             }
             console.log(msg)
             lcm.publish("LiveScore/ScoreDelta", msg);
@@ -258,40 +258,40 @@
         }
 
         $(".blue#gold .inc").click(function() {
-            increment("blue", "gold", 1)
+            increment("blue", 0, 1)
         });
         $(".blue#pirate .inc").click(function() {
-            increment("blue", "pirate", 1)
+            increment("blue", 1, 1)
         });
         $(".gold#gold .inc").click(function() {
-            increment("gold", "gold", 1)
+            increment("gold", 0, 1)
         });
         $(".gold#pirate .inc").click(function() {
-            increment("gold", "pirate", 1)
+            increment("gold", 1, 1)
         });
         $(".blue#gold .dec").click(function() {
-            increment("blue", "gold", -1)
+            increment("blue", 0, -1)
         });
         $(".blue#pirate .dec").click(function() {
-            increment("blue", "pirate", -1)
+            increment("blue", 1, -1)
         });
         $(".gold#gold .dec").click(function() {
-            increment("gold", "gold", -1)
+            increment("gold", 0, -1)
         });
         $(".gold#pirate .dec").click(function() {
-            increment("gold", "pirate", -1)
+            increment("gold", 1, -1)
         });
         $(".blue#5 .inc").click(function() {
-            increment_raw("blue", 1)
+            increment("blue", 2, 1)
         });
         $(".gold#5 .inc").click(function() {
-            increment_raw("gold", 1)
+            increment("gold", 2, 1)
         });
         $(".blue#5 .dec").click(function() {
-            increment_raw("blue", -1)
+            increment("blue", 2, -1)
         });
         $(".gold#5 .dec").click(function() {
-            increment_raw("gold", -1)
+            increment("gold", 2, -1)
         });
         $(".match,.phase").change(function() {
             $(".auto").prop("checked", false)
@@ -457,31 +457,27 @@
                 </div>
             </div>
         </div>
-        <h2>Balls Scored</h2>
+        <h2>Points Scored</h2>
         <div class="row">
             <div class="col-md-3">
                 <h3>Blue Alliance</h3>
                 <ul class="list-group">
                     <li class="list-group-item blue" id="gold">
-                        <span class="">Gold</span>
-                        <span class="badge score-teleop">T: 0</span>
-                        <span class="badge score-autonomous">A: 0</span>
+                        <span class="">10</span>
                         <div class="btn-group btn-group-xs" role="group">
                             <button class="btn btn-success inc">+</button>
                             <button class="btn btn-danger dec">-</button>
                         </div>
                     </li>
                     <li class="list-group-item blue" id="pirate">
-                        Pirate
+                        5 
                         <div class="btn-group btn-group-xs" role="group">
                             <button class="btn btn-success inc">+</button>
                             <button class="btn btn-danger dec">-</button>
                         </div>
-                        <span class="badge score-teleop">T: 0</span>
-                        <span class="badge score-autonomous">A: 0</span>
                     </li>
                     <li class="list-group-item blue" id="5">
-                        5
+                        1
                         <div class="btn-group btn-group-xs" role="group">
                             <button class="btn btn-success inc">+</button>
                             <button class="btn btn-danger dec">-</button>
@@ -494,25 +490,21 @@
                 <ul class="list-group">
                     <li class="list-group-item gold" id="gold">
 
-                        <span class="">Gold</span>
+                        <span class="">10</span>
                         <div class="btn-group btn-group-xs" role="group">
                             <button class="btn btn-success inc">+</button>
                             <button class="btn btn-danger dec">-</button>
                         </div>
-                        <span class="badge score-teleop">T: 0</span>
-                        <span class="badge score-autonomous">A: 0</span>
                     </li>
                     <li class="list-group-item gold" id="pirate">
-                        Pirate
+                        5 
                         <div class="btn-group btn-group-xs" role="group">
                             <button class="btn btn-success inc">+</button>
                             <button class="btn btn-danger dec">-</button>
                         </div>
-                        <span class="badge score-teleop">T: 0</span>
-                        <span class="badge score-autonomous">A: 0</span>
                     </li>
                     <li class="list-group-item gold" id="5">
-                        5
+                        1
                         <div class="btn-group btn-group-xs" role="group">
                             <button class="btn btn-success inc">+</button>
                             <button class="btn btn-danger dec">-</button>
