@@ -13,6 +13,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
     <script type="text/javascript" src="tabletop.js"></script>
     <script type="text/javascript" src="lcm_ws_bridge.js"></script>
+    <script src="matchdb.js"></script>
     <style>
     .progress {
         text-align: center;
@@ -83,6 +84,8 @@
             "gold": 0,
             "pirate": 1
         }
+
+        var matches = matchdb;
 
         // Access to Google Spreadsheet
         // THIS DATA MAY CHANGE FROM YEAR TO YEAR
@@ -283,8 +286,7 @@
             var matchFound = false;
             tabletop.fetch();
             if (isQuals) {
-                var data = tabletop.sheets(qualSheetName);
-                var qualMatches = data.all();
+                var qualMatches = matches;
                 for (var i = 0; i < qualMatches.length; i ++) {
                     if (qualMatches[i]['MatchNumber'] == matchNumber) {
                         $("#blue-0-number").val(qualMatches[i]['Blue1Number']);
@@ -491,15 +493,6 @@
         <div class="row">
             <div class="col-xs-12 col-md-12">
                 <div class="progress timer">
-                    <div class="progress-bar progress-bar-striped progress-bar-info" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                        <span>Offline</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-12 col-md-12">
-                <div class="progress lighthouse-timer">
                     <div class="progress-bar progress-bar-striped progress-bar-info" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                         <span>Offline</span>
                     </div>
