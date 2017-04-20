@@ -1,0 +1,178 @@
+var matchdb = [
+	{
+		MatchNumber: 1,
+		Blue1Number: 18,
+		Blue1Name: 'Cal Prep',
+		Blue2Number: 29,
+		Blue2Name: 'Realm',
+		Gold1Number: 1,
+		Gold1Name: 'Albany',
+		Gold2Number: 8,
+		Gold2Name: 'Bishop'
+	},
+	{
+		MatchNumber: 2,
+		Blue1Number: 30,
+		Blue1Name: 'Saint Mary\'s',
+		Blue2Number: 9,
+		Blue2Name: 'Hercules',
+		Gold1Number: 15,
+		Gold1Name: 'Pinole',
+		Gold2Number: 31,
+		Gold2Name: 'Arroyo'
+	},
+	{
+		MatchNumber: 3,
+		Blue1Number: 17,
+		Blue1Name: 'ACLC',
+		Blue2Number: 3,
+		Blue2Name: 'De Anza',
+		Gold1Number: 15,
+		Gold1Name: 'Pinole',
+		Gold2Number: 4,
+		Gold2Name: 'LPS Richmond'
+	},
+	{
+		MatchNumber: 4,
+		Blue1Number: 12,
+		Blue1Name: 'El Cerrito',
+		Blue2Number: 35,
+		Blue2Name: 'Hayward',
+		Gold1Number: 24,
+		Gold1Name: 'Lighthouse',
+		Gold2Number: 37,
+		Gold2Name: 'Coliseum'
+	},
+	{
+		MatchNumber: 5,
+		Blue1Number: 30,
+		Blue1Name: 'Saint Mary\'s',
+		Blue2Number: 1,
+		Blue2Name: 'Albany',
+		Gold1Number: 28,
+		Gold1Name: 'NEA',
+		Gold2Number: 17,
+		Gold2Name: 'ACLC'
+	},
+	{
+		MatchNumber: 6,
+		Blue1Number: 4,
+		Blue1Name: 'LPS Richmond',
+		Blue2Number: 20,
+		Blue2Name: 'Encinal',
+		Gold1Number: 31,
+		Gold1Name: 'Arroyo',
+		Gold2Number: 35,
+		Gold2Name: 'Hayward'
+	},
+	{
+		MatchNumber: 7,
+		Blue1Number: 28,
+		Blue1Name: 'NEA',
+		Blue2Number: 9,
+		Blue2Name: 'Hercules',
+		Gold1Number: 18,
+		Gold1Name: 'Cal Prep',
+		Gold2Number: 26,
+		Gold2Name: 'Oakland Arts'
+	},
+	{
+		MatchNumber: 8,
+		Blue1Number: 3,
+		Blue1Name: 'De Anza',
+		Blue2Number: 29,
+		Blue2Name: 'Realm',
+		Gold1Number: 15,
+		Gold1Name: 'Pinole',
+		Gold2Number: 24,
+		Gold2Name: 'Lighthouse'
+	},
+	{
+		MatchNumber: 9,
+		Blue1Number: 1,
+		Blue1Name: 'Albany',
+		Blue2Number: 12,
+		Blue2Name: 'El Cerrito',
+		Gold1Number: 37,
+		Gold1Name: 'Coliseum',
+		Gold2Number: 8,
+		Gold2Name: 'Bishop'
+	},
+	{
+		MatchNumber: 10,
+		Blue1Number: 17,
+		Blue1Name: 'ACLC',
+		Blue2Number: 9,
+		Blue2Name: 'Hercules',
+		Gold1Number: 28,
+		Gold1Name: 'NEA',
+		Gold2Number: 3,
+		Gold2Name: 'De Anza'
+	},
+	{
+		MatchNumber: 11,
+		Blue1Number: 15,
+		Blue1Name: 'Pinole',
+		Blue2Number: 12,
+		Blue2Name: 'El Cerrito',
+		Gold1Number: 18,
+		Gold1Name: 'Cal Prep',
+		Gold2Number: 20,
+		Gold2Name: 'Encinal'
+	},
+	{
+		MatchNumber: 12,
+		Blue1Number: 24,
+		Blue1Name: 'Lighthouse',
+		Blue2Number: 31,
+		Blue2Name: 'Arroyo',
+		Gold1Number: 1,
+		Gold1Name: 'Albany',
+		Gold2Number: 26,
+		Gold2Name: 'Oakland Arts'
+	},
+	{
+		MatchNumber: 13,
+		Blue1Number: 4,
+		Blue1Name: 'LPS Richmond',
+		Blue2Number: 29,
+		Blue2Name: 'Realm',
+		Gold1Number: 30,
+		Gold1Name: 'Saint Mary\'s',
+		Gold2Number: 37,
+		Gold2Name: 'Coliseum'
+	},
+	{
+		MatchNumber: 14,
+		Blue1Number: 26,
+		Blue1Name: 'Oakland Arts',
+		Blue2Number: 3,
+		Blue2Name: 'De Anza',
+		Gold1Number: 8,
+		Gold1Name: 'Bishop',
+		Gold2Number: 35,
+		Gold2Name: 'Hayward'
+	},
+	{
+		MatchNumber: 15,
+		Blue1Number: 31,
+		Blue1Name: 'Arroyo',
+		Blue2Number: 29,
+		Blue2Name: 'Realm',
+		Gold1Number: 18,
+		Gold1Name: 'Cal Prep',
+		Gold2Number: 28,
+		Gold2Name: 'NEA'
+	},
+	{
+		MatchNumber: 16,
+		Blue1Number: 37,
+		Blue1Name: 'Coliseum',
+		Blue2Number: 9,
+		Blue2Name: 'Hercules',
+		Gold1Number: 17,
+		Gold1Name: 'ACLC',
+		Gold2Number: 20,
+		Gold2Name: 'Encinal'
+	},
+]

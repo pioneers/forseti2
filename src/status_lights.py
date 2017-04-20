@@ -96,6 +96,7 @@ class DriverStatusLight(Node):
 
     def handle_robot(self, channel, data):
         msg = forseti2.RobotState.decode(data)
+        print (msg)
         if msg.connected != "Disconnected":
             self.red = False
             self.green = True
@@ -119,7 +120,8 @@ class DriverStatusLight(Node):
 def main():
     lc = lcm.LCM(settings.LCM_URI)
 
-    lighthouse_lights = [LightHouseStatusLight(lc, 0), LightHouseStatusLight(lc, 1)]
+    #lighthouse_lights = [LightHouseStatusLight(lc, 0), LightHouseStatusLight(lc, 1)]
+    dsl = [DriverStatusLight(lc, 0)]
     while True:
         lc.handle()
         time.sleep(.01)

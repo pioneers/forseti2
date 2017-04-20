@@ -10,7 +10,7 @@
 <!--             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous"> -->
     <!-- Latest compiled and minified JavaScript -->
     <script src="bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+    <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script> -->
     <script type="text/javascript" src="tabletop.js"></script>
     <script type="text/javascript" src="lcm_ws_bridge.js"></script>
     <style>
@@ -126,7 +126,7 @@
         var start_secs = Math.floor(start.getTime() / 1000)
         start.setMilliseconds(0)
             //console.log('http://' + document.domain + ':' + location.port + "/")
-        var addr = '192.168.0.101'
+        var addr = 'localhost'
         var port = '8000'
         var uri = '/'
         var score = {}

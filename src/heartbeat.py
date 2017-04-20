@@ -33,7 +33,7 @@ while True:
         state += 1
         state = state % len(times)
         lc.publish("Heartbeat/Beat", expanded if state % 2 else contracted)
-    time.sleep(.01)
+    time.sleep(.1)
 
 # match_init = forseti2.Match()
 # lc.publish("Match/Init", match_init.encode())

@@ -10,7 +10,7 @@
 <!--             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous"> -->
     <!-- Latest compiled and minified JavaScript -->
     <script src="bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+    <!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>-->
     <script type="text/javascript" src="lcm_ws_bridge.js"></script>
     <style>
     .progress {
@@ -67,7 +67,8 @@
         var start_secs = Math.floor(start.getTime() / 1000)
         start.setMilliseconds(0)
             //console.log('http://' + document.domain + ':' + location.port + "/")
-        var addr = '192.168.0.101'
+        //var addr = '192.168.0.101'
+        var addr='localhost'
         var port = '8000'
         var uri = '/'
         var score = {}
@@ -82,7 +83,6 @@
             "gold": 0,
             "pirate": 1
         }
-
         function updateTimer(msg) {
             // $(".phase-display").text(msg.stage_name);
             var width = 100;
@@ -127,10 +127,8 @@
             $(".timer span").text(text);
             $(".clock div").text(time);
         }
-
         function handleTime(msg) {
             updateTimer(msg);
-
             if (!$(".auto").prop('checked')) {
                 return;
             }
@@ -153,34 +151,27 @@
             match_number = msg.match_number;
             $(".match").val(match_number);
         }
-
         function handleScore(msg) {
             console.log("NEWSCORE!")
             score = msg;
             updateLiveScore(msg);
             updateLiveScoreBreakdown();
         }
-
         function handleBeat(msg) {
             $(".heartbeat").toggleClass("contracted", msg.state)
         }
-
         function handleMatch(msg) {
             $(".team-0").text(msg.team_numbers[0] + " " + msg.team_names[0])
             $(".team-1").text(msg.team_numbers[1] + " " + msg.team_names[1])
             $(".team-2").text(msg.team_names[2] + " " + msg.team_numbers[2])
             $(".team-3").text(msg.team_names[3] + " " + msg.team_numbers[3])
         }
-
         function updateLiveScore(msg) {
-            var blue = 20 * msg.treasure_autonomous[0] + 15 * msg.treasure_autonomous[1] + 10 * msg.treasure_teleop[0] + 5 * msg.treasure_teleop[1];
-            var gold = 20 * msg.treasure_autonomous[2] + 15 * msg.treasure_autonomous[3] + 10 * msg.treasure_teleop[2] + 5 * msg.treasure_teleop[3];
+            var blue = msg.treasure_autonomous[0];
+            var gold = msg.treasure_teleop[0];
             $(".score-blue").text(blue);
             $(".score-gold").text(gold);
-
-
         }
-
         function updateLiveScoreBreakdown() {
             for (alliance in alliances) {
                 for (chest in chests) {
@@ -190,7 +181,6 @@
             }
             //$(".blue#gold .score-autonomous").text("A: " + score.treasure_autonomous[0])
         }
-
         function updateLighthouse(msg) {
             var status = 'Offline'
             if (msg.enabled) {
@@ -220,7 +210,6 @@
             }
             $(".lighthouse-timer span").text(status)
         }
-
         function increment(alliance, chest, amount) {
             msg = {
                 __type__: "LiveScore",
@@ -231,16 +220,15 @@
                 water_teleop: [0, 0, 0, 0],
                 treasure_teleop: [0, 0, 0, 0]
             }
-            if ($(".phase").val() == "Autonomous") {
-                msg.treasure_autonomous[alliances[alliance] + chests[chest]] += amount;
+            if (alliance == 0) {
+              msg.treasure_autonomous[chest] += amount;
             }
-            if ($(".phase").val() == "Teleop") {
-                msg.treasure_teleop[alliances[alliance] + chests[chest]] += amount;
+            if (alliance == 2) {
+              msg.treasure_teleop[chest] += amount;
             }
             console.log(msg)
             lcm.publish("LiveScore/ScoreDelta", msg);
         }
-
         function increment_raw(alliance, amount) {
             msg = {
                 __type__: "LiveScore",
@@ -251,47 +239,45 @@
                 water_teleop: [0, 0, 0, 0],
                 treasure_teleop: [0, 0, 0, 0]
             }
-
             msg.treasure_teleop[alliances[alliance] + chests['pirate']] += amount;
             console.log(msg)
             lcm.publish("LiveScore/ScoreDelta", msg);
         }
-
         $(".blue#gold .inc").click(function() {
-            increment("blue", "gold", 1)
+            increment(0, 0, 10)
         });
         $(".blue#pirate .inc").click(function() {
-            increment("blue", "pirate", 1)
+            increment(0, 0, 5)
         });
         $(".gold#gold .inc").click(function() {
-            increment("gold", "gold", 1)
+            increment(2, 0, 10)
         });
         $(".gold#pirate .inc").click(function() {
-            increment("gold", "pirate", 1)
+            increment(2, 0, 5)
         });
         $(".blue#gold .dec").click(function() {
-            increment("blue", "gold", -1)
+            increment(0, 0, -10)
         });
         $(".blue#pirate .dec").click(function() {
-            increment("blue", "pirate", -1)
+            increment(0, 0, -5)
         });
         $(".gold#gold .dec").click(function() {
-            increment("gold", "gold", -1)
+            increment(2, 0, -10)
         });
         $(".gold#pirate .dec").click(function() {
-            increment("gold", "pirate", -1)
+            increment(2, 0, -5)
         });
         $(".blue#5 .inc").click(function() {
-            increment_raw("blue", 1)
+            increment(0, 0, 1)
         });
         $(".gold#5 .inc").click(function() {
-            increment_raw("gold", 1)
+            increment(2, 0, 1)
         });
         $(".blue#5 .dec").click(function() {
-            increment_raw("blue", -1)
+            increment(0, 0, -1)
         });
         $(".gold#5 .dec").click(function() {
-            increment_raw("gold", -1)
+            increment(2, 0, -1)
         });
         $(".match,.phase").change(function() {
             $(".auto").prop("checked", false)
@@ -315,10 +301,10 @@
         function makeLCM(url) {
             console.log('attempting to connect to ' + url)
             if (url == undefined) {
-                url = '192.168.0.101'
+                //url = '192.168.0.101'
+                url = 'localhost'
             }
             lcm = new LCM('ws://' + url + ':8000/');
-
             function subscribeAll() {
                 console.log('Connected to LCM Bridge')
                 lcm.subscribe("Timer/Time", "Time", handleTime)
@@ -327,7 +313,6 @@
                 lcm.subscribe("Timer/Match", "Match", handleMatch)
                 lcm.subscribe("LighthouseTimer/LighthouseTime", "LighthouseTime", updateLighthouse)
             }
-
             function reconnect() {
                 return;
                 makeLCM(url)
@@ -457,31 +442,27 @@
                 </div>
             </div>
         </div>
-        <h2>Balls Scored</h2>
+        <h2>Points Scored</h2>
         <div class="row">
             <div class="col-md-3">
                 <h3>Blue Alliance</h3>
                 <ul class="list-group">
                     <li class="list-group-item blue" id="gold">
-                        <span class="">Gold</span>
-                        <span class="badge score-teleop">T: 0</span>
-                        <span class="badge score-autonomous">A: 0</span>
+                        <span class="">10</span>
                         <div class="btn-group btn-group-xs" role="group">
                             <button class="btn btn-success inc">+</button>
                             <button class="btn btn-danger dec">-</button>
                         </div>
                     </li>
                     <li class="list-group-item blue" id="pirate">
-                        Pirate
+                        5 
                         <div class="btn-group btn-group-xs" role="group">
                             <button class="btn btn-success inc">+</button>
                             <button class="btn btn-danger dec">-</button>
                         </div>
-                        <span class="badge score-teleop">T: 0</span>
-                        <span class="badge score-autonomous">A: 0</span>
                     </li>
                     <li class="list-group-item blue" id="5">
-                        5
+                        1
                         <div class="btn-group btn-group-xs" role="group">
                             <button class="btn btn-success inc">+</button>
                             <button class="btn btn-danger dec">-</button>
@@ -494,25 +475,21 @@
                 <ul class="list-group">
                     <li class="list-group-item gold" id="gold">
 
-                        <span class="">Gold</span>
+                        <span class="">10</span>
                         <div class="btn-group btn-group-xs" role="group">
                             <button class="btn btn-success inc">+</button>
                             <button class="btn btn-danger dec">-</button>
                         </div>
-                        <span class="badge score-teleop">T: 0</span>
-                        <span class="badge score-autonomous">A: 0</span>
                     </li>
                     <li class="list-group-item gold" id="pirate">
-                        Pirate
+                        5 
                         <div class="btn-group btn-group-xs" role="group">
                             <button class="btn btn-success inc">+</button>
                             <button class="btn btn-danger dec">-</button>
                         </div>
-                        <span class="badge score-teleop">T: 0</span>
-                        <span class="badge score-autonomous">A: 0</span>
                     </li>
                     <li class="list-group-item gold" id="5">
-                        5
+                        1
                         <div class="btn-group btn-group-xs" role="group">
                             <button class="btn btn-success inc">+</button>
                             <button class="btn btn-danger dec">-</button>

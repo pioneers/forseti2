@@ -61,6 +61,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         obj = json.loads(message)
         msg_type = obj["type"]
         data = obj["data"]
+        print (obj)
 
         if msg_type == "subscribe":
             self.add_subscription(data["channel"],
@@ -69,6 +70,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         elif msg_type == "unsubscribe":
             self.remove_subscription(data["subscription_id"])
         elif msg_type == "publish":
+            print (data)
             self.lc.publish(data["channel"],
                             self.dict_to_lcm(data["data"]).encode())
         else:

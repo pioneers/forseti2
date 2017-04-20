@@ -10,9 +10,10 @@
 <!--             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous"> -->
     <!-- Latest compiled and minified JavaScript -->
     <script src="bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+    <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script> -->
     <script type="text/javascript" src="tabletop.js"></script>
     <script type="text/javascript" src="lcm_ws_bridge.js"></script>
+    <script src="matchdb.js"></script>
     <style>
     .progress {
         text-align: center;
@@ -68,7 +69,8 @@
         var start_secs = Math.floor(start.getTime() / 1000)
         start.setMilliseconds(0)
             //console.log('http://' + document.domain + ':' + location.port + "/")
-        var addr = '192.168.0.101'
+        //var addr = '192.168.0.101'
+        var addr = 'localhost'
         var port = '8000'
         var uri = '/'
         var score = {}
@@ -83,7 +85,7 @@
             "gold": 0,
             "pirate": 1
         }
-
+        var matches = matchdb;
         // Access to Google Spreadsheet
         // THIS DATA MAY CHANGE FROM YEAR TO YEAR
         var schoolSheetName = 'schools';
@@ -91,7 +93,6 @@
         var elimSheetName = 'elim_matches';
         var rankSheetName = 'team_rankings';
         var public_spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1329UhQ9onylGly0lnkjUD2fN81QuIyWS_f8ZapCtbg0/pubhtml';
-
         tabletop = Tabletop.init({
             key: public_spreadsheet_url,
             callback: function (){
@@ -100,8 +101,6 @@
             simpleSheet: false,
             debug: true
           });
-
-
         function updateTimer(msg) {
             // $(".phase-display").text(msg.stage_name);
             var width = 100;
@@ -146,10 +145,8 @@
             $(".timer span").text(text);
             $(".clock div").text(time);
         }
-
         function handleTime(msg) {
             updateTimer(msg);
-
             if (!$(".auto").prop('checked')) {
                 return;
             }
@@ -172,32 +169,26 @@
             match_number = msg.match_number;
             $(".match").val(match_number);
         }
-
         function handleScore(msg) {
             console.log("NEWSCORE!")
             score = msg;
             updateLiveScore(msg);
             updateLiveScoreBreakdown();
         }
-
         function handleBeat(msg) {
             $(".heartbeat").toggleClass("contracted", msg.state)
         }
-
         function handleMatch(msg) {
             $(".team-0").text(msg.team_numbers[0] + " " + msg.team_names[0])
             $(".team-1").text(msg.team_numbers[1] + " " + msg.team_names[1])
             $(".team-2").text(msg.team_names[2] + " " + msg.team_numbers[2])
             $(".team-3").text(msg.team_names[3] + " " + msg.team_numbers[3])
         }
-
         function updateLiveScore(msg) {
-            var blue = 20 * msg.treasure_autonomous[0] + 15 * msg.treasure_autonomous[1] + 10 * msg.treasure_teleop[0] + 5 * msg.treasure_teleop[1];
-            var gold = 20 * msg.treasure_autonomous[2] + 15 * msg.treasure_autonomous[3] + 10 * msg.treasure_teleop[2] + 5 * msg.treasure_teleop[3];
+            var blue = msg.treasure_autonomous[0];
+            var gold = msg.treasure_teleop[0];
             $(".score-blue").text(blue);
             $(".score-gold").text(gold);
-
-
         }
         function makeMatch() {
             var matchNumber = parseInt($("#new-match-num").val())
@@ -216,7 +207,6 @@
             console.log(msg)
             lcm.publish("Timer/Control", msg)
         }
-
         function updateLiveScoreBreakdown() {
             for (alliance in alliances) {
                 for (chest in chests) {
@@ -226,7 +216,6 @@
             }
             //$(".blue#gold .score-autonomous").text("A: " + score.treasure_autonomous[0])
         }
-
         function updateLighthouse(msg) {
             var status = 'Offline'
             if (msg.enabled) {
@@ -256,7 +245,6 @@
             }
             $(".lighthouse-timer span").text(status)
         }
-
         function increment(alliance, chest, amount) {
             msg = {
                 __type__: "LiveScore",
@@ -276,22 +264,19 @@
             console.log(msg)
             lcm.publish("LiveScore/ScoreDelta", msg);
         }
-
         function populateMatch() {
             var matchNumber = $("#new-match-num").val()
             var isQuals = parseInt(matchNumber) < 100;
             var matchFound = false;
             tabletop.fetch();
             if (isQuals) {
-                var data = tabletop.sheets(qualSheetName);
-                var qualMatches = data.all();
+                var qualMatches = matches;
                 for (var i = 0; i < qualMatches.length; i ++) {
                     if (qualMatches[i]['MatchNumber'] == matchNumber) {
                         $("#blue-0-number").val(qualMatches[i]['Blue1Number']);
                         $("#blue-1-number").val(qualMatches[i]['Blue2Number']);
                         $("#gold-0-number").val(qualMatches[i]['Gold1Number']);
                         $("#gold-1-number").val(qualMatches[i]['Gold2Number']);
-
                         $("#blue-0-name").val(qualMatches[i]['Blue1Name']);
                         $("#blue-1-name").val(qualMatches[i]['Blue2Name']);
                         $("#gold-0-name").val(qualMatches[i]['Gold1Name']);
@@ -305,27 +290,22 @@
                 var data = tabletop.sheets(elimSheetName);
                 var elimMatches = data.all();
                 var i = matchNumber - 100 - 2;
-
                 if (i < elimMatches.length) {
                     matchFound = true;
                     $("#blue-0-number").val(elimMatches[i]['Blue1Number']);
                     $("#blue-1-number").val(elimMatches[i]['Blue2Number']);
                     $("#gold-0-number").val(elimMatches[i]['Gold1Number']);
                     $("#gold-1-number").val(elimMatches[i]['Gold2Number']);
-
                     $("#blue-0-name").val(elimMatches[i]['Blue1Name']);
                     $("#blue-1-name").val(elimMatches[i]['Blue2Name']);
                     $("#gold-0-name").val(elimMatches[i]['Gold1Name']);
                     $("#gold-1-name").val(elimMatches[i]['Gold2Name']);
-
                 }
             }
-
             if (!matchFound) {
                 alert(isQuals ? "Qualification match not found" : "Elimination match not found");
             }
         }
-
         $(".blue#gold .inc").click(function() {
             increment("blue", "gold", 1)
         });
@@ -358,8 +338,6 @@
         })
         $("#populate-match").click(populateMatch)
         $("#create-match").click(makeMatch)
-
-
         $("#match-start").click(function() {
             sendCommand("start")
         })
@@ -372,8 +350,6 @@
         $("#match-reset-stage").click(function() {
             sendCommand("reset_stage")
         })
-
-
         $("#address").change(function() {
                 makeLCM($("#address").val())
             })
@@ -390,10 +366,9 @@
         function makeLCM(url) {
             console.log('attempting to connect to ' + url)
             if (url == undefined) {
-                url = '192.168.0.101'
+                //url = '192.168.0.101'
             }
             lcm = new LCM('ws://' + url + ':8000/');
-
             function subscribeAll() {
                 console.log('Connected to LCM Bridge')
                 lcm.subscribe("Timer/Time", "Time", handleTime)
@@ -402,7 +377,6 @@
                 lcm.subscribe("Timer/Match", "Match", handleMatch)
                 lcm.subscribe("LighthouseTimer/LighthouseTime", "LighthouseTime", updateLighthouse)
             }
-
             function reconnect() {
                 return;
                 makeLCM(url)
@@ -490,16 +464,7 @@
         </div>
         <div class="row">
             <div class="col-xs-12 col-md-12">
-                <div class="progress timer">
-                    <div class="progress-bar progress-bar-striped progress-bar-info" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                        <span>Offline</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-12 col-md-12">
-                <div class="progress lighthouse-timer">
+                <div class="progress timer">0.101
                     <div class="progress-bar progress-bar-striped progress-bar-info" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                         <span>Offline</span>
                     </div>
@@ -594,7 +559,6 @@
                 <h3>Gold Alliance</h3>
                 <ul class="list-group">
                     <li class="list-group-item gold" id="gold">
-
                         <span class="">Gold</span>
                         <div class="btn-group btn-group-xs" role="group">
                             <button class="btn btn-success inc">+</button>
