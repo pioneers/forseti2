@@ -173,8 +173,8 @@
         }
 
         function updateLiveScore(msg) {
-            var blue = 10 * msg.treasure_autonomous[0] + 5 * msg.treasure_autonomous[1] + 1 * msg.treasure_autonomous[2];
-            var gold = 10 * msg.treasure_teleop[0] + 5 * msg.treasure_teleop[1] + 1 * msg.treasure_teleop[2];
+            var blue = msg.treasure_autonomous[0]
+            var gold = msg.treasure_teleop[0]
             $(".score-blue").text(blue);
             $(".score-gold").text(gold);
 
@@ -258,40 +258,40 @@
         }
 
         $(".blue#gold .inc").click(function() {
-            increment("blue", 0, 1)
+            increment(0, 0, 10)
         });
         $(".blue#pirate .inc").click(function() {
-            increment("blue", 1, 1)
+            increment(0, 0, 5)
         });
         $(".gold#gold .inc").click(function() {
-            increment("gold", 0, 1)
+            increment(2, 0, 10)
         });
         $(".gold#pirate .inc").click(function() {
-            increment("gold", 1, 1)
+            increment(2, 0, 5)
         });
         $(".blue#gold .dec").click(function() {
-            increment("blue", 0, -1)
+            increment(0, 0, -10)
         });
         $(".blue#pirate .dec").click(function() {
-            increment("blue", 1, -1)
+            increment(0, 0, -5)
         });
         $(".gold#gold .dec").click(function() {
-            increment("gold", 0, -1)
+            increment(2, 0, -10)
         });
         $(".gold#pirate .dec").click(function() {
-            increment("gold", 1, -1)
+            increment(2, 0, -5)
         });
         $(".blue#5 .inc").click(function() {
-            increment("blue", 2, 1)
+            increment(0, 0, 1)
         });
         $(".gold#5 .inc").click(function() {
-            increment("gold", 2, 1)
+            increment(2, 0, 1)
         });
         $(".blue#5 .dec").click(function() {
-            increment("blue", 2, -1)
+            increment(0, 0, -1)
         });
         $(".gold#5 .dec").click(function() {
-            increment("gold", 2, -1)
+            increment(2, 0, -1)
         });
         $(".match,.phase").change(function() {
             $(".auto").prop("checked", false)
