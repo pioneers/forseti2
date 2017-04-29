@@ -1,49 +1,28 @@
+#!/usr/bin/env bash
+
 cd
-rm scan_wifi.sh*
-wget https://raw.githubusercontent.com/pioneers/forseti2/2016/scan_wifi.sh
-sudo chmod 777 scan_wifi.sh
-rm dawn-linux-x64.tar.gz*
-wget https://dl.dropboxusercontent.com/s/g9ohjmtcfc2ooay/dawn-linux-x64.tar.gz
-sudo tar -xvzf dawn-linux-x64.tar.gz
-rm dawn-linux-x64.tar.gz*
-sudo rm -rf /opt/driver_station
-sudo mv dawn-linux-x64 /opt/driver_station
-sudo chmod -R 777 /opt/driver_station
-DEFAULT_FIELD_IP=192.168.0.101
-echo -n "Field IP (default $DEFAULT_FIELD_IP) ?"
-read FIELD_IP
-[ -z $FIELD_IP ] && FIELD_IP="$DEFAULT_FIELD_IP"
-echo -n "$FIELD_IP" > /opt/driver_station/lcm_bridge_addr.txt
-echo -n "Station number ?"
-read STATION_NUMBER
-echo -n "$STATION_NUMBER" > /opt/driver_station/station_number.txt
-# # get curl
-# sudo apt-get install -y curl
 
-# # get git
-# sudo apt-get install -y git
+echo "Field Control Dawn URL:";
+read url;
+if [ -n "$url" ]; then
+    wget $url
+    tar -xvzf dawn-linux-x64.tar.gz
+    rm dawn-linux-x64.tar.gz*
+fi
 
-# # get node
-# curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
-# sudo apt-get install -y nodejs
+echo "Type Bridge Address:";
+read address;
+if [ -z "$address" ]; then
+    address="192.168.128.138";
+fi
+echo -n $address > ~/Desktop/bridge_address.txt;
 
-# wget https://bootstrap.pypa.io/get-pip.py
-# sudo python get-pip.py
-# # get forseti2
-# if [ ! -d "forseti2" ]; then
-#   git clone https://github.com/karthik-shanmugam/forseti2.git
-# fi
-# cd forseti2
-# git checkout 2016
-# cd ..
-
-# # get daemon
-# if [ ! -d "daemon" ]; then
-#   git clone https://github.com/rjli13/daemon.git
-# fi
-# cd daemon
-# git checkout field-control
-# cd ..
+echo "Bridge Station (0-1 For Blue, 2-3 For Gold):"
+read station;
+if [ -z "$station" ]; then
+    station=0;
+fi
+echo -n $station > ~/Desktop/station_number.txt;
 
 # # get lcm
 # sudo apt-get install -y build-essential
@@ -65,10 +44,4 @@ echo -n "$STATION_NUMBER" > /opt/driver_station/station_number.txt
 # ./gen-types.sh
 # sudo pip install tornado
 
-# # set up daemon
-# cd ../daemon/dawn
-# sudo npm install -g electron-prebuilt
-# sudo npm install
-# npm run-script build
-# cd
 echo "Driver station deployed"
