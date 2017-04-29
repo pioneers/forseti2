@@ -93,7 +93,7 @@
         var qualSheetName = 'qual_matches';
         var elimSheetName = 'elim_matches';
         var rankSheetName = 'team_rankings';
-        var public_spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1329UhQ9onylGly0lnkjUD2fN81QuIyWS_f8ZapCtbg0/pubhtml';
+        var public_spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1iEjHU2-kEfuMuRypNA44LqzTYFv3ruzLqs-VzbayWiI/pubhtml';
 
         tabletop = Tabletop.init({
             key: public_spreadsheet_url,
@@ -286,7 +286,8 @@
             var matchFound = false;
             tabletop.fetch();
             if (isQuals) {
-                var qualMatches = matches;
+                var data = tabletop.sheets(qualSheetName);
+                var qualMatches = data.all();
                 for (var i = 0; i < qualMatches.length; i ++) {
                     if (qualMatches[i]['MatchNumber'] == matchNumber) {
                         $("#blue-0-number").val(qualMatches[i]['Blue1Number']);
