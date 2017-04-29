@@ -310,8 +310,8 @@
         }
 
         function updateLiveScore(msg) {
-            var blue = 10 * msg.treasure_autonomous[0] + 5 * msg.treasure_autonomous[1] + 1 * msg.treasure_autonomous[2];
-            var gold = 10 * msg.treasure_teleop[0] + 5 * msg.treasure_teleop[1] + 1 * msg.treasure_teleop[2];
+            var blue = msg.treasure_autonomous[0]
+            var gold = msg.treasure_teleop[0]
             $(".score-blue").text(blue);
             $(".score-gold").text(gold);
 
